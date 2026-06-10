@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: erp-platform
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/erp}
+    username: ${DB_USERNAME:erp}
+    password: ${DB_PASSWORD:erp}
+    hikari:
+      maximum-pool-size: 10
+      pool-name: erp-pool
+
+  jpa:
+    open-in-view: false          # avoid lazy-loading in the view layer
+    hibernate:
+      ddl-auto: validate         # schema is owned by Flyway, never by Hibernate
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: false
+    show-sql: false
+
+  # Boot's single Flyway is disabled; FlywayConfig runs one pipeline per module schema.
+  flyway:
+    enabled: false
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-stacktrace: never
+
+# ── Application-specific security settings ──────────────────────────
+erp:
+  security:
+    jwt:
+      # Override in real environments via ERP_SECURITY_JWT_SECRET (min 32 chars).
+      secret: ${ERP_SECURITY_JWT_SECRET:change-me-in-production-this-is-a-dev-secret-key-0123456789}
+      issuer: erp-platform
+      expiration-minutes: 120
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+logging:
+  level:
+    com.enlear.erp: INFO
+    org.flywaydb: INFO

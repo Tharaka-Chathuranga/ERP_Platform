@@ -1,0 +1,32 @@
+# Keep the build context small and reproducible — the image builds everything
+# from source inside the Dockerfile stages, so host build outputs are excluded.
+
+# Gradle / Java
+**/.gradle/
+**/build/
+*.class
+*.log
+
+# Node / frontend (rebuilt in stage 1)
+**/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# VCS & CI (not needed in the image)
+.git/
+.github/
+
+# Infra & docs (not part of the app image)
+deploy/
+DEPLOYMENT.md
+docker-compose.yml
+
+# Env files / secrets must never enter the image
+.env
+**/*.env

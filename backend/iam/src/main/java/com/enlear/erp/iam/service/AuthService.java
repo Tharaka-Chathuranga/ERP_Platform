@@ -1,0 +1,47 @@
+package com.enlear.erp.iam.service;
+
+import com.enlear.erp.iam.repository.UserRepository;
+import com.enlear.erp.iam.web.dto.LoginRequest;
+import com.enlear.erp.iam.web.dto.LoginResponse;
+import com.enlear.erp.shared.security.JwtService;
+import java.util.List;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Authenticates a user against the configured {@link AuthenticationManager} and
+ * issues a signed JWT carrying the user's roles.
+ */
+@Service
+public class AuthService {
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final UserRepository users;
+
+    public AuthService(AuthenticationManager authenticationManager,
+                       JwtService jwtService,
+                       UserRepository users) {
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.users = users;
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+
+        List<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .map(a -> a.startsWith("ROLE_") ? a.substring(5) : a)
+                .toList();
+
+        String token = jwtService.issueToken(authentication.getName(), roles);
+        return LoginResponse.bearer(token, authentication.getName(), roles);
+    }
+}

@@ -1,0 +1,82 @@
+#!/bin/bash
+# EC2 bootstrap (Amazon Linux 2023). Runs once on first boot. Installs Docker,
+# writes the redeploy script that the CI pipeline invokes via SSM, then starts
+# the app for the first time. The SSM Agent is preinstalled on AL2023, which is
+# how GitHub Actions reaches this host without SSH.
+set -euxo pipefail
+
+# ── Packages ──────────────────────────────────────────────────────────────────
+dnf update -y
+dnf install -y docker jq
+systemctl enable --now docker
+
+# ── Non-secret runtime config (consumed by deploy.sh) ─────────────────────────
+mkdir -p /opt/erp
+cat > /opt/erp/config.env <<CONFIG
+AWS_REGION=${aws_region}
+ECR_REPO_URL=${ecr_repo_url}
+DB_SECRET_ARN=${db_secret_arn}
+APP_SECRET_ARN=${app_secret_arn}
+LOG_GROUP=${app_log_group}
+HOST_PORT=80
+CONTAINER_PORT=8080
+CONFIG
+
+# ── Redeploy script (idempotent; safe to call on every deploy) ────────────────
+# Heredoc is intentionally NOT expanded here; all $$ below become $ on disk.
+cat > /opt/erp/deploy.sh <<'DEPLOY'
+#!/bin/bash
+set -euo pipefail
+source /opt/erp/config.env
+
+# Image to run: explicit arg from CI, else the latest in ECR.
+IMAGE_URI="$${1:-$${ECR_REPO_URL}:latest}"
+REGISTRY="$${ECR_REPO_URL%%/*}"
+
+echo "[deploy] logging in to ECR $${REGISTRY}"
+aws ecr get-login-password --region "$${AWS_REGION}" \
+  | docker login --username AWS --password-stdin "$${REGISTRY}"
+
+echo "[deploy] pulling $${IMAGE_URI}"
+docker pull "$${IMAGE_URI}"
+
+# Pull DB connection + JWT secret from Secrets Manager at runtime (never baked
+# into the image or the instance template).
+DB_JSON="$$(aws secretsmanager get-secret-value --region "$${AWS_REGION}" \
+  --secret-id "$${DB_SECRET_ARN}" --query SecretString --output text)"
+APP_JSON="$$(aws secretsmanager get-secret-value --region "$${AWS_REGION}" \
+  --secret-id "$${APP_SECRET_ARN}" --query SecretString --output text)"
+
+DB_HOST="$$(echo "$${DB_JSON}" | jq -r '.host')"
+DB_PORT="$$(echo "$${DB_JSON}" | jq -r '.port // 5432')"
+DB_NAME="$$(echo "$${DB_JSON}" | jq -r '.dbname')"
+DB_USER="$$(echo "$${DB_JSON}" | jq -r '.username')"
+DB_PASS="$$(echo "$${DB_JSON}" | jq -r '.password')"
+JWT_SECRET="$$(echo "$${APP_JSON}" | jq -r '.jwt_secret')"
+
+DB_URL="jdbc:postgresql://$${DB_HOST}:$${DB_PORT}/$${DB_NAME}"
+
+echo "[deploy] (re)starting container"
+docker rm -f erp >/dev/null 2>&1 || true
+docker run -d --name erp --restart unless-stopped \
+  -p "$${HOST_PORT}:$${CONTAINER_PORT}" \
+  -e DB_URL="$${DB_URL}" \
+  -e DB_USERNAME="$${DB_USER}" \
+  -e DB_PASSWORD="$${DB_PASS}" \
+  -e ERP_SECURITY_JWT_SECRET="$${JWT_SECRET}" \
+  --log-driver=awslogs \
+  --log-opt awslogs-region="$${AWS_REGION}" \
+  --log-opt awslogs-group="$${LOG_GROUP}" \
+  --log-opt awslogs-create-group=true \
+  "$${IMAGE_URI}"
+
+# Drop dangling images so the disk does not fill over many deploys.
+docker image prune -f >/dev/null 2>&1 || true
+echo "[deploy] done: $${IMAGE_URI}"
+DEPLOY
+chmod +x /opt/erp/deploy.sh
+
+# ── First boot: start the app from whatever 'latest' is in ECR ────────────────
+# Tolerated to fail if no image has been pushed yet — the first CI run will
+# deploy and this host is already wired to redeploy on command.
+/opt/erp/deploy.sh || echo "[bootstrap] no image yet; CI will deploy on first push"

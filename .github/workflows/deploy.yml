@@ -1,0 +1,115 @@
+name: Build & Deploy
+
+# Builds the single Docker image (React SPA + Spring Boot API), pushes it to
+# Amazon ECR, then tells the EC2 host to pull the new image and restart — all
+# without anyone manually uploading an image. Auth to AWS uses GitHub OIDC, so
+# there are NO long-lived AWS access keys stored in GitHub.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}   # allow manual "Run workflow" from the Actions tab
+
+# Required for the OIDC token exchange with AWS.
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false   # never interrupt a deploy mid-flight
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPOSITORY: ${{ vars.ECR_REPOSITORY }}
+  # Tag of the EC2 instance(s) to deploy to (matches Terraform: Name=erp-app).
+  DEPLOY_TARGET_TAG_KEY: Name
+  DEPLOY_TARGET_TAG_VALUE: erp-app
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & push image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          # Tag with the immutable git SHA (for traceability/rollback) and 'latest'.
+          tags: |
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to EC2 via SSM Run Command
+        env:
+          IMAGE_URI: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        run: |
+          set -euo pipefail
+          echo "Deploying image: $IMAGE_URI"
+
+          # Ask the running instance(s) to pull this exact image and restart the
+          # container. /opt/erp/deploy.sh is installed by the EC2 user-data.
+          COMMAND_ID=$(aws ssm send-command \
+            --region "$AWS_REGION" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy ${GITHUB_SHA::7}" \
+            --targets "Key=tag:${DEPLOY_TARGET_TAG_KEY},Values=${DEPLOY_TARGET_TAG_VALUE}" \
+            --parameters commands="sudo /opt/erp/deploy.sh '$IMAGE_URI'" \
+            --query "Command.CommandId" --output text)
+
+          echo "SSM CommandId: $COMMAND_ID"
+
+          # Wait for the instance to finish, streaming the result.
+          INSTANCE_ID=$(aws ssm list-command-invocations \
+            --region "$AWS_REGION" --command-id "$COMMAND_ID" \
+            --query "CommandInvocations[0].InstanceId" --output text)
+
+          # list-command-invocations may lag a moment after send-command.
+          for i in $(seq 1 10); do
+            [ "$INSTANCE_ID" != "None" ] && [ -n "$INSTANCE_ID" ] && break
+            sleep 3
+            INSTANCE_ID=$(aws ssm list-command-invocations \
+              --region "$AWS_REGION" --command-id "$COMMAND_ID" \
+              --query "CommandInvocations[0].InstanceId" --output text)
+          done
+          echo "Target instance: $INSTANCE_ID"
+
+          aws ssm wait command-executed \
+            --region "$AWS_REGION" \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" || true
+
+          STATUS=$(aws ssm get-command-invocation \
+            --region "$AWS_REGION" --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+            --query "Status" --output text)
+          echo "----- deploy stdout -----"
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+            --query "StandardOutputContent" --output text
+          echo "----- deploy stderr -----"
+          aws ssm get-command-invocation \
+            --region "$AWS_REGION" --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" \
+            --query "StandardErrorContent" --output text
+
+          echo "Deploy status: $STATUS"
+          [ "$STATUS" = "Success" ] || { echo "Deployment failed"; exit 1; }

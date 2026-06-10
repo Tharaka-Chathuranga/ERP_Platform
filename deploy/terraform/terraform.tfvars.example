@@ -1,0 +1,9 @@
+# Copy to terraform.tfvars and fill in. Only github_repo is required.
+github_repo = "enlear/ERP-Platform"
+
+# Optional overrides:
+# aws_region          = "eu-central-1"
+# allowed_http_cidr   = "203.0.113.0/24"   # lock the app to your office/VPN
+# instance_type       = "t3.small"
+# db_instance_class   = "db.t4g.micro"
+# db_multi_az         = false
