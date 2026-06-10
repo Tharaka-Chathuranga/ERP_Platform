@@ -1,26 +1,26 @@
-package com.enlear.erp.iam.service;
+package com.enlear.erp.user.service;
 
-import com.enlear.erp.iam.api.IamApi;
-import com.enlear.erp.iam.api.dto.CurrentUser;
-import com.enlear.erp.iam.domain.Role;
-import com.enlear.erp.iam.repository.UserRepository;
+import com.enlear.erp.user.api.UserApi;
+import com.enlear.erp.user.api.dto.CurrentUser;
+import com.enlear.erp.user.domain.Role;
+import com.enlear.erp.user.repository.UserRepository;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implements the public {@link IamApi} facade by delegating to the module's
+ * Implements the public {@link UserApi} facade by delegating to the module's
  * repository, mapping the internal {@code User} aggregate to a boundary-safe
  * {@link CurrentUser} view.
  */
 @Service
 @Transactional(readOnly = true)
-public class IamApiService implements IamApi {
+public class UserApiService implements UserApi {
 
     private final UserRepository users;
 
-    public IamApiService(UserRepository users) {
+    public UserApiService(UserRepository users) {
         this.users = users;
     }
 

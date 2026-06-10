@@ -21,18 +21,18 @@ import org.springframework.context.annotation.DependsOn;
 public class FlywayConfig {
 
     @Bean(initMethod = "migrate")
-    public Flyway iamFlyway(DataSource dataSource) {
+    public Flyway userFlyway(DataSource dataSource) {
         return Flyway.configure()
                 .dataSource(dataSource)
-                .schemas("iam")
-                .defaultSchema("iam")
-                .locations("classpath:db/migration/iam")
+                .schemas("users")
+                .defaultSchema("users")
+                .locations("classpath:db/migration/user")
                 .baselineOnMigrate(true)
                 .load();
     }
 
     @Bean(initMethod = "migrate")
-    @DependsOn("iamFlyway")
+    @DependsOn("userFlyway")
     public Flyway storeFlyway(DataSource dataSource) {
         return Flyway.configure()
                 .dataSource(dataSource)
@@ -47,7 +47,7 @@ public class FlywayConfig {
     @Configuration
     static class JpaDependsOnFlyway extends EntityManagerFactoryDependsOnPostProcessor {
         JpaDependsOnFlyway() {
-            super("iamFlyway", "storeFlyway");
+            super("userFlyway", "storeFlyway");
         }
     }
 }

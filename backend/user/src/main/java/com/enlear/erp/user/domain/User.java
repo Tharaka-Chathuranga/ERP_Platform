@@ -1,4 +1,4 @@
-package com.enlear.erp.iam.domain;
+package com.enlear.erp.user.domain;
 
 import com.enlear.erp.shared.domain.BaseEntity;
 import jakarta.persistence.Column;
@@ -19,7 +19,7 @@ import lombok.Setter;
  * an eagerly-loaded set of roles used to build security authorities at login.
  */
 @Entity
-@Table(name = "users", schema = "iam")
+@Table(name = "users", schema = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -39,7 +39,7 @@ public class User extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_roles", schema = "iam",
+            name = "user_roles", schema = "users",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();

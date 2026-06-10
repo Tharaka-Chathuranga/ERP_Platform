@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
     implementation(project(":shared"))
-    implementation(project(":iam"))
+    implementation(project(":user"))
     implementation(project(":store"))
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")

@@ -1,9 +1,9 @@
-package com.enlear.erp.iam.service;
+package com.enlear.erp.user.service;
 
-import com.enlear.erp.iam.domain.Role;
-import com.enlear.erp.iam.domain.User;
-import com.enlear.erp.iam.repository.RoleRepository;
-import com.enlear.erp.iam.repository.UserRepository;
+import com.enlear.erp.user.domain.Role;
+import com.enlear.erp.user.domain.User;
+import com.enlear.erp.user.repository.RoleRepository;
+import com.enlear.erp.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;

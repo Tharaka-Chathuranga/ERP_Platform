@@ -1,8 +1,8 @@
-package com.enlear.erp.iam.web;
+package com.enlear.erp.user.web;
 
-import com.enlear.erp.iam.service.AuthService;
-import com.enlear.erp.iam.web.dto.LoginRequest;
-import com.enlear.erp.iam.web.dto.LoginResponse;
+import com.enlear.erp.user.service.AuthService;
+import com.enlear.erp.user.web.dto.LoginRequest;
+import com.enlear.erp.user.web.dto.LoginResponse;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import org.springframework.http.ResponseEntity;

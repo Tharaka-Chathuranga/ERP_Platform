@@ -1,4 +1,4 @@
-package com.enlear.erp.iam.domain;
+package com.enlear.erp.user.domain;
 
 import com.enlear.erp.shared.domain.BaseEntity;
 import jakarta.persistence.Column;
@@ -14,7 +14,7 @@ import lombok.Setter;
  * when building Spring Security authorities.
  */
 @Entity
-@Table(name = "roles", schema = "iam")
+@Table(name = "roles", schema = "users")
 @Getter
 @Setter
 @NoArgsConstructor

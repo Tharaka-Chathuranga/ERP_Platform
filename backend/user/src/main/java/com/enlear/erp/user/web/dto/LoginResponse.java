@@ -1,4 +1,4 @@
-package com.enlear.erp.iam.web.dto;
+package com.enlear.erp.user.web.dto;
 
 import java.util.List;
 

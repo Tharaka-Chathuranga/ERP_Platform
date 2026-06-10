@@ -8,8 +8,8 @@
 --   * Receiving/issuing POST into store.stock_movements (the append-only
 --     ledger from V1); stock_levels stays the single source of on-hand qty.
 --     => items carry NO currentQuantity column — it is read from stock_levels.
---   * store_keeper_id / *_user_id reference iam.users but carry NO database
---     FK: store and iam are independent modules. Validate at the app layer.
+--   * store_keeper_id / *_user_id reference users.users but carry NO database
+--     FK: store and user are independent modules. Validate at the app layer.
 --   * item.locations is the ONE intentional embedded array (JSONB): a small,
 --     item-owned list of bins, not queried from the outside or carrying qty.
 -- ════════════════════════════════════════════════════════════════════
@@ -63,7 +63,7 @@ CREATE TABLE store.goods_receipts (
     invoice_number  VARCHAR(64),
     supplier_id     UUID         NOT NULL REFERENCES store.suppliers(id),
     warehouse_id    UUID         NOT NULL REFERENCES store.warehouses(id),
-    store_keeper_id UUID         NOT NULL,                       -- iam.users (no cross-module FK)
+    store_keeper_id UUID         NOT NULL,                       -- users.users (no cross-module FK)
     status          VARCHAR(16)  NOT NULL DEFAULT 'DRAFT',       -- DRAFT|POSTED|CANCELLED
     received_at     TIMESTAMPTZ  NOT NULL,
     created_at TIMESTAMPTZ, created_by VARCHAR(100),
@@ -92,8 +92,8 @@ CREATE TABLE store.issues (
     version             BIGINT       NOT NULL DEFAULT 0,
     issue_number        VARCHAR(32)  NOT NULL UNIQUE,
     warehouse_id        UUID         NOT NULL REFERENCES store.warehouses(id),
-    borrowing_user_id   UUID         NOT NULL,                   -- iam.users (no FK)
-    store_keeper_id     UUID         NOT NULL,                   -- iam.users (no FK)
+    borrowing_user_id   UUID         NOT NULL,                   -- users.users (no FK)
+    store_keeper_id     UUID         NOT NULL,                   -- users.users (no FK)
     status              VARCHAR(20)  NOT NULL DEFAULT 'DRAFT',
                         -- DRAFT|PENDING_APPROVAL|APPROVED|ISSUED|REJECTED|RETURNED
     approved_by_user_id UUID,

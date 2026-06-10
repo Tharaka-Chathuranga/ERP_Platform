@@ -1,4 +1,4 @@
-package com.enlear.erp.iam.api.dto;
+package com.enlear.erp.user.api.dto;
 
 import java.util.Set;
 import java.util.UUID;

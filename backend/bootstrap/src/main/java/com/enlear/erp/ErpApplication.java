@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Application entry point. Component scanning starts at {@code com.enlear.erp},
- * which transitively picks up every module (shared, iam, store) since
+ * which transitively picks up every module (shared, user, store) since
  * they share that base package. New modules are wired in simply by adding the
  * Gradle dependency in {@code bootstrap/build.gradle.kts}.
  */

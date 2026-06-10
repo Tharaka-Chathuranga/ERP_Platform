@@ -1,4 +1,4 @@
-// iam ── identity & access management: users, roles, authentication endpoint.
+// user ── identity & access management: users, authentication endpoint.
 // Depends only on the shared.
 
 dependencies {

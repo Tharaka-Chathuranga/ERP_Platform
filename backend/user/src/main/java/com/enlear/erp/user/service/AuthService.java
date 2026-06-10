@@ -1,8 +1,8 @@
-package com.enlear.erp.iam.service;
+package com.enlear.erp.user.service;
 
-import com.enlear.erp.iam.repository.UserRepository;
-import com.enlear.erp.iam.web.dto.LoginRequest;
-import com.enlear.erp.iam.web.dto.LoginResponse;
+import com.enlear.erp.user.repository.UserRepository;
+import com.enlear.erp.user.web.dto.LoginRequest;
+import com.enlear.erp.user.web.dto.LoginResponse;
 import com.enlear.erp.shared.security.JwtService;
 import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;

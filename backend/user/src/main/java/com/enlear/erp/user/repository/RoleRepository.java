@@ -1,6 +1,6 @@
-package com.enlear.erp.iam.repository;
+package com.enlear.erp.user.repository;
 
-import com.enlear.erp.iam.domain.Role;
+import com.enlear.erp.user.domain.Role;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
-package com.enlear.erp.iam.service;
+package com.enlear.erp.user.service;
 
-import com.enlear.erp.iam.repository.UserRepository;
+import com.enlear.erp.user.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Bridges our {@link com.enlear.erp.iam.domain.User} aggregate to Spring
+ * Bridges our {@link com.enlear.erp.user.domain.User} aggregate to Spring
  * Security's {@link UserDetails}, used by the authentication manager during the
  * username/password login exchange.
  */

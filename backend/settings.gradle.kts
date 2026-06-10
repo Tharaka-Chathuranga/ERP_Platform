@@ -6,7 +6,7 @@ rootProject.name = "erp-platform"
 // bootstrap module assembles them into a single deployable application.
 include(
     ":shared",
-    ":iam",
+    ":user",
     ":store",
     ":bootstrap",
 )
