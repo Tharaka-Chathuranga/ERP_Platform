@@ -13,7 +13,7 @@ export type ItemStatus = "ACTIVE" | "INACTIVE";
 
 export interface Item {
   id: string;
-  sku: string;
+  itemCode: string;
   name: string;
   description?: string;
   unitOfMeasure: string;

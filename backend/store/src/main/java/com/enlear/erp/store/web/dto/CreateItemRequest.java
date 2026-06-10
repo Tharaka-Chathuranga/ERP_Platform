@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record CreateItemRequest(
-        @NotBlank @Size(max = 64) String sku,
+        @NotBlank @Size(max = 64) String itemCode,
         @NotBlank @Size(max = 200) String name,
         @Size(max = 1000) String description,
         @NotBlank @Size(max = 16) String unitOfMeasure,
@@ -23,7 +23,7 @@ public record CreateItemRequest(
         List<Location> locations) {
 
     public CreateItemCommand toCommand() {
-        return new CreateItemCommand(sku, name, description, unitOfMeasure, unitPrice, category,
+        return new CreateItemCommand(itemCode, name, description, unitOfMeasure, unitPrice, category,
                 valuationMethod, reorderLevel, criticalItem, approvalRequiredForIssue, locations);
     }
 }

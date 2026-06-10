@@ -52,7 +52,7 @@ public class StockService {
                 .orElseThrow(() -> new ResourceNotFoundException("Item", cmd.itemId()));
         if (!item.isActive()) {
             throw new BusinessRuleException("STORE_ITEM_INACTIVE",
-                    "Cannot post stock for inactive item " + item.getSku());
+                    "Cannot post stock for inactive item " + item.getItemCode());
         }
 
         // On-hand is derived from the ledger. The non-negative check below is

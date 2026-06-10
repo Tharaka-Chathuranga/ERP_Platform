@@ -11,7 +11,7 @@ import type {
 // ── Store module API calls, mirroring the backend REST contract. ──
 
 export interface CreateItemInput {
-  sku: string;
+  itemCode: string;
   name: string;
   description?: string;
   unitOfMeasure: string;
@@ -32,7 +32,7 @@ export interface PostMovementInput {
 
 export async function listItems(search?: string): Promise<Page<Item>> {
   const { data } = await api.get<Page<Item>>("/store/items", {
-    params: { search, size: 50, sort: "sku" },
+    params: { search, size: 50, sort: "itemCode" },
   });
   return data;
 }

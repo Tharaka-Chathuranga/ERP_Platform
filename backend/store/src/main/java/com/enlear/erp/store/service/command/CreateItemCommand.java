@@ -7,7 +7,7 @@ import java.util.List;
 
 /** Intent to create a new item. Validated at the web edge before reaching here. */
 public record CreateItemCommand(
-        String sku,
+        String itemCode,
         String name,
         String description,
         String unitOfMeasure,

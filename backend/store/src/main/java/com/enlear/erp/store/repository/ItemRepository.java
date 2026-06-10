@@ -14,10 +14,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface ItemRepository extends JpaRepository<Item, UUID> {
 
-    Optional<Item> findBySku(String sku);
+    Optional<Item> findByItemCode(String itemCode);
 
-    boolean existsBySku(String sku);
+    boolean existsByItemCode(String itemCode);
 
-    Page<Item> findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(
-            String name, String sku, Pageable pageable);
+    Page<Item> findByNameContainingIgnoreCaseOrItemCodeContainingIgnoreCase(
+            String name, String itemCode, Pageable pageable);
 }

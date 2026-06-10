@@ -22,13 +22,13 @@ public final class StoreResponses {
     }
 
     public record ItemResponse(
-            UUID id, String sku, String name, String description, String unitOfMeasure,
+            UUID id, String itemCode, String name, String description, String unitOfMeasure,
             BigDecimal unitPrice, String category, ValuationMethod valuationMethod,
             BigDecimal reorderLevel, boolean criticalItem, boolean approvalRequiredForIssue,
             List<Location> locations, ItemStatus status) {
 
         public static ItemResponse from(Item i) {
-            return new ItemResponse(i.getId(), i.getSku(), i.getName(), i.getDescription(),
+            return new ItemResponse(i.getId(), i.getItemCode(), i.getName(), i.getDescription(),
                     i.getUnitOfMeasure(), i.getUnitPrice(), i.getCategory(), i.getValuationMethod(),
                     i.getReorderLevel(), i.isCriticalItem(), i.isApprovalRequiredForIssue(),
                     i.getLocations(), i.getStatus());

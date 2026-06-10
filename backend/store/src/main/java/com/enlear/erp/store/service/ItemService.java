@@ -23,11 +23,11 @@ public class ItemService {
     }
 
     public Item createItem(CreateItemCommand cmd) {
-        if (items.existsBySku(cmd.sku())) {
-            throw new BusinessRuleException("STORE_DUPLICATE_SKU",
-                    "An item with SKU '%s' already exists".formatted(cmd.sku()));
+        if (items.existsByItemCode(cmd.itemCode())) {
+            throw new BusinessRuleException("STORE_DUPLICATE_ITEM_CODE",
+                    "An item with item code '%s' already exists".formatted(cmd.itemCode()));
         }
-        Item item = new Item(cmd.sku(), cmd.name(), cmd.description(), cmd.unitOfMeasure(),
+        Item item = new Item(cmd.itemCode(), cmd.name(), cmd.description(), cmd.unitOfMeasure(),
                 cmd.unitPrice(), cmd.category(), cmd.valuationMethod(), cmd.reorderLevel(),
                 cmd.criticalItem(), cmd.approvalRequiredForIssue(), cmd.locations());
         return items.save(item);
@@ -42,7 +42,7 @@ public class ItemService {
     @Transactional(readOnly = true)
     public Page<Item> listItems(String search, Pageable pageable) {
         if (StringUtils.hasText(search)) {
-            return items.findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(
+            return items.findByNameContainingIgnoreCaseOrItemCodeContainingIgnoreCase(
                     search, search, pageable);
         }
         return items.findAll(pageable);

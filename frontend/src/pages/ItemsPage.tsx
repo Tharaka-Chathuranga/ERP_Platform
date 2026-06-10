@@ -26,7 +26,7 @@ export function ItemsPage() {
         <div className="card-head">
           <h2>Items</h2>
           <input
-            placeholder="Search SKU or name…"
+            placeholder="Search item code or name…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -38,7 +38,7 @@ export function ItemsPage() {
         <table className="table">
           <thead>
             <tr>
-              <th>SKU</th>
+              <th>Item Code</th>
               <th>Name</th>
               <th>UoM</th>
               <th>Reorder</th>
@@ -52,7 +52,7 @@ export function ItemsPage() {
                 className={selected?.id === item.id ? "row selected" : "row"}
                 onClick={() => setSelected(item)}
               >
-                <td>{item.sku}</td>
+                <td>{item.itemCode}</td>
                 <td>{item.name}</td>
                 <td>{item.unitOfMeasure}</td>
                 <td>{item.reorderLevel}</td>
@@ -71,7 +71,7 @@ export function ItemsPage() {
       </section>
 
       <section className="card">
-        <h2>{selected ? `Stock — ${selected.sku}` : "Stock"}</h2>
+        <h2>{selected ? `Stock — ${selected.itemCode}` : "Stock"}</h2>
         {!selected && <p className="muted">Select an item to view stock and post movements.</p>}
         {selected && <StockPanel item={selected} />}
       </section>
@@ -81,7 +81,7 @@ export function ItemsPage() {
 
 function CreateItemForm({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
-  const [sku, setSku] = useState("");
+  const [itemCode, setItemCode] = useState("");
   const [name, setName] = useState("");
   const [uom, setUom] = useState("EACH");
   const [reorder, setReorder] = useState("0");
@@ -90,14 +90,14 @@ function CreateItemForm({ onCreated }: { onCreated: () => void }) {
   const mutation = useMutation({
     mutationFn: () =>
       createItem({
-        sku,
+        itemCode,
         name,
         unitOfMeasure: uom,
         valuationMethod: "WEIGHTED_AVERAGE",
         reorderLevel: Number(reorder),
       }),
     onSuccess: () => {
-      setSku(""); setName(""); setReorder("0"); setError(null); setOpen(false);
+      setItemCode(""); setName(""); setReorder("0"); setError(null); setOpen(false);
       onCreated();
     },
     onError: (e) => setError(apiErrorMessage(e)),
@@ -116,7 +116,7 @@ function CreateItemForm({ onCreated }: { onCreated: () => void }) {
     <form className="subform" onSubmit={onSubmit}>
       <h3>New item</h3>
       <div className="form-row">
-        <input placeholder="SKU" value={sku} onChange={(e) => setSku(e.target.value)} required />
+        <input placeholder="Item Code" value={itemCode} onChange={(e) => setItemCode(e.target.value)} required />
         <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
       <div className="form-row">

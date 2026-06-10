@@ -45,7 +45,7 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public PageResponse<ItemResponse> list(
             @RequestParam(required = false) String search,
-            @PageableDefault(size = 20, sort = "sku") Pageable pageable) {
+            @PageableDefault(size = 20, sort = "itemCode") Pageable pageable) {
         return PageResponse.of(items.listItems(search, pageable), ItemResponse::from);
     }
 

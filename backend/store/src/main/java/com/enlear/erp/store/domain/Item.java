@@ -16,7 +16,7 @@ import org.hibernate.type.SqlTypes;
 
 /**
  * A stock-keeping item (product/material). Identified to users by its unique
- * {@code sku}. Carries the master data needed for inventory control, a
+ * {@code itemCode}. Carries the master data needed for inventory control, a
  * {@code reorderLevel} used to flag low stock, control flags, and the storage
  * bins it occupies (embedded JSONB — see {@link Location}).
  *
@@ -29,8 +29,8 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 public class Item extends BaseEntity {
 
-    @Column(nullable = false, unique = true, length = 64)
-    private String sku;
+    @Column(name = "itemcode", nullable = false, unique = true, length = 64)
+    private String itemCode;
 
     @Column(nullable = false, length = 200)
     private String name;
@@ -73,11 +73,11 @@ public class Item extends BaseEntity {
     @Column(nullable = false, length = 16)
     private ItemStatus status = ItemStatus.ACTIVE;
 
-    public Item(String sku, String name, String description, String unitOfMeasure,
+    public Item(String itemCode, String name, String description, String unitOfMeasure,
                 BigDecimal unitPrice, String category, ValuationMethod valuationMethod,
                 BigDecimal reorderLevel, boolean criticalItem, boolean approvalRequiredForIssue,
                 List<Location> locations) {
-        this.sku = sku;
+        this.itemCode = itemCode;
         this.name = name;
         this.description = description;
         this.unitOfMeasure = unitOfMeasure;
