@@ -23,7 +23,9 @@ CONTAINER_PORT=8080
 CONFIG
 
 # ── Redeploy script (idempotent; safe to call on every deploy) ────────────────
-# Heredoc is intentionally NOT expanded here; all $$ below become $ on disk.
+# Terraform templatefile() only rewrites $${ -> ${ (brace form). Bash variable
+# expansions are therefore written $${VAR}; command substitutions stay $(...)
+# (parens are not template syntax, so they pass through untouched).
 cat > /opt/erp/deploy.sh <<'DEPLOY'
 #!/bin/bash
 set -euo pipefail
@@ -42,17 +44,17 @@ docker pull "$${IMAGE_URI}"
 
 # Pull DB connection + JWT secret from Secrets Manager at runtime (never baked
 # into the image or the instance template).
-DB_JSON="$$(aws secretsmanager get-secret-value --region "$${AWS_REGION}" \
+DB_JSON="$(aws secretsmanager get-secret-value --region "$${AWS_REGION}" \
   --secret-id "$${DB_SECRET_ARN}" --query SecretString --output text)"
-APP_JSON="$$(aws secretsmanager get-secret-value --region "$${AWS_REGION}" \
+APP_JSON="$(aws secretsmanager get-secret-value --region "$${AWS_REGION}" \
   --secret-id "$${APP_SECRET_ARN}" --query SecretString --output text)"
 
-DB_HOST="$$(echo "$${DB_JSON}" | jq -r '.host')"
-DB_PORT="$$(echo "$${DB_JSON}" | jq -r '.port // 5432')"
-DB_NAME="$$(echo "$${DB_JSON}" | jq -r '.dbname')"
-DB_USER="$$(echo "$${DB_JSON}" | jq -r '.username')"
-DB_PASS="$$(echo "$${DB_JSON}" | jq -r '.password')"
-JWT_SECRET="$$(echo "$${APP_JSON}" | jq -r '.jwt_secret')"
+DB_HOST="$(echo "$${DB_JSON}" | jq -r '.host')"
+DB_PORT="$(echo "$${DB_JSON}" | jq -r '.port // 5432')"
+DB_NAME="$(echo "$${DB_JSON}" | jq -r '.dbname')"
+DB_USER="$(echo "$${DB_JSON}" | jq -r '.username')"
+DB_PASS="$(echo "$${DB_JSON}" | jq -r '.password')"
+JWT_SECRET="$(echo "$${APP_JSON}" | jq -r '.jwt_secret')"
 
 DB_URL="jdbc:postgresql://$${DB_HOST}:$${DB_PORT}/$${DB_NAME}"
 
