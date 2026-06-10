@@ -25,12 +25,12 @@ public final class IssueResponses {
     }
 
     public record IssueResponse(
-            UUID id, String issueNumber, UUID warehouseId, UUID borrowingUserId, UUID storeKeeperId,
+            UUID id, String issueNumber, UUID borrowingUserId, UUID storeKeeperId,
             IssueStatus status, UUID approvedByUserId, Instant approvedAt, Instant issuedAt,
             List<IssueLineResponse> lines) {
 
         public static IssueResponse from(Issue i) {
-            return new IssueResponse(i.getId(), i.getIssueNumber(), i.getWarehouseId(),
+            return new IssueResponse(i.getId(), i.getIssueNumber(),
                     i.getBorrowingUserId(), i.getStoreKeeperId(), i.getStatus(),
                     i.getApprovedByUserId(), i.getApprovedAt(), i.getIssuedAt(),
                     i.getLines().stream().map(IssueLineResponse::from).toList());

@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "stock_movements", schema = "store",
         indexes = {
-                @Index(name = "idx_movement_item_wh", columnList = "item_id, warehouse_id"),
+                @Index(name = "idx_movement_item", columnList = "item_id"),
                 @Index(name = "idx_movement_occurred", columnList = "occurred_at")
         })
 @Getter
@@ -35,9 +35,6 @@ public class StockMovement extends BaseEntity {
 
     @Column(name = "item_id", nullable = false)
     private UUID itemId;
-
-    @Column(name = "warehouse_id", nullable = false)
-    private UUID warehouseId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
@@ -55,21 +52,16 @@ public class StockMovement extends BaseEntity {
     @Column(length = 100)
     private String reference;
 
-    @Column(length = 500)
-    private String note;
-
     @Column(name = "occurred_at", nullable = false)
     private Instant occurredAt;
 
-    public StockMovement(UUID itemId, UUID warehouseId, MovementType type, BigDecimal quantity,
-                         BigDecimal unitCost, String reference, String note, Instant occurredAt) {
+    public StockMovement(UUID itemId, MovementType type, BigDecimal quantity,
+                         BigDecimal unitCost, String reference, Instant occurredAt) {
         this.itemId = itemId;
-        this.warehouseId = warehouseId;
         this.type = type;
         this.quantity = quantity;
         this.unitCost = unitCost;
         this.reference = reference;
-        this.note = note;
         this.occurredAt = occurredAt != null ? occurredAt : Instant.now();
     }
 

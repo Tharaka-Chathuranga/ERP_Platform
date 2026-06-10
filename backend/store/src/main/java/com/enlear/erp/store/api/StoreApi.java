@@ -1,7 +1,6 @@
 package com.enlear.erp.store.api;
 
 import com.enlear.erp.store.api.dto.StockLevelView;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -12,6 +11,6 @@ import java.util.UUID;
  */
 public interface StoreApi {
 
-    /** Current on-hand quantities for an item across all warehouses. */
-    List<StockLevelView> stockLevelsForItem(UUID itemId);
+    /** Current on-hand quantity for an item, derived from the movement ledger. */
+    StockLevelView stockOnHand(UUID itemId);
 }

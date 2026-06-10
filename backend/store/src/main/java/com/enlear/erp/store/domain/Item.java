@@ -20,8 +20,8 @@ import org.hibernate.type.SqlTypes;
  * {@code reorderLevel} used to flag low stock, control flags, and the storage
  * bins it occupies (embedded JSONB — see {@link Location}).
  *
- * <p>On-hand quantity is NOT stored here: it is the projection in
- * {@code StockLevel}, derived from the stock-movement ledger.
+ * <p>On-hand quantity is NOT stored here: it is derived by summing the
+ * append-only stock-movement ledger.
  */
 @Entity
 @Table(name = "items", schema = "store")

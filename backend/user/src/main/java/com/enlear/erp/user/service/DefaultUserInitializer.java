@@ -1,8 +1,6 @@
 package com.enlear.erp.user.service;
 
-import com.enlear.erp.user.domain.Role;
 import com.enlear.erp.user.domain.User;
-import com.enlear.erp.user.repository.RoleRepository;
 import com.enlear.erp.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +23,10 @@ public class DefaultUserInitializer implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(DefaultUserInitializer.class);
 
     private final UserRepository users;
-    private final RoleRepository roles;
     private final PasswordEncoder passwordEncoder;
 
-    public DefaultUserInitializer(UserRepository users, RoleRepository roles,
-                                  PasswordEncoder passwordEncoder) {
+    public DefaultUserInitializer(UserRepository users, PasswordEncoder passwordEncoder) {
         this.users = users;
-        this.roles = roles;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -41,15 +36,12 @@ public class DefaultUserInitializer implements ApplicationRunner {
         if (users.count() > 0) {
             return;
         }
-        Role adminRole = roles.findByName("ADMIN")
-                .orElseThrow(() -> new IllegalStateException("ADMIN role missing — check migrations"));
-
         User admin = new User();
         admin.setUsername("admin");
         admin.setDisplayName("Administrator");
         admin.setPasswordHash(passwordEncoder.encode("admin123"));
+        admin.setRole("ADMIN");
         admin.setEnabled(true);
-        admin.addRole(adminRole);
         users.save(admin);
 
         log.warn("Created default admin user 'admin' / 'admin123' — CHANGE THIS PASSWORD.");

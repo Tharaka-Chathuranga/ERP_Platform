@@ -7,15 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * A user's request to borrow a quantity of an item. Once APPROVED it can be
- * fulfilled by an {@link Issue} (referenced by {@code issueId}).
+ * A user's request to borrow against an {@link Issue} document (which carries the
+ * items and quantities via its lines). Moves through an approval workflow.
  */
 @Entity
 @Table(name = "borrow_requests", schema = "store")
@@ -23,11 +22,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BorrowRequest extends BaseEntity {
 
-    @Column(name = "item_id", nullable = false)
-    private UUID itemId;
-
-    @Column(nullable = false, precision = 19, scale = 4)
-    private BigDecimal quantity;
+    @Column(name = "issue_id", nullable = false)
+    private UUID issueId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
@@ -48,12 +44,8 @@ public class BorrowRequest extends BaseEntity {
     @Column(name = "approved_at")
     private Instant approvedAt;
 
-    @Column(name = "issue_id")
-    private UUID issueId;
-
-    public BorrowRequest(UUID itemId, BigDecimal quantity, String reason, UUID requestedByUserId) {
-        this.itemId = itemId;
-        this.quantity = quantity;
+    public BorrowRequest(UUID issueId, String reason, UUID requestedByUserId) {
+        this.issueId = issueId;
         this.reason = reason;
         this.requestedByUserId = requestedByUserId;
         this.requestedAt = Instant.now();
@@ -72,16 +64,6 @@ public class BorrowRequest extends BaseEntity {
         this.status = BorrowRequestStatus.REJECTED;
         this.approvedByUserId = approverId;
         this.approvedAt = Instant.now();
-    }
-
-    /** Links the fulfilling issue and flips the request to ISSUED. */
-    public void fulfil(UUID issueId) {
-        if (status != BorrowRequestStatus.APPROVED) {
-            throw new BusinessRuleException("STORE_BORROW_NOT_APPROVED",
-                    "Only an APPROVED borrow request can be fulfilled (current: " + status + ")");
-        }
-        this.issueId = issueId;
-        this.status = BorrowRequestStatus.ISSUED;
     }
 
     private void requirePending(String action) {

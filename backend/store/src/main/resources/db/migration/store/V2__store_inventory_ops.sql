@@ -4,10 +4,9 @@
 --
 --  Design notes (carried over from V1):
 --   * Money / quantity columns use NUMERIC(19,4) — never floating point.
---   * Multi-item documents use a header + lines split (no embedded lists).
+--   * Multi-item documents use a header + item-lines split (no embedded lists).
 --   * Receiving/issuing POST into store.stock_movements (the append-only
---     ledger from V1); stock_levels stays the single source of on-hand qty.
---     => items carry NO currentQuantity column — it is read from stock_levels.
+--     ledger from V1); on-hand qty is derived by summing that ledger.
 --   * store_keeper_id / *_user_id reference users.users but carry NO database
 --     FK: store and user are independent modules. Validate at the app layer.
 --   * item.locations is the ONE intentional embedded array (JSONB): a small,
@@ -54,44 +53,42 @@ CREATE TABLE store.supplier_items (
 );
 CREATE INDEX idx_supplier_items_item ON store.supplier_items(item_id);
 
--- ── Goods receiving (GRN): header + lines ───────────────────────────
-CREATE TABLE store.goods_receipts (
+-- ── Goods receive note (GRN): header + item lines ───────────────────
+CREATE TABLE store.good_receive_note (
     id              UUID PRIMARY KEY,
     version         BIGINT       NOT NULL DEFAULT 0,
     grn_number      VARCHAR(32)  NOT NULL UNIQUE,
     po_number       VARCHAR(64),
     invoice_number  VARCHAR(64),
     supplier_id     UUID         NOT NULL REFERENCES store.suppliers(id),
-    warehouse_id    UUID         NOT NULL REFERENCES store.warehouses(id),
     store_keeper_id UUID         NOT NULL,                       -- users.users (no cross-module FK)
     status          VARCHAR(16)  NOT NULL DEFAULT 'DRAFT',       -- DRAFT|POSTED|CANCELLED
     received_at     TIMESTAMPTZ  NOT NULL,
     created_at TIMESTAMPTZ, created_by VARCHAR(100),
     updated_at TIMESTAMPTZ, updated_by VARCHAR(100)
 );
-CREATE INDEX idx_grn_supplier ON store.goods_receipts(supplier_id);
-CREATE INDEX idx_grn_status   ON store.goods_receipts(status);
-CREATE INDEX idx_grn_received ON store.goods_receipts(received_at);
+CREATE INDEX idx_grn_supplier ON store.good_receive_note(supplier_id);
+CREATE INDEX idx_grn_status   ON store.good_receive_note(status);
+CREATE INDEX idx_grn_received ON store.good_receive_note(received_at);
 
-CREATE TABLE store.goods_receipt_lines (
-    id               UUID PRIMARY KEY,
-    version          BIGINT        NOT NULL DEFAULT 0,
-    goods_receipt_id UUID          NOT NULL REFERENCES store.goods_receipts(id) ON DELETE CASCADE,
-    item_id          UUID          NOT NULL REFERENCES store.items(id),
-    quantity         NUMERIC(19,4) NOT NULL CHECK (quantity > 0),
-    unit_cost        NUMERIC(19,4),
+CREATE TABLE store.good_receive_note_item (
+    id                   UUID PRIMARY KEY,
+    version              BIGINT        NOT NULL DEFAULT 0,
+    good_receive_note_id UUID          NOT NULL REFERENCES store.good_receive_note(id) ON DELETE CASCADE,
+    item_id              UUID          NOT NULL REFERENCES store.items(id),
+    quantity             NUMERIC(19,4) NOT NULL CHECK (quantity > 0),
+    unit_cost            NUMERIC(19,4),
     created_at TIMESTAMPTZ, created_by VARCHAR(100),
     updated_at TIMESTAMPTZ, updated_by VARCHAR(100)
 );
-CREATE INDEX idx_grn_lines_grn  ON store.goods_receipt_lines(goods_receipt_id);
-CREATE INDEX idx_grn_lines_item ON store.goods_receipt_lines(item_id);
+CREATE INDEX idx_grn_items_grn  ON store.good_receive_note_item(good_receive_note_id);
+CREATE INDEX idx_grn_items_item ON store.good_receive_note_item(item_id);
 
--- ── Issuing / borrowing: header + lines ─────────────────────────────
+-- ── Issuing / borrowing: header + item lines ────────────────────────
 CREATE TABLE store.issues (
     id                  UUID PRIMARY KEY,
     version             BIGINT       NOT NULL DEFAULT 0,
     issue_number        VARCHAR(32)  NOT NULL UNIQUE,
-    warehouse_id        UUID         NOT NULL REFERENCES store.warehouses(id),
     borrowing_user_id   UUID         NOT NULL,                   -- users.users (no FK)
     store_keeper_id     UUID         NOT NULL,                   -- users.users (no FK)
     status              VARCHAR(20)  NOT NULL DEFAULT 'DRAFT',
@@ -105,7 +102,7 @@ CREATE TABLE store.issues (
 CREATE INDEX idx_issues_user   ON store.issues(borrowing_user_id);
 CREATE INDEX idx_issues_status ON store.issues(status);
 
-CREATE TABLE store.issue_lines (
+CREATE TABLE store.issues_item (
     id                UUID PRIMARY KEY,
     version           BIGINT        NOT NULL DEFAULT 0,
     issue_id          UUID          NOT NULL REFERENCES store.issues(id) ON DELETE CASCADE,
@@ -116,34 +113,33 @@ CREATE TABLE store.issue_lines (
     created_at TIMESTAMPTZ, created_by VARCHAR(100),
     updated_at TIMESTAMPTZ, updated_by VARCHAR(100)
 );
-CREATE INDEX idx_issue_lines_issue ON store.issue_lines(issue_id);
-CREATE INDEX idx_issue_lines_item  ON store.issue_lines(item_id);
+CREATE INDEX idx_issues_item_issue ON store.issues_item(issue_id);
+CREATE INDEX idx_issues_item_item  ON store.issues_item(item_id);
 
 -- ── Request workflows ───────────────────────────────────────────────
+-- A borrow request references an ISSUE document (which carries the items/qty
+-- via issues_item) rather than a single item.
 CREATE TABLE store.borrow_requests (
     id                   UUID PRIMARY KEY,
     version              BIGINT        NOT NULL DEFAULT 0,
-    item_id              UUID          NOT NULL REFERENCES store.items(id),
-    quantity             NUMERIC(19,4) NOT NULL CHECK (quantity > 0),
+    issue_id             UUID          NOT NULL REFERENCES store.issues(id),
     status               VARCHAR(16)   NOT NULL DEFAULT 'PENDING', -- PENDING|APPROVED|REJECTED|ISSUED|RETURNED
     reason               VARCHAR(1000),
     requested_by_user_id UUID          NOT NULL,
     requested_at         TIMESTAMPTZ   NOT NULL,
     approved_by_user_id  UUID,
     approved_at          TIMESTAMPTZ,
-    issue_id             UUID          REFERENCES store.issues(id),  -- set once fulfilled
     created_at TIMESTAMPTZ, created_by VARCHAR(100),
     updated_at TIMESTAMPTZ, updated_by VARCHAR(100)
 );
-CREATE INDEX idx_borrow_item   ON store.borrow_requests(item_id);
+CREATE INDEX idx_borrow_issue  ON store.borrow_requests(issue_id);
 CREATE INDEX idx_borrow_user   ON store.borrow_requests(requested_by_user_id);
 CREATE INDEX idx_borrow_status ON store.borrow_requests(status);
 
+-- A deviation request is a multi-item document: header + item lines.
 CREATE TABLE store.deviation_requests (
     id                   UUID PRIMARY KEY,
     version              BIGINT       NOT NULL DEFAULT 0,
-    item_id              UUID         NOT NULL REFERENCES store.items(id),
-    quantity             NUMERIC(19,4),
     status               VARCHAR(16)  NOT NULL DEFAULT 'PENDING',  -- PENDING|APPROVED|REJECTED
     stage                VARCHAR(16)  NOT NULL DEFAULT 'INCOMING', -- INCOMING|IN_PROGRESS|FINAL
     reason               VARCHAR(1000),
@@ -154,6 +150,17 @@ CREATE TABLE store.deviation_requests (
     created_at TIMESTAMPTZ, created_by VARCHAR(100),
     updated_at TIMESTAMPTZ, updated_by VARCHAR(100)
 );
-CREATE INDEX idx_deviation_item   ON store.deviation_requests(item_id);
 CREATE INDEX idx_deviation_status ON store.deviation_requests(status);
 CREATE INDEX idx_deviation_stage  ON store.deviation_requests(stage);
+
+CREATE TABLE store.deviation_requests_item (
+    id                   UUID PRIMARY KEY,
+    version              BIGINT        NOT NULL DEFAULT 0,
+    deviation_request_id UUID          NOT NULL REFERENCES store.deviation_requests(id) ON DELETE CASCADE,
+    item_id              UUID          NOT NULL REFERENCES store.items(id),
+    quantity             NUMERIC(19,4),
+    created_at TIMESTAMPTZ, created_by VARCHAR(100),
+    updated_at TIMESTAMPTZ, updated_by VARCHAR(100)
+);
+CREATE INDEX idx_dev_item_dev  ON store.deviation_requests_item(deviation_request_id);
+CREATE INDEX idx_dev_item_item ON store.deviation_requests_item(item_id);

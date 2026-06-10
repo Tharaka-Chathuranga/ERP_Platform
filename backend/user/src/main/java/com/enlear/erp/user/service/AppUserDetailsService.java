@@ -1,6 +1,7 @@
 package com.enlear.erp.user.service;
 
 import com.enlear.erp.user.repository.UserRepository;
+import java.util.List;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,9 +30,7 @@ public class AppUserDetailsService implements UserDetailsService {
         var user = users.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Unknown user: " + username));
 
-        var authorities = user.getRoles().stream()
-                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getName()))
-                .toList();
+        var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
 
         return User.builder()
                 .username(user.getUsername())

@@ -12,11 +12,9 @@ import java.util.UUID;
  */
 public record PostStockMovementCommand(
         UUID itemId,
-        UUID warehouseId,
         MovementType type,
         BigDecimal quantity,
         BigDecimal unitCost,
         String reference,
-        String note,
         Instant occurredAt) {
 }

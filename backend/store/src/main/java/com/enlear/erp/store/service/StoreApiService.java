@@ -2,7 +2,6 @@ package com.enlear.erp.store.service;
 
 import com.enlear.erp.store.api.StoreApi;
 import com.enlear.erp.store.api.dto.StockLevelView;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,9 +22,7 @@ public class StoreApiService implements StoreApi {
     }
 
     @Override
-    public List<StockLevelView> stockLevelsForItem(UUID itemId) {
-        return stock.getStockLevelsForItem(itemId).stream()
-                .map(s -> new StockLevelView(s.getItemId(), s.getWarehouseId(), s.getQuantityOnHand()))
-                .toList();
+    public StockLevelView stockOnHand(UUID itemId) {
+        return new StockLevelView(itemId, stock.getOnHand(itemId));
     }
 }

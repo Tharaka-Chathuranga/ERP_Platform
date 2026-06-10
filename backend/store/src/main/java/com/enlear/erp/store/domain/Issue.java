@@ -31,9 +31,6 @@ public class Issue extends BaseEntity {
     @Column(name = "issue_number", nullable = false, unique = true, length = 32)
     private String issueNumber;
 
-    @Column(name = "warehouse_id", nullable = false)
-    private UUID warehouseId;
-
     @Column(name = "borrowing_user_id", nullable = false)
     private UUID borrowingUserId;
 
@@ -57,10 +54,9 @@ public class Issue extends BaseEntity {
     @JoinColumn(name = "issue_id", nullable = false)
     private List<IssueLine> lines = new ArrayList<>();
 
-    public Issue(String issueNumber, UUID warehouseId, UUID borrowingUserId, UUID storeKeeperId,
+    public Issue(String issueNumber, UUID borrowingUserId, UUID storeKeeperId,
                  boolean requiresApproval) {
         this.issueNumber = issueNumber;
-        this.warehouseId = warehouseId;
         this.borrowingUserId = borrowingUserId;
         this.storeKeeperId = storeKeeperId;
         this.status = requiresApproval ? IssueStatus.PENDING_APPROVAL : IssueStatus.APPROVED;

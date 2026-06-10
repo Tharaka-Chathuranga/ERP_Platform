@@ -2,11 +2,10 @@ package com.enlear.erp.store.web;
 
 import com.enlear.erp.shared.web.PageResponse;
 import com.enlear.erp.store.web.dto.PostMovementRequest;
-import com.enlear.erp.store.web.dto.StoreResponses.StockLevelResponse;
+import com.enlear.erp.store.web.dto.StoreResponses.OnHandResponse;
 import com.enlear.erp.store.web.dto.StoreResponses.StockMovementResponse;
 import com.enlear.erp.store.service.StockService;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -33,22 +32,21 @@ public class StockController {
     /** Post a stock movement (receipt / issue / adjustment / transfer). */
     @PostMapping("/stock/movements")
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public StockMovementResponse post(@Valid @RequestBody PostMovementRequest request) {
         return StockMovementResponse.from(stock.postMovement(request.toCommand()));
     }
 
-    /** Current on-hand quantities for an item across all warehouses. */
-    @GetMapping("/items/{itemId}/stock-levels")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
-    public List<StockLevelResponse> levels(@PathVariable UUID itemId) {
-        return stock.getStockLevelsForItem(itemId).stream()
-                .map(StockLevelResponse::from).toList();
+    /** Current on-hand quantity for an item, derived from the ledger. */
+    @GetMapping("/items/{itemId}/on-hand")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    public OnHandResponse onHand(@PathVariable UUID itemId) {
+        return OnHandResponse.of(itemId, stock.getOnHand(itemId));
     }
 
     /** Movement history (ledger) for an item, newest first. */
     @GetMapping("/items/{itemId}/movements")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public PageResponse<StockMovementResponse> movements(
             @PathVariable UUID itemId,
             @PageableDefault(size = 20) Pageable pageable) {

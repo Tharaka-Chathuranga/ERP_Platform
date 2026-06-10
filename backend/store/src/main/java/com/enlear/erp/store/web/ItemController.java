@@ -33,7 +33,7 @@ public class ItemController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ItemResponse> create(@Valid @RequestBody CreateItemRequest request) {
         var item = items.createItem(request.toCommand());
         return ResponseEntity
@@ -42,7 +42,7 @@ public class ItemController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public PageResponse<ItemResponse> list(
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "sku") Pageable pageable) {
@@ -50,14 +50,14 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ItemResponse get(@PathVariable UUID id) {
         return ItemResponse.from(items.getItem(id));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deactivate(@PathVariable UUID id) {
         items.deactivateItem(id);
     }

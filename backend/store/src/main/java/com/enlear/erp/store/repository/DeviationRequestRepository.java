@@ -9,6 +9,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DeviationRequestRepository extends JpaRepository<DeviationRequest, UUID> {
 
     List<DeviationRequest> findByStageOrderByRequestedAtDesc(DeviationStage stage);
-
-    List<DeviationRequest> findByItemIdOrderByRequestedAtDesc(UUID itemId);
 }

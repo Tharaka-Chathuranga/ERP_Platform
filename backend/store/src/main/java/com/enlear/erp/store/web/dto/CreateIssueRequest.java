@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.UUID;
 
 public record CreateIssueRequest(
-        @NotNull UUID warehouseId,
         @NotNull UUID borrowingUserId,
         @NotNull UUID storeKeeperId,
         @NotEmpty @Valid List<Line> lines) {
@@ -22,7 +21,7 @@ public record CreateIssueRequest(
     }
 
     public CreateIssueCommand toCommand() {
-        return new CreateIssueCommand(warehouseId, borrowingUserId, storeKeeperId,
+        return new CreateIssueCommand(borrowingUserId, storeKeeperId,
                 lines.stream()
                         .map(l -> new CreateIssueCommand.Line(l.itemId(), l.quantity(), l.returnable()))
                         .toList());

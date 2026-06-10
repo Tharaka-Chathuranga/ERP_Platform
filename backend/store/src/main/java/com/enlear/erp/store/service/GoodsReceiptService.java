@@ -7,7 +7,6 @@ import com.enlear.erp.store.domain.GoodsReceiptLine;
 import com.enlear.erp.store.domain.MovementType;
 import com.enlear.erp.store.repository.GoodsReceiptRepository;
 import com.enlear.erp.store.repository.ItemRepository;
-import com.enlear.erp.store.repository.WarehouseRepository;
 import com.enlear.erp.store.service.command.CreateGoodsReceiptCommand;
 import com.enlear.erp.store.service.command.PostStockMovementCommand;
 import java.time.Instant;
@@ -27,14 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class GoodsReceiptService {
 
     private final GoodsReceiptRepository receipts;
-    private final WarehouseRepository warehouses;
     private final ItemRepository items;
     private final StockService stock;
 
-    public GoodsReceiptService(GoodsReceiptRepository receipts, WarehouseRepository warehouses,
+    public GoodsReceiptService(GoodsReceiptRepository receipts,
                                ItemRepository items, StockService stock) {
         this.receipts = receipts;
-        this.warehouses = warehouses;
         this.items = items;
         this.stock = stock;
     }
@@ -44,12 +41,9 @@ public class GoodsReceiptService {
             throw new BusinessRuleException("STORE_GRN_EMPTY",
                     "A goods receipt must have at least one line");
         }
-        if (!warehouses.existsById(cmd.warehouseId())) {
-            throw new ResourceNotFoundException("Warehouse", cmd.warehouseId());
-        }
 
         GoodsReceipt grn = new GoodsReceipt(generateGrnNumber(), cmd.poNumber(), cmd.invoiceNumber(),
-                cmd.supplierId(), cmd.warehouseId(), cmd.storeKeeperId(), cmd.receivedAt());
+                cmd.supplierId(), cmd.storeKeeperId(), cmd.receivedAt());
 
         for (CreateGoodsReceiptCommand.Line line : cmd.lines()) {
             if (!items.existsById(line.itemId())) {
@@ -66,9 +60,9 @@ public class GoodsReceiptService {
         grn.markPosted();
         for (GoodsReceiptLine line : grn.getLines()) {
             stock.postMovement(new PostStockMovementCommand(
-                    line.getItemId(), grn.getWarehouseId(), MovementType.RECEIPT,
+                    line.getItemId(), MovementType.RECEIPT,
                     line.getQuantity(), line.getUnitCost(), grn.getGrnNumber(),
-                    "Goods receipt " + grn.getGrnNumber(), grn.getReceivedAt()));
+                    grn.getReceivedAt()));
         }
         return receipts.save(grn);
     }

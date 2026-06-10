@@ -3,7 +3,7 @@ package com.enlear.erp.store.service;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import com.enlear.erp.store.domain.BorrowRequest;
 import com.enlear.erp.store.repository.BorrowRequestRepository;
-import com.enlear.erp.store.repository.ItemRepository;
+import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.service.command.CreateBorrowRequestCommand;
 import java.util.List;
 import java.util.UUID;
@@ -15,18 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class BorrowRequestService {
 
     private final BorrowRequestRepository requests;
-    private final ItemRepository items;
+    private final IssueRepository issues;
 
-    public BorrowRequestService(BorrowRequestRepository requests, ItemRepository items) {
+    public BorrowRequestService(BorrowRequestRepository requests, IssueRepository issues) {
         this.requests = requests;
-        this.items = items;
+        this.issues = issues;
     }
 
     public BorrowRequest create(CreateBorrowRequestCommand cmd) {
-        if (!items.existsById(cmd.itemId())) {
-            throw new ResourceNotFoundException("Item", cmd.itemId());
+        if (!issues.existsById(cmd.issueId())) {
+            throw new ResourceNotFoundException("Issue", cmd.issueId());
         }
-        return requests.save(new BorrowRequest(cmd.itemId(), cmd.quantity(), cmd.reason(),
+        return requests.save(new BorrowRequest(cmd.issueId(), cmd.reason(),
                 cmd.requestedByUserId()));
     }
 

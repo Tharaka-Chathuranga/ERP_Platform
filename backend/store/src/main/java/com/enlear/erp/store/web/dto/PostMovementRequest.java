@@ -10,16 +10,14 @@ import java.util.UUID;
 
 public record PostMovementRequest(
         @NotNull UUID itemId,
-        @NotNull UUID warehouseId,
         @NotNull MovementType type,
         @NotNull @DecimalMin(value = "0.0", inclusive = false) BigDecimal quantity,
         @DecimalMin("0.0") BigDecimal unitCost,
         String reference,
-        String note,
         Instant occurredAt) {
 
     public PostStockMovementCommand toCommand() {
-        return new PostStockMovementCommand(itemId, warehouseId, type, quantity, unitCost,
-                reference, note, occurredAt);
+        return new PostStockMovementCommand(itemId, type, quantity, unitCost,
+                reference, occurredAt);
     }
 }

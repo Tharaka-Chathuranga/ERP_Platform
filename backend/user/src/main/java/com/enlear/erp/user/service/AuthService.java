@@ -4,7 +4,6 @@ import com.enlear.erp.user.repository.UserRepository;
 import com.enlear.erp.user.web.dto.LoginRequest;
 import com.enlear.erp.user.web.dto.LoginResponse;
 import com.enlear.erp.shared.security.JwtService;
-import java.util.List;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Authenticates a user against the configured {@link AuthenticationManager} and
- * issues a signed JWT carrying the user's roles.
+ * issues a signed JWT carrying the user's role.
  */
 @Service
 public class AuthService {
@@ -36,12 +35,13 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password()));
 
-        List<String> roles = authentication.getAuthorities().stream()
+        String role = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .map(a -> a.startsWith("ROLE_") ? a.substring(5) : a)
-                .toList();
+                .findFirst()
+                .orElse(null);
 
-        String token = jwtService.issueToken(authentication.getName(), roles);
-        return LoginResponse.bearer(token, authentication.getName(), roles);
+        String token = jwtService.issueToken(authentication.getName(), role);
+        return LoginResponse.bearer(token, authentication.getName(), role);
     }
 }

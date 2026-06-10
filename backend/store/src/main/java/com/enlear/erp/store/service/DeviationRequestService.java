@@ -24,11 +24,14 @@ public class DeviationRequestService {
     }
 
     public DeviationRequest create(CreateDeviationRequestCommand cmd) {
-        if (!items.existsById(cmd.itemId())) {
-            throw new ResourceNotFoundException("Item", cmd.itemId());
+        DeviationRequest req = new DeviationRequest(cmd.reason(), cmd.requestedByUserId());
+        for (CreateDeviationRequestCommand.Line line : cmd.items()) {
+            if (!items.existsById(line.itemId())) {
+                throw new ResourceNotFoundException("Item", line.itemId());
+            }
+            req.addItem(line.itemId(), line.quantity());
         }
-        return requests.save(new DeviationRequest(cmd.itemId(), cmd.quantity(), cmd.reason(),
-                cmd.requestedByUserId()));
+        return requests.save(req);
     }
 
     public DeviationRequest approve(UUID id, UUID approverId) {

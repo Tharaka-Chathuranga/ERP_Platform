@@ -29,7 +29,7 @@ public class DeviationRequestController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ResponseEntity<DeviationRequestResponse> create(
             @Valid @RequestBody CreateDeviationRequestRequest request) {
         var req = requests.create(request.toCommand());
@@ -39,32 +39,32 @@ public class DeviationRequestController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public DeviationRequestResponse approve(@PathVariable UUID id, @RequestParam UUID approverId) {
         return DeviationRequestResponse.from(requests.approve(id, approverId));
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public DeviationRequestResponse reject(@PathVariable UUID id, @RequestParam UUID approverId) {
         return DeviationRequestResponse.from(requests.reject(id, approverId));
     }
 
     @PostMapping("/{id}/stage")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public DeviationRequestResponse advanceStage(@PathVariable UUID id,
                                                  @RequestParam DeviationStage stage) {
         return DeviationRequestResponse.from(requests.advanceStage(id, stage));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public DeviationRequestResponse get(@PathVariable UUID id) {
         return DeviationRequestResponse.from(requests.get(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public List<DeviationRequestResponse> listByStage(@RequestParam DeviationStage stage) {
         return requests.listByStage(stage).stream().map(DeviationRequestResponse::from).toList();
     }

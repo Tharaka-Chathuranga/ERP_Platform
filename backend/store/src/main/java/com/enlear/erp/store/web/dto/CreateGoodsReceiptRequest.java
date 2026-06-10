@@ -15,7 +15,6 @@ public record CreateGoodsReceiptRequest(
         @Size(max = 64) String poNumber,
         @Size(max = 64) String invoiceNumber,
         @NotNull UUID supplierId,
-        @NotNull UUID warehouseId,
         @NotNull UUID storeKeeperId,
         Instant receivedAt,
         @NotEmpty @Valid List<Line> lines) {
@@ -27,7 +26,7 @@ public record CreateGoodsReceiptRequest(
     }
 
     public CreateGoodsReceiptCommand toCommand() {
-        return new CreateGoodsReceiptCommand(poNumber, invoiceNumber, supplierId, warehouseId,
+        return new CreateGoodsReceiptCommand(poNumber, invoiceNumber, supplierId,
                 storeKeeperId, receivedAt,
                 lines.stream()
                         .map(l -> new CreateGoodsReceiptCommand.Line(l.itemId(), l.quantity(), l.unitCost()))

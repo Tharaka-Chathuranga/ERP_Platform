@@ -29,7 +29,7 @@ public class SupplierController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SupplierResponse> create(@Valid @RequestBody CreateSupplierRequest request) {
         var supplier = suppliers.createSupplier(request.toCommand());
         return ResponseEntity
@@ -38,19 +38,19 @@ public class SupplierController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public List<SupplierResponse> list() {
         return suppliers.listSuppliers().stream().map(SupplierResponse::from).toList();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public SupplierResponse get(@PathVariable UUID id) {
         return SupplierResponse.from(suppliers.getSupplier(id));
     }
 
     @PostMapping("/{id}/items")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SupplierItemResponse> addItem(
             @PathVariable UUID id, @Valid @RequestBody AddSupplierItemRequest request) {
         var link = suppliers.addItem(request.toCommand(id));
@@ -58,7 +58,7 @@ public class SupplierController {
     }
 
     @GetMapping("/{id}/items")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public List<SupplierItemResponse> items(@PathVariable UUID id) {
         return suppliers.listItemsForSupplier(id).stream()
                 .map(SupplierItemResponse::from).toList();

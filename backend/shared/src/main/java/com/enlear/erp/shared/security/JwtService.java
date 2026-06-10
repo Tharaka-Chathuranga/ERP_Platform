@@ -7,14 +7,13 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 
 /**
- * Issues and validates signed JWT access tokens. Roles are embedded as a
- * {@code roles} claim so the stateless filter can build authorities without a
- * database round-trip on every request.
+ * Issues and validates signed JWT access tokens. The user's single role is
+ * embedded as a {@code role} claim so the stateless filter can build the
+ * authority without a database round-trip on every request.
  */
 @Service
 public class JwtService {
@@ -27,13 +26,13 @@ public class JwtService {
         this.key = Keys.hmacShaKeyFor(props.secret().getBytes(StandardCharsets.UTF_8));
     }
 
-    public String issueToken(String subject, List<String> roles) {
+    public String issueToken(String subject, String role) {
         Instant now = Instant.now();
         Instant expiry = now.plus(props.expirationMinutes(), ChronoUnit.MINUTES);
         return Jwts.builder()
                 .issuer(props.issuer())
                 .subject(subject)
-                .claim("roles", roles)
+                .claim("role", role)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(key)
@@ -49,9 +48,8 @@ public class JwtService {
                 .getPayload();
     }
 
-    @SuppressWarnings("unchecked")
-    public List<String> extractRoles(Claims claims) {
-        Object roles = claims.get("roles");
-        return roles instanceof List<?> list ? (List<String>) list : List.of();
+    public String extractRole(Claims claims) {
+        Object role = claims.get("role");
+        return role != null ? role.toString() : null;
     }
 }

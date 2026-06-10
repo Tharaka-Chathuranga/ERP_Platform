@@ -25,12 +25,12 @@ public final class ReceivingResponses {
 
     public record GoodsReceiptResponse(
             UUID id, String grnNumber, String poNumber, String invoiceNumber, UUID supplierId,
-            UUID warehouseId, UUID storeKeeperId, GrnStatus status, Instant receivedAt,
+            UUID storeKeeperId, GrnStatus status, Instant receivedAt,
             List<GoodsReceiptLineResponse> lines) {
 
         public static GoodsReceiptResponse from(GoodsReceipt g) {
             return new GoodsReceiptResponse(g.getId(), g.getGrnNumber(), g.getPoNumber(),
-                    g.getInvoiceNumber(), g.getSupplierId(), g.getWarehouseId(), g.getStoreKeeperId(),
+                    g.getInvoiceNumber(), g.getSupplierId(), g.getStoreKeeperId(),
                     g.getStatus(), g.getReceivedAt(),
                     g.getLines().stream().map(GoodsReceiptLineResponse::from).toList());
         }

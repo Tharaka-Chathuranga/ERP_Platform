@@ -31,7 +31,7 @@ public class IssueController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ResponseEntity<IssueResponse> create(@Valid @RequestBody CreateIssueRequest request) {
         var issue = issues.createIssue(request.toCommand());
         return ResponseEntity
@@ -40,39 +40,39 @@ public class IssueController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public IssueResponse approve(@PathVariable UUID id, @RequestParam UUID approverId) {
         return IssueResponse.from(issues.approve(id, approverId));
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public IssueResponse reject(@PathVariable UUID id, @RequestParam UUID approverId) {
         return IssueResponse.from(issues.reject(id, approverId));
     }
 
     /** Physically issue an APPROVED document — posts ISSUE movements. */
     @PostMapping("/{id}/issue")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public IssueResponse issue(@PathVariable UUID id) {
         return IssueResponse.from(issues.issue(id));
     }
 
     @PostMapping("/{id}/returns")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public IssueResponse returnItems(@PathVariable UUID id,
                                      @Valid @RequestBody ReturnItemsRequest request) {
         return IssueResponse.from(issues.returnItems(request.toCommand(id)));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public IssueResponse get(@PathVariable UUID id) {
         return IssueResponse.from(issues.getIssue(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public PageResponse<IssueResponse> listForUser(
             @RequestParam UUID borrowingUserId,
             @PageableDefault(size = 20) Pageable pageable) {

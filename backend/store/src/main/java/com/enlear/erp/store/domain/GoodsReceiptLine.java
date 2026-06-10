@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  * {@code goods_receipt_id} is owned by the parent's {@code @OneToMany}).
  */
 @Entity
-@Table(name = "goods_receipt_lines", schema = "store")
+@Table(name = "good_receive_note_item", schema = "store")
 @Getter
 @NoArgsConstructor
 public class GoodsReceiptLine extends BaseEntity {

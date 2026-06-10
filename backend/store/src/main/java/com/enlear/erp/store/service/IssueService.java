@@ -8,7 +8,6 @@ import com.enlear.erp.store.domain.Item;
 import com.enlear.erp.store.domain.MovementType;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.repository.IssueRepository;
-import com.enlear.erp.store.repository.WarehouseRepository;
 import com.enlear.erp.store.service.command.CreateIssueCommand;
 import com.enlear.erp.store.service.command.PostStockMovementCommand;
 import com.enlear.erp.store.service.command.ReturnItemsCommand;
@@ -29,14 +28,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class IssueService {
 
     private final IssueRepository issues;
-    private final WarehouseRepository warehouses;
     private final ItemRepository items;
     private final StockService stock;
 
-    public IssueService(IssueRepository issues, WarehouseRepository warehouses,
+    public IssueService(IssueRepository issues,
                         ItemRepository items, StockService stock) {
         this.issues = issues;
-        this.warehouses = warehouses;
         this.items = items;
         this.stock = stock;
     }
@@ -45,9 +42,6 @@ public class IssueService {
         if (cmd.lines() == null || cmd.lines().isEmpty()) {
             throw new BusinessRuleException("STORE_ISSUE_EMPTY",
                     "An issue must have at least one line");
-        }
-        if (!warehouses.existsById(cmd.warehouseId())) {
-            throw new ResourceNotFoundException("Warehouse", cmd.warehouseId());
         }
 
         boolean requiresApproval = false;
@@ -59,7 +53,7 @@ public class IssueService {
             }
         }
 
-        Issue issue = new Issue(generateIssueNumber(), cmd.warehouseId(), cmd.borrowingUserId(),
+        Issue issue = new Issue(generateIssueNumber(), cmd.borrowingUserId(),
                 cmd.storeKeeperId(), requiresApproval);
         for (CreateIssueCommand.Line line : cmd.lines()) {
             issue.addLine(new IssueLine(line.itemId(), line.quantity(), line.returnable()));
@@ -85,9 +79,9 @@ public class IssueService {
         issue.markIssued();
         for (IssueLine line : issue.getLines()) {
             stock.postMovement(new PostStockMovementCommand(
-                    line.getItemId(), issue.getWarehouseId(), MovementType.ISSUE,
+                    line.getItemId(), MovementType.ISSUE,
                     line.getQuantity(), null, issue.getIssueNumber(),
-                    "Issue " + issue.getIssueNumber(), Instant.now()));
+                    Instant.now()));
         }
         return issues.save(issue);
     }
@@ -107,9 +101,9 @@ public class IssueService {
                     .orElseThrow(() -> new ResourceNotFoundException("IssueLine", ret.itemId()));
             line.recordReturn(ret.quantity());
             stock.postMovement(new PostStockMovementCommand(
-                    line.getItemId(), issue.getWarehouseId(), MovementType.RECEIPT,
+                    line.getItemId(), MovementType.RECEIPT,
                     ret.quantity(), null, issue.getIssueNumber(),
-                    "Return against " + issue.getIssueNumber(), Instant.now()));
+                    Instant.now()));
         }
         boolean allReturned = issue.getLines().stream()
                 .allMatch(l -> l.getReturnedQuantity().compareTo(l.getQuantity()) >= 0);

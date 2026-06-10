@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  * has come back so far ({@code returnedQuantity}). Part of the Issue aggregate.
  */
 @Entity
-@Table(name = "issue_lines", schema = "store")
+@Table(name = "issues_item", schema = "store")
 @Getter
 @NoArgsConstructor
 public class IssueLine extends BaseEntity {

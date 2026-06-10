@@ -30,7 +30,7 @@ public class GoodsReceiptController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ResponseEntity<GoodsReceiptResponse> create(
             @Valid @RequestBody CreateGoodsReceiptRequest request) {
         var grn = receipts.createReceipt(request.toCommand());
@@ -41,19 +41,19 @@ public class GoodsReceiptController {
 
     /** Posts a DRAFT GRN — records stock and locks the document. */
     @PostMapping("/{id}/post")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public GoodsReceiptResponse post(@PathVariable UUID id) {
         return GoodsReceiptResponse.from(receipts.postReceipt(id));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public GoodsReceiptResponse get(@PathVariable UUID id) {
         return GoodsReceiptResponse.from(receipts.getReceipt(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public PageResponse<GoodsReceiptResponse> listForSupplier(
             @RequestParam UUID supplierId,
             @PageableDefault(size = 20) Pageable pageable) {

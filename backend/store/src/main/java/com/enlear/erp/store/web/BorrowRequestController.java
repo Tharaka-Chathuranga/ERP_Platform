@@ -28,7 +28,7 @@ public class BorrowRequestController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ResponseEntity<BorrowRequestResponse> create(
             @Valid @RequestBody CreateBorrowRequestRequest request) {
         var req = requests.create(request.toCommand());
@@ -38,25 +38,25 @@ public class BorrowRequestController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public BorrowRequestResponse approve(@PathVariable UUID id, @RequestParam UUID approverId) {
         return BorrowRequestResponse.from(requests.approve(id, approverId));
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public BorrowRequestResponse reject(@PathVariable UUID id, @RequestParam UUID approverId) {
         return BorrowRequestResponse.from(requests.reject(id, approverId));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public BorrowRequestResponse get(@PathVariable UUID id) {
         return BorrowRequestResponse.from(requests.get(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_MANAGER','STORE_CLERK')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public List<BorrowRequestResponse> listForUser(@RequestParam UUID userId) {
         return requests.listForUser(userId).stream().map(BorrowRequestResponse::from).toList();
     }

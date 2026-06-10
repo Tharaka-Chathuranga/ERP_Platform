@@ -2,32 +2,31 @@ package com.enlear.erp.store.domain;
 
 import com.enlear.erp.shared.domain.BaseEntity;
 import com.enlear.erp.shared.error.BusinessRuleException;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * A request to deviate from standard handling for an item, moving through stages
- * (INCOMING → IN_PROGRESS → FINAL) and an approval status.
+ * A multi-item request to deviate from standard handling, moving through stages
+ * (INCOMING → IN_PROGRESS → FINAL) and an approval status. Header + item lines.
  */
 @Entity
 @Table(name = "deviation_requests", schema = "store")
 @Getter
 @NoArgsConstructor
 public class DeviationRequest extends BaseEntity {
-
-    @Column(name = "item_id", nullable = false)
-    private UUID itemId;
-
-    @Column(precision = 19, scale = 4)
-    private BigDecimal quantity;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
@@ -52,14 +51,20 @@ public class DeviationRequest extends BaseEntity {
     @Column(name = "approved_at")
     private Instant approvedAt;
 
-    public DeviationRequest(UUID itemId, BigDecimal quantity, String reason, UUID requestedByUserId) {
-        this.itemId = itemId;
-        this.quantity = quantity;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "deviation_request_id", nullable = false)
+    private List<DeviationRequestItem> items = new ArrayList<>();
+
+    public DeviationRequest(String reason, UUID requestedByUserId) {
         this.reason = reason;
         this.requestedByUserId = requestedByUserId;
         this.requestedAt = Instant.now();
         this.status = DeviationStatus.PENDING;
         this.stage = DeviationStage.INCOMING;
+    }
+
+    public void addItem(UUID itemId, BigDecimal quantity) {
+        items.add(new DeviationRequestItem(itemId, quantity));
     }
 
     public void advanceTo(DeviationStage newStage) {

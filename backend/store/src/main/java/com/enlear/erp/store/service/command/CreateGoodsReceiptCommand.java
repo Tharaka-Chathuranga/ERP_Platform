@@ -10,7 +10,6 @@ public record CreateGoodsReceiptCommand(
         String poNumber,
         String invoiceNumber,
         UUID supplierId,
-        UUID warehouseId,
         UUID storeKeeperId,
         Instant receivedAt,
         List<Line> lines) {

@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
  * to {@code POSTED} (an immutable record thereafter).
  */
 @Entity
-@Table(name = "goods_receipts", schema = "store")
+@Table(name = "good_receive_note", schema = "store")
 @Getter
 @NoArgsConstructor
 public class GoodsReceipt extends BaseEntity {
@@ -40,9 +40,6 @@ public class GoodsReceipt extends BaseEntity {
     @Column(name = "supplier_id", nullable = false)
     private UUID supplierId;
 
-    @Column(name = "warehouse_id", nullable = false)
-    private UUID warehouseId;
-
     @Column(name = "store_keeper_id", nullable = false)
     private UUID storeKeeperId;
 
@@ -54,16 +51,15 @@ public class GoodsReceipt extends BaseEntity {
     private Instant receivedAt;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "goods_receipt_id", nullable = false)
+    @JoinColumn(name = "good_receive_note_id", nullable = false)
     private List<GoodsReceiptLine> lines = new ArrayList<>();
 
     public GoodsReceipt(String grnNumber, String poNumber, String invoiceNumber, UUID supplierId,
-                        UUID warehouseId, UUID storeKeeperId, Instant receivedAt) {
+                        UUID storeKeeperId, Instant receivedAt) {
         this.grnNumber = grnNumber;
         this.poNumber = poNumber;
         this.invoiceNumber = invoiceNumber;
         this.supplierId = supplierId;
-        this.warehouseId = warehouseId;
         this.storeKeeperId = storeKeeperId;
         this.receivedAt = receivedAt != null ? receivedAt : Instant.now();
         this.status = GrnStatus.DRAFT;

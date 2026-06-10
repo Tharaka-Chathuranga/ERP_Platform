@@ -13,7 +13,6 @@ import java.util.UUID;
 public record StockMovementRecordedEvent(
         UUID movementId,
         UUID itemId,
-        UUID warehouseId,
         MovementType type,
         BigDecimal quantity,
         BigDecimal newQuantityOnHand,

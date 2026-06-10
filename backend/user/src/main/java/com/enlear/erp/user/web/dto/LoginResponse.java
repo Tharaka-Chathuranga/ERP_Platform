@@ -1,14 +1,12 @@
 package com.enlear.erp.user.web.dto;
 
-import java.util.List;
-
 public record LoginResponse(
         String accessToken,
         String tokenType,
         String username,
-        List<String> roles) {
+        String role) {
 
-    public static LoginResponse bearer(String token, String username, List<String> roles) {
-        return new LoginResponse(token, "Bearer", username, roles);
+    public static LoginResponse bearer(String token, String username, String role) {
+        return new LoginResponse(token, "Bearer", username, role);
     }
 }
