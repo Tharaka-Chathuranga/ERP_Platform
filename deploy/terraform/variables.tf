@@ -53,13 +53,19 @@ variable "db_username" {
 }
 
 variable "db_engine_version" {
-  description = "PostgreSQL major.minor version."
+  description = "PostgreSQL major.minor version (must be available in the region; see `aws rds describe-db-engine-versions`)."
   type        = string
-  default     = "16.4"
+  default     = "16.9"
 }
 
 variable "db_multi_az" {
   description = "Run RDS in Multi-AZ (higher availability, ~2x cost)."
   type        = bool
   default     = false
+}
+
+variable "db_backup_retention_days" {
+  description = "Automated backup retention in days. AWS Free Plan accounts must use 0 (backups disabled); raise to 7+ after upgrading the account."
+  type        = number
+  default     = 0
 }

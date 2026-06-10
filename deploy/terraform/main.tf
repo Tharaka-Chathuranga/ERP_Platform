@@ -131,8 +131,10 @@ resource "aws_db_instance" "db" {
   engine_version = var.db_engine_version
   instance_class = var.db_instance_class
 
-  allocated_storage     = var.db_allocated_storage
-  max_allocated_storage = var.db_allocated_storage * 2 # storage autoscaling headroom
+  allocated_storage = var.db_allocated_storage
+  # Storage autoscaling is disabled (0) for Free Plan compatibility. Raise this
+  # above allocated_storage to re-enable headroom once the account is upgraded.
+  max_allocated_storage = 0
   storage_type          = "gp3"
   storage_encrypted     = true
 
@@ -145,7 +147,7 @@ resource "aws_db_instance" "db" {
   publicly_accessible    = false
   multi_az               = var.db_multi_az
 
-  backup_retention_period = 7
+  backup_retention_period = var.db_backup_retention_days
   deletion_protection     = false # set true once you have real data
   skip_final_snapshot     = true  # set false (+ final_snapshot_identifier) for prod
   apply_immediately       = true
