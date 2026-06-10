@@ -69,12 +69,15 @@ jobs:
 
           # Ask the running instance(s) to pull this exact image and restart the
           # container. /opt/erp/deploy.sh is installed by the EC2 user-data.
+          # Pass --parameters as JSON (via a file) so the image URI isn't mangled
+          # by the CLI's key=value shorthand parser. The URI has no spaces.
+          printf '{"commands":["sudo /opt/erp/deploy.sh %s"]}' "$IMAGE_URI" > /tmp/ssm-params.json
           COMMAND_ID=$(aws ssm send-command \
             --region "$AWS_REGION" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy ${GITHUB_SHA::7}" \
             --targets "Key=tag:${DEPLOY_TARGET_TAG_KEY},Values=${DEPLOY_TARGET_TAG_VALUE}" \
-            --parameters commands="sudo /opt/erp/deploy.sh '$IMAGE_URI'" \
+            --parameters file:///tmp/ssm-params.json \
             --query "Command.CommandId" --output text)
 
           echo "SSM CommandId: $COMMAND_ID"
