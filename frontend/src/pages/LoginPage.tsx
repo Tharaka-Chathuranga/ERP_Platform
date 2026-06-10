@@ -42,7 +42,6 @@ export function LoginPage() {
         <button type="submit" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}
         </button>
-        <p className="muted small">Default dev login: admin / admin123</p>
       </form>
     </div>
   );
