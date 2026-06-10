@@ -23,9 +23,9 @@ CONTAINER_PORT=8080
 CONFIG
 
 # ── Redeploy script (idempotent; safe to call on every deploy) ────────────────
-# Terraform templatefile() only rewrites $${ -> ${ (brace form). Bash variable
-# expansions are therefore written $${VAR}; command substitutions stay $(...)
-# (parens are not template syntax, so they pass through untouched).
+# In this heredoc, bash variable expansions are written with a doubled dollar
+# (escaped for Terraform's templatefile), while command substitutions use a
+# single dollar with parens, which Terraform passes through untouched.
 cat > /opt/erp/deploy.sh <<'DEPLOY'
 #!/bin/bash
 set -euo pipefail

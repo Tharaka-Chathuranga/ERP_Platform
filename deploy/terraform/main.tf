@@ -198,6 +198,13 @@ resource "aws_instance" "app" {
     http_tokens = "required" # IMDSv2 only
   }
 
+  # The host is updated in place via SSM (the CI deploy + manual patches), not by
+  # re-imaging. Ignore user_data/ami drift so routine applies (e.g. adding the
+  # EIP) never destroy the running instance and its database.
+  lifecycle {
+    ignore_changes = [user_data, ami]
+  }
+
   tags = {
     Name = "${var.project_name}-app" # CI targets this tag via SSM
   }
@@ -208,4 +215,14 @@ resource "aws_instance" "app" {
     aws_secretsmanager_secret_version.app,
     aws_db_instance.db,
   ]
+}
+
+# Static public IP so the app URL is stable across instance stop/start.
+# (Auto-assigned public IPs change whenever the instance is stopped/started.)
+resource "aws_eip" "app" {
+  domain   = "vpc"
+  instance = aws_instance.app.id
+  tags = {
+    Name = "${var.project_name}-app-eip"
+  }
 }

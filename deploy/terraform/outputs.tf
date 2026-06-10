@@ -1,10 +1,11 @@
 output "app_url" {
-  description = "Open this once the first deploy completes."
-  value       = "http://${aws_instance.app.public_ip}"
+  description = "Open this once the first deploy completes. Stable across restarts (Elastic IP)."
+  value       = "http://${aws_eip.app.public_ip}"
 }
 
 output "ec2_public_ip" {
-  value = aws_instance.app.public_ip
+  description = "Static Elastic IP of the app host."
+  value       = aws_eip.app.public_ip
 }
 
 output "ecr_repository_url" {
