@@ -50,7 +50,7 @@ export function GoodsReceiptDetailPage() {
     <div>
       <PageHeader
         title={grn.grnNumber}
-        subtitle="Goods receipt"
+        subtitle="Item receival"
         actions={
           <Group>
             <Button

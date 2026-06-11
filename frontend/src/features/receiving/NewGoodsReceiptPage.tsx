@@ -40,7 +40,7 @@ export function NewGoodsReceiptPage() {
         })),
       }),
     onSuccess: (grn) => {
-      notifySuccess(`Goods receipt ${grn.grnNumber} created`);
+      notifySuccess(`Items received — GRN ${grn.grnNumber} generated`);
       qc.invalidateQueries({ queryKey: ["grns"] });
       navigate(`/receiving/${grn.id}`);
     },
@@ -49,7 +49,10 @@ export function NewGoodsReceiptPage() {
 
   return (
     <div>
-      <PageHeader title="New goods receipt" subtitle="Record items arriving from a supplier" />
+      <PageHeader
+        title="New item receival"
+        subtitle="Receive items arriving from a supplier — the GRN is generated automatically on submit"
+      />
       <Card withBorder radius="md" padding="lg">
         <Stack>
           <Grid>
@@ -96,7 +99,7 @@ export function NewGoodsReceiptPage() {
               loading={mutation.isPending}
               disabled={!canSubmit}
             >
-              Create receipt
+              Receive items
             </Button>
           </Group>
         </Stack>

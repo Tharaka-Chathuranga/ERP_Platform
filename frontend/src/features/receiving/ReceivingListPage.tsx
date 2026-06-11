@@ -16,10 +16,10 @@ export function ReceivingListPage() {
     <div>
       <PageHeader
         title="Receiving"
-        subtitle="Goods receipts (GRN) — record stock arriving from suppliers"
+        subtitle="Receive items into the store"
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/receiving/new")}>
-            New goods receipt
+            New item receival
           </Button>
         }
       />
@@ -29,11 +29,11 @@ export function ReceivingListPage() {
           <Loader />
         ) : !data || data.content.length === 0 ? (
           <EmptyState
-            title="No goods receipts yet"
-            description="Create a GRN to record items arriving into the store."
+            title="No receivals yet"
+            description="Receive items into the store — a GRN is generated automatically."
             action={
               <Button variant="light" onClick={() => navigate("/receiving/new")}>
-                New goods receipt
+                New item receival
               </Button>
             }
           />
