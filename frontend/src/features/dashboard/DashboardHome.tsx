@@ -1,7 +1,6 @@
-import { Button, Card, Grid, Group, SimpleGrid, Stack, Text } from "@mantine/core";
+import { Button, Card, Group, SimpleGrid, Text, ThemeIcon } from "@mantine/core";
 import {
   IconAlertTriangle,
-  IconClipboardList,
   IconPackageExport,
   IconPackageImport,
   IconBuildingWarehouse,
@@ -15,6 +14,7 @@ import { listIssues } from "../../api/store/issues";
 import { listDeviations } from "../../api/store/deviations";
 import { listGoodsReceipts } from "../../api/store/receiving";
 import { listItems } from "../../api/store/items";
+import { NAV } from "../../lib/nav";
 
 export function DashboardHome() {
   const { username } = useAuth();
@@ -73,73 +73,59 @@ export function DashboardHome() {
         />
       </SimpleGrid>
 
-      <Grid>
-        <Grid.Col span={{ base: 12, md: 7 }}>
-          <Card withBorder radius="md" padding="lg" h="100%">
-            <Text fw={600} mb="md">
-              Quick actions
-            </Text>
-            <Group>
-              <Button
-                leftSection={<IconPackageImport size={16} />}
-                onClick={() => navigate("/receiving/new")}
-              >
-                New goods receipt
-              </Button>
-              <Button
-                leftSection={<IconPackageExport size={16} />}
-                variant="light"
-                onClick={() => navigate("/issuing/new")}
-              >
-                New issue
-              </Button>
-              <Button
-                leftSection={<IconAlertTriangle size={16} />}
-                variant="light"
-                color="red"
-                onClick={() => navigate("/defects/new")}
-              >
-                Report defect
-              </Button>
-            </Group>
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 5 }}>
-          <Card withBorder radius="md" padding="lg" h="100%">
-            <Text fw={600} mb="md">
-              Sections
-            </Text>
-            <Stack gap="xs">
-              <SectionLink
-                icon={<IconClipboardList size={16} />}
-                label="Process borrow requests"
-                onClick={() => navigate("/requests")}
-              />
-              <SectionLink
-                icon={<IconBuildingWarehouse size={16} />}
-                label="Manage items & stock"
-                onClick={() => navigate("/store")}
-              />
-            </Stack>
-          </Card>
-        </Grid.Col>
-      </Grid>
-    </div>
-  );
-}
+      <Card withBorder radius="md" padding="lg" mb="lg">
+        <Text fw={600} mb="md">
+          Quick actions
+        </Text>
+        <Group>
+          <Button
+            leftSection={<IconPackageImport size={16} />}
+            onClick={() => navigate("/receiving/new")}
+          >
+            New goods receipt
+          </Button>
+          <Button
+            leftSection={<IconPackageExport size={16} />}
+            variant="light"
+            onClick={() => navigate("/issuing/new")}
+          >
+            New issue
+          </Button>
+          <Button
+            leftSection={<IconAlertTriangle size={16} />}
+            variant="light"
+            color="red"
+            onClick={() => navigate("/defects/new")}
+          >
+            Report defect
+          </Button>
+        </Group>
+      </Card>
 
-function SectionLink({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <Button variant="subtle" justify="flex-start" leftSection={icon} onClick={onClick} fullWidth>
-      {label}
-    </Button>
+      {/* One box per sidebar section, kept in sync via the shared NAV list. */}
+      <Text fw={600} mb="sm">
+        Sections
+      </Text>
+      <SimpleGrid cols={{ base: 2, sm: 3, lg: 5 }}>
+        {NAV.filter((n) => n.to !== "/dashboard").map(({ to, label, icon: Icon, color, description }) => (
+          <Card
+            key={to}
+            withBorder
+            radius="md"
+            padding="lg"
+            onClick={() => navigate(to)}
+            style={{ cursor: "pointer", height: "100%" }}
+          >
+            <ThemeIcon color={color} variant="light" size={44} radius="md" mb="sm">
+              <Icon size={24} />
+            </ThemeIcon>
+            <Text fw={600}>{label}</Text>
+            <Text size="xs" c="dimmed">
+              {description}
+            </Text>
+          </Card>
+        ))}
+      </SimpleGrid>
+    </div>
   );
 }

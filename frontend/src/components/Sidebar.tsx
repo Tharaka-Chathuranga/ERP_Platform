@@ -1,72 +1,52 @@
-import { Badge, Divider, Group, NavLink, Stack, Text, UnstyledButton } from "@mantine/core";
-import {
-  IconAlertTriangle,
-  IconBuildingWarehouse,
-  IconClipboardList,
-  IconHome,
-  IconLogout,
-  IconPackageExport,
-  IconPackageImport,
-} from "@tabler/icons-react";
-import { NavLink as RouterNavLink, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthContext";
+import { NavLink, Stack, Tooltip } from "@mantine/core";
+import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
+import { NAV } from "../lib/nav";
 
-const NAV = [
-  { to: "/dashboard", label: "Home", icon: IconHome },
-  { to: "/receiving", label: "Receiving", icon: IconPackageImport },
-  { to: "/issuing", label: "Issuing", icon: IconPackageExport },
-  { to: "/store", label: "Store", icon: IconBuildingWarehouse },
-  { to: "/defects", label: "Defects", icon: IconAlertTriangle },
-  { to: "/requests", label: "Requests", icon: IconClipboardList },
-];
-
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const { username, role, logout } = useAuth();
-  const navigate = useNavigate();
+/**
+ * Main navigation. When `collapsed` the labels are hidden and each entry shrinks
+ * to an icon rail with a hover tooltip; otherwise it shows the full icon+label.
+ */
+export function Sidebar({
+  collapsed = false,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
   const location = useLocation();
 
   return (
-    <Stack h="100%" justify="space-between" gap={4}>
-      <Stack gap={4}>
-        {NAV.map(({ to, label, icon: Icon }) => {
-          const active = location.pathname === to || location.pathname.startsWith(to + "/");
-          return (
-            <NavLink
-              key={to}
-              component={RouterNavLink}
-              to={to}
-              label={label}
-              active={active}
-              leftSection={<Icon size={18} />}
-              onClick={onNavigate}
-              variant="light"
-            />
-          );
-        })}
-      </Stack>
+    <Stack gap={4}>
+      {NAV.map(({ to, label, icon: Icon }) => {
+        const active = location.pathname === to || location.pathname.startsWith(to + "/");
+        const link = (
+          <NavLink
+            key={to}
+            component={RouterNavLink}
+            to={to}
+            label={collapsed ? undefined : label}
+            active={active}
+            leftSection={<Icon size={20} />}
+            onClick={onNavigate}
+            variant="light"
+            aria-label={label}
+            styles={
+              collapsed
+                ? { section: { marginInlineEnd: 0 }, body: { display: "none" } }
+                : undefined
+            }
+            style={collapsed ? { justifyContent: "center" } : undefined}
+          />
+        );
 
-      <div>
-        <Divider mb="sm" />
-        <Group justify="space-between" px="xs" mb="xs" wrap="nowrap">
-          <div style={{ minWidth: 0 }}>
-            <Text size="sm" fw={600} truncate>
-              {username}
-            </Text>
-            <Badge size="xs" variant="light" color={role === "ADMIN" ? "grape" : "blue"}>
-              {role}
-            </Badge>
-          </div>
-          <UnstyledButton
-            onClick={() => {
-              logout();
-              navigate("/login");
-            }}
-            aria-label="Logout"
-          >
-            <IconLogout size={18} />
-          </UnstyledButton>
-        </Group>
-      </div>
+        return collapsed ? (
+          <Tooltip key={to} label={label} position="right" withArrow>
+            {link}
+          </Tooltip>
+        ) : (
+          link
+        );
+      })}
     </Stack>
   );
 }
