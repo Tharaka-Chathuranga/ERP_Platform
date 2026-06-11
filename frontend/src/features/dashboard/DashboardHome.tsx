@@ -34,7 +34,7 @@ export function DashboardHome() {
   return (
     <div>
       <PageHeader
-        title={`Welcome back, ${username ?? ""}`}
+        title={`Welcome back, ${username ?? ""} 👋`}
         subtitle="Your store at a glance"
       />
 
