@@ -1,6 +1,7 @@
 package com.enlear.erp.user.api;
 
 import com.enlear.erp.user.api.dto.CurrentUser;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -12,4 +13,7 @@ public interface UserApi {
 
     /** Look up a user by username, returning a boundary-safe identity view. */
     Optional<CurrentUser> findByUsername(String username);
+
+    /** All users as boundary-safe identity views, ordered by username. */
+    List<CurrentUser> listAll();
 }

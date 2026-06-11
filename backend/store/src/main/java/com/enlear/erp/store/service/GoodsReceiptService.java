@@ -78,6 +78,12 @@ public class GoodsReceiptService {
         return receipts.findBySupplierIdOrderByReceivedAtDesc(supplierId, pageable);
     }
 
+    /** All goods receipts, most recently received first. */
+    @Transactional(readOnly = true)
+    public Page<GoodsReceipt> listAll(Pageable pageable) {
+        return receipts.findAllByOrderByReceivedAtDesc(pageable);
+    }
+
     private String generateGrnNumber() {
         return "GRN-" + Instant.now().toEpochMilli();
     }

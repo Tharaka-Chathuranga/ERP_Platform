@@ -1,12 +1,15 @@
 package com.enlear.erp.user.web.dto;
 
+import java.util.UUID;
+
 public record LoginResponse(
         String accessToken,
         String tokenType,
+        UUID userId,
         String username,
         String role) {
 
-    public static LoginResponse bearer(String token, String username, String role) {
-        return new LoginResponse(token, "Bearer", username, role);
+    public static LoginResponse bearer(String token, UUID userId, String username, String role) {
+        return new LoginResponse(token, "Bearer", userId, username, role);
     }
 }

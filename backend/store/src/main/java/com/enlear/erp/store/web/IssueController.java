@@ -73,9 +73,13 @@ public class IssueController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
-    public PageResponse<IssueResponse> listForUser(
-            @RequestParam UUID borrowingUserId,
+    public PageResponse<IssueResponse> list(
+            @RequestParam(required = false) UUID borrowingUserId,
+            @RequestParam(required = false) com.enlear.erp.store.domain.IssueStatus status,
             @PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(issues.listForUser(borrowingUserId, pageable), IssueResponse::from);
+        var page = borrowingUserId != null
+                ? issues.listForUser(borrowingUserId, pageable)
+                : issues.list(status, pageable);
+        return PageResponse.of(page, IssueResponse::from);
     }
 }

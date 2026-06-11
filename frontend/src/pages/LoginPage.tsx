@@ -1,13 +1,24 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Alert,
+  Button,
+  Center,
+  Paper,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
 import { useAuth } from "../auth/AuthContext";
 import { apiErrorMessage } from "../api/client";
 
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -17,7 +28,7 @@ export function LoginPage() {
     setBusy(true);
     try {
       await login(username, password);
-      navigate("/items", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -26,23 +37,40 @@ export function LoginPage() {
   }
 
   return (
-    <div className="login-wrap">
-      <form className="card login-card" onSubmit={onSubmit}>
-        <h1>ERP Platform</h1>
-        <p className="muted">Sign in to continue</p>
-        <label>
-          Username
-          <input value={username} onChange={(e) => setUsername(e.target.value)} autoFocus />
-        </label>
-        <label>
-          Password
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
-        {error && <div className="error">{error}</div>}
-        <button type="submit" disabled={busy}>
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-    </div>
+    <Center mih="100vh" bg="var(--mantine-color-gray-0)">
+      <Paper withBorder shadow="md" radius="md" p="xl" w={360} component="form" onSubmit={onSubmit}>
+        <Stack gap="md">
+          <div>
+            <Title order={2} c="brand">
+              ERP Platform
+            </Title>
+            <Text c="dimmed" size="sm">
+              Sign in to continue
+            </Text>
+          </div>
+          <TextInput
+            label="Username"
+            value={username}
+            onChange={(e) => setUsername(e.currentTarget.value)}
+            autoFocus
+            required
+          />
+          <PasswordInput
+            label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.currentTarget.value)}
+            required
+          />
+          {error && (
+            <Alert color="red" variant="light">
+              {error}
+            </Alert>
+          )}
+          <Button type="submit" loading={busy} fullWidth>
+            Sign in
+          </Button>
+        </Stack>
+      </Paper>
+    </Center>
   );
 }

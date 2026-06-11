@@ -55,9 +55,13 @@ public class BorrowRequestController {
         return BorrowRequestResponse.from(requests.get(id));
     }
 
+    /** Processing list: all borrow requests, or filtered by status / requesting user. */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
-    public List<BorrowRequestResponse> listForUser(@RequestParam UUID userId) {
-        return requests.listForUser(userId).stream().map(BorrowRequestResponse::from).toList();
+    public List<BorrowRequestResponse> list(
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) com.enlear.erp.store.domain.BorrowRequestStatus status) {
+        var list = userId != null ? requests.listForUser(userId) : requests.list(status);
+        return list.stream().map(BorrowRequestResponse::from).toList();
     }
 }

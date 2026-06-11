@@ -11,4 +11,6 @@ public interface GoodsReceiptRepository extends JpaRepository<GoodsReceipt, UUID
     boolean existsByGrnNumber(String grnNumber);
 
     Page<GoodsReceipt> findBySupplierIdOrderByReceivedAtDesc(UUID supplierId, Pageable pageable);
+
+    Page<GoodsReceipt> findAllByOrderByReceivedAtDesc(Pageable pageable);
 }
