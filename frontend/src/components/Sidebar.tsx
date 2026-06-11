@@ -1,4 +1,4 @@
-import { ActionIcon, Box, NavLink, Stack, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Group, NavLink, Stack, Title, Tooltip } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { NAV } from "../lib/nav";
@@ -42,6 +42,12 @@ export function Sidebar({
           </ActionIcon>
         </Tooltip>
       )}
+
+      <Group h={40} mb="md" px={collapsed ? 0 : "xs"} justify={collapsed ? "center" : "flex-start"}>
+        <Title order={4} c="brand">
+          {collapsed ? "ERP" : "ERP Platform"}
+        </Title>
+      </Group>
 
       <Stack gap={4}>
         {NAV.map(({ to, label, icon: Icon }) => {

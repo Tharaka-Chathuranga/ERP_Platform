@@ -1,4 +1,4 @@
-import { AppShell, Avatar, Burger, Group, Menu, Text, Title } from "@mantine/core";
+import { AppShell, Avatar, Burger, Group, Menu, Text } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconLogout } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -25,6 +25,7 @@ export function AppLayout() {
 
   return (
     <AppShell
+      layout="alt"
       header={{ height: 56 }}
       navbar={{
         width: expanded ? 240 : 72,
@@ -33,13 +34,9 @@ export function AppLayout() {
       }}
       padding="lg"
     >
-      <AppShell.Header>
+      <AppShell.Header withBorder={false}>
         <Group h="100%" px="md" gap="sm" wrap="nowrap">
           <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-
-          <Title order={4} c="brand">
-            ERP Platform
-          </Title>
 
           {/* User avatar + menu, pinned to the top-right corner. */}
           <Menu position="bottom-end" withArrow shadow="md" width={200}>

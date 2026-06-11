@@ -106,7 +106,7 @@ export function DashboardHome() {
       <Text fw={600} mb="sm">
         Sections
       </Text>
-      <SimpleGrid cols={{ base: 2, sm: 3, lg: 5 }}>
+      <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
         {NAV.filter((n) => n.to !== "/dashboard").map(({ to, label, icon: Icon, color, description }) => (
           <Card
             key={to}
