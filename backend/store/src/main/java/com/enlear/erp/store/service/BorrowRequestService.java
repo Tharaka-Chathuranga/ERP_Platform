@@ -52,4 +52,13 @@ public class BorrowRequestService {
     public List<BorrowRequest> listForUser(UUID userId) {
         return requests.findByRequestedByUserIdOrderByRequestedAtDesc(userId);
     }
+
+    /** Borrow requests filtered by status, or all when {@code status} is null. */
+    @Transactional(readOnly = true)
+    public List<BorrowRequest> list(com.enlear.erp.store.domain.BorrowRequestStatus status) {
+        return status == null
+                ? requests.findAll(org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Direction.DESC, "requestedAt"))
+                : requests.findByStatusOrderByRequestedAtDesc(status);
+    }
 }

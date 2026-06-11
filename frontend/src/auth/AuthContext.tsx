@@ -2,54 +2,66 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { api, getToken, setToken } from "../api/client";
 import type { LoginResponse } from "../types";
 
+interface StoredUser {
+  userId: string;
+  username: string;
+  role: string;
+}
+
 interface AuthState {
+  userId: string | null;
   username: string | null;
-  roles: string[];
+  role: string | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
+const USER_KEY = "erp.user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [username, setUsername] = useState<string | null>(null);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [user, setUser] = useState<StoredUser | null>(null);
 
   // Restore a previously stored session on first load.
   useEffect(() => {
     const token = getToken();
     if (token) {
-      const cached = localStorage.getItem("erp.user");
-      if (cached) {
-        const parsed = JSON.parse(cached) as { username: string; roles: string[] };
-        setUsername(parsed.username);
-        setRoles(parsed.roles);
-      }
+      const cached = localStorage.getItem(USER_KEY);
+      if (cached) setUser(JSON.parse(cached) as StoredUser);
     }
   }, []);
 
-  async function login(user: string, password: string) {
-    const { data } = await api.post<LoginResponse>("/auth/login", {
-      username: user,
-      password,
-    });
+  async function login(username: string, password: string) {
+    const { data } = await api.post<LoginResponse>("/auth/login", { username, password });
     setToken(data.accessToken);
-    localStorage.setItem("erp.user", JSON.stringify({ username: data.username, roles: data.roles }));
-    setUsername(data.username);
-    setRoles(data.roles);
+    const stored: StoredUser = {
+      userId: data.userId,
+      username: data.username,
+      role: data.role,
+    };
+    localStorage.setItem(USER_KEY, JSON.stringify(stored));
+    setUser(stored);
   }
 
   function logout() {
     setToken(null);
-    localStorage.removeItem("erp.user");
-    setUsername(null);
-    setRoles([]);
+    localStorage.removeItem(USER_KEY);
+    setUser(null);
   }
 
   const value = useMemo<AuthState>(
-    () => ({ username, roles, isAuthenticated: !!username, login, logout }),
-    [username, roles]
+    () => ({
+      userId: user?.userId ?? null,
+      username: user?.username ?? null,
+      role: user?.role ?? null,
+      isAuthenticated: !!user,
+      isAdmin: user?.role === "ADMIN",
+      login,
+      logout,
+    }),
+    [user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

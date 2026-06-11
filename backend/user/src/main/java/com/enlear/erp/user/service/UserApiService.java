@@ -3,7 +3,9 @@ package com.enlear.erp.user.service;
 import com.enlear.erp.user.api.UserApi;
 import com.enlear.erp.user.api.dto.CurrentUser;
 import com.enlear.erp.user.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +26,15 @@ public class UserApiService implements UserApi {
 
     @Override
     public Optional<CurrentUser> findByUsername(String username) {
-        return users.findByUsername(username)
-                .map(u -> new CurrentUser(u.getId(), u.getUsername(), u.getDisplayName(), u.getRole()));
+        return users.findByUsername(username).map(UserApiService::toView);
+    }
+
+    @Override
+    public List<CurrentUser> listAll() {
+        return users.findAll(Sort.by("username")).stream().map(UserApiService::toView).toList();
+    }
+
+    private static CurrentUser toView(com.enlear.erp.user.domain.User u) {
+        return new CurrentUser(u.getId(), u.getUsername(), u.getDisplayName(), u.getRole());
     }
 }

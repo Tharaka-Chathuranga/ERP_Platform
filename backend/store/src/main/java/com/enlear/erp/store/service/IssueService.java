@@ -124,6 +124,14 @@ public class IssueService {
         return issues.findByBorrowingUserIdOrderByCreatedAtDesc(borrowingUserId, pageable);
     }
 
+    /** Issues filtered by status, or all issues when {@code status} is null. */
+    @Transactional(readOnly = true)
+    public Page<Issue> list(com.enlear.erp.store.domain.IssueStatus status, Pageable pageable) {
+        return status == null
+                ? issues.findAllByOrderByCreatedAtDesc(pageable)
+                : issues.findByStatusOrderByCreatedAtDesc(status, pageable);
+    }
+
     private String generateIssueNumber() {
         return "ISS-" + Instant.now().toEpochMilli();
     }

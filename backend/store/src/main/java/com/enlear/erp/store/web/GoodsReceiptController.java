@@ -52,12 +52,15 @@ public class GoodsReceiptController {
         return GoodsReceiptResponse.from(receipts.getReceipt(id));
     }
 
+    /** Lists goods receipts; filters by supplier when {@code supplierId} is given. */
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
-    public PageResponse<GoodsReceiptResponse> listForSupplier(
-            @RequestParam UUID supplierId,
+    public PageResponse<GoodsReceiptResponse> list(
+            @RequestParam(required = false) UUID supplierId,
             @PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(receipts.listForSupplier(supplierId, pageable),
-                GoodsReceiptResponse::from);
+        var page = supplierId == null
+                ? receipts.listAll(pageable)
+                : receipts.listForSupplier(supplierId, pageable);
+        return PageResponse.of(page, GoodsReceiptResponse::from);
     }
 }

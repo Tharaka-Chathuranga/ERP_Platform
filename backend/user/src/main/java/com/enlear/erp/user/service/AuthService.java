@@ -41,7 +41,11 @@ public class AuthService {
                 .findFirst()
                 .orElse(null);
 
+        var user = users.findByUsername(authentication.getName())
+                .orElseThrow(() -> new IllegalStateException(
+                        "Authenticated user not found: " + authentication.getName()));
+
         String token = jwtService.issueToken(authentication.getName(), role);
-        return LoginResponse.bearer(token, authentication.getName(), role);
+        return LoginResponse.bearer(token, user.getId(), authentication.getName(), role);
     }
 }
