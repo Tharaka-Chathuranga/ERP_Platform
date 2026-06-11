@@ -1,16 +1,6 @@
-import {
-  ActionIcon,
-  AppShell,
-  Avatar,
-  Burger,
-  Group,
-  Menu,
-  Text,
-  Title,
-  Tooltip,
-} from "@mantine/core";
+import { AppShell, Avatar, Burger, Group, Menu, Text, Title } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand, IconLogout } from "@tabler/icons-react";
+import { IconLogout } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { useAuth } from "../auth/AuthContext";
@@ -46,21 +36,6 @@ export function AppLayout() {
       <AppShell.Header>
         <Group h="100%" px="md" gap="sm" wrap="nowrap">
           <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-          <Tooltip label={desktopOpened ? "Minimize sidebar" : "Expand sidebar"} withArrow>
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              onClick={toggleDesktop}
-              visibleFrom="sm"
-              aria-label="Toggle sidebar"
-            >
-              {desktopOpened ? (
-                <IconLayoutSidebarLeftCollapse size={20} />
-              ) : (
-                <IconLayoutSidebarLeftExpand size={20} />
-              )}
-            </ActionIcon>
-          </Tooltip>
 
           <Title order={4} c="brand">
             ERP Platform
@@ -97,8 +72,12 @@ export function AppLayout() {
         </Group>
       </AppShell.Header>
 
-      <AppShell.Navbar p="sm">
-        <Sidebar collapsed={!expanded} onNavigate={mobileOpened ? toggleMobile : undefined} />
+      <AppShell.Navbar p="sm" style={{ overflow: "visible" }}>
+        <Sidebar
+          collapsed={!expanded}
+          onToggle={toggleDesktop}
+          onNavigate={mobileOpened ? toggleMobile : undefined}
+        />
       </AppShell.Navbar>
 
       <AppShell.Main>
