@@ -1,3 +1,18 @@
+-- ════════════════════════════════════════════════════════════════════
+--  STORE module schema (single consolidated migration).
+--
+--  Design notes:
+--   * stock_movements is APPEND-ONLY — the source of truth for inventory.
+--   * On-hand quantity is DERIVED by summing the signed ledger (no stored
+--     projection table). Single-store model: no warehouse dimension.
+--   * Monetary/quantity columns use NUMERIC(19,4) — never floating point.
+--   * Multi-item documents use a header + item-lines split (no embedded lists).
+--   * store_keeper_id / *_user_id reference users.users but carry NO database
+--     FK: store and user are independent modules. Validate at the app layer.
+--   * item.locations is the ONE intentional embedded array (JSONB): a small,
+--     item-owned list of bins, not queried from the outside or carrying qty.
+-- ════════════════════════════════════════════════════════════════════
+
 -- ── Item master data ────────────────────────────────────────────────
 CREATE TABLE store.items (
     id                             UUID PRIMARY KEY,
