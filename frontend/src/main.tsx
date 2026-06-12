@@ -4,9 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { AuthProvider } from "./auth/AuthContext";
+import { AuthProvider } from "@auth/AuthContext";
 import { theme } from "./theme";
-import App from "./App";
+import App from "@app/App";
 
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
