@@ -30,11 +30,10 @@ export function IssueListPage() {
   return (
     <div>
       <PageHeader
-        title="Issuing"
-        subtitle="Issue and borrow stock to users"
+        title="Goods Issue"
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/issuing/new")}>
-            New issue
+            New goods issue
           </Button>
         }
       />
@@ -45,7 +44,7 @@ export function IssueListPage() {
         {isLoading ? (
           <Loader />
         ) : !data || data.content.length === 0 ? (
-          <EmptyState title="No issues" description="Create an issue to give stock to a user." />
+          <EmptyState title="No goods issues" description="Issue stock to a user to get started." />
         ) : (
           <Table highlightOnHover>
             <Table.Thead>

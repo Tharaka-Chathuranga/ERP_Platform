@@ -37,7 +37,6 @@ export function ItemsPage() {
     <div>
       <PageHeader
         title="Store"
-        subtitle="Items, stock levels and movements"
         actions={
           <Group>
             <Button

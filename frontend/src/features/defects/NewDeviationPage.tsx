@@ -36,7 +36,7 @@ export function NewDeviationPage() {
 
   return (
     <div>
-      <PageHeader title="Report defect" subtitle="Log damaged or non-conforming items" />
+      <PageHeader title="Report defect" />
       <Card withBorder radius="md" padding="lg">
         <Stack>
           <Textarea

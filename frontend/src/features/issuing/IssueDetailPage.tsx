@@ -61,12 +61,12 @@ export function IssueDetailPage() {
 
   const approve = useMutation({
     mutationFn: () => approveIssue(id, userId!),
-    onSuccess: () => { notifySuccess("Issue approved"); invalidate(); },
+    onSuccess: () => { notifySuccess("Goods issue approved"); invalidate(); },
     onError: notifyError,
   });
   const reject = useMutation({
     mutationFn: () => rejectIssue(id, userId!),
-    onSuccess: () => { notifySuccess("Issue rejected"); invalidate(); },
+    onSuccess: () => { notifySuccess("Goods issue rejected"); invalidate(); },
     onError: notifyError,
   });
   const doIssue = useMutation({
@@ -84,7 +84,6 @@ export function IssueDetailPage() {
     <div>
       <PageHeader
         title={issue.issueNumber}
-        subtitle="Issue document"
         actions={
           <Group>
             <Button

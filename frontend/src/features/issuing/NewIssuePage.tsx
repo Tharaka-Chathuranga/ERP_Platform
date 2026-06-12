@@ -41,7 +41,7 @@ export function NewIssuePage() {
 
   return (
     <div>
-      <PageHeader title="New issue" subtitle="Give stock to a user (returnable or consumed)" />
+      <PageHeader title="New goods issue" />
       <Card withBorder radius="md" padding="lg">
         <Stack>
           <UserSelect
