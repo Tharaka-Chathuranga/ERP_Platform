@@ -16,26 +16,26 @@ export function StatCard({ label, value, icon, color = "brand", to, hint }: Stat
   return (
     <Card
       withBorder
-      padding="lg"
+      padding="md"
       radius="md"
       onClick={to ? () => navigate(to) : undefined}
-      style={{ cursor: to ? "pointer" : "default", height: "100%" }}
+      style={{ cursor: to ? "pointer" : "default" }}
     >
-      <Group justify="space-between" align="flex-start" wrap="nowrap">
-        <div>
-          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+      <Group justify="space-between" align="center" wrap="nowrap">
+        <div style={{ minWidth: 0 }}>
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600} truncate>
             {label}
           </Text>
-          <Text fw={700} size="28px" mt={4}>
+          <Text fw={700} size="26px" lh={1.1} mt={2}>
             {value}
           </Text>
           {hint && (
-            <Text size="xs" c="dimmed" mt={4}>
+            <Text size="xs" c="dimmed" mt={2} truncate>
               {hint}
             </Text>
           )}
         </div>
-        <ThemeIcon color={color} variant="light" size={44} radius="md">
+        <ThemeIcon color={color} variant="light" size={36} radius="md">
           {icon}
         </ThemeIcon>
       </Group>

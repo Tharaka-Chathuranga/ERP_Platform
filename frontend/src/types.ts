@@ -104,11 +104,37 @@ export interface GoodsReceipt {
   grnNumber: string;
   poNumber?: string;
   invoiceNumber?: string;
-  supplierId: string;
+  supplierId?: string;
+  supplierName?: string;
   storeKeeperId: string;
   status: GrnStatus;
   receivedAt?: string;
   lines: GoodsReceiptLine[];
+}
+
+// ── Receivals (the physical "goods arrived" event) ──
+export interface ReceivalItem {
+  id: string;
+  itemId: string;
+  quantity: number;
+  unitCost?: number;
+}
+
+export interface Receival {
+  id: string;
+  receivalNumber: string;
+  poNumber?: string;
+  invoiceNumber?: string;
+  /** Set when received from a registered supplier. */
+  supplierId?: string;
+  /** Set when received from an unregistered supplier. */
+  supplierName?: string;
+  allReceivedForPo: boolean;
+  storeKeeperId: string;
+  /** Set once this receival has been rolled into a generated GRN. */
+  goodReceiveNoteId?: string;
+  receivedAt: string;
+  lines: ReceivalItem[];
 }
 
 // ── Issues ──

@@ -1,7 +1,6 @@
 package com.enlear.erp.store.domain;
 
 import com.enlear.erp.shared.domain.BaseEntity;
-import com.enlear.erp.shared.error.BusinessRuleException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,9 +17,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * A Goods Receipt Note (GRN): the header for a batch of items received from a
- * supplier. Created as {@code DRAFT}; posting it records the stock and flips it
- * to {@code POSTED} (an immutable record thereafter).
+ * A Goods Receipt Note (GRN): the formal record of items received against a
+ * supplier. GRNs are generated from {@link Receival}s (which already posted the
+ * stock), so a GRN is created directly as {@code POSTED} and writes no stock of
+ * its own. The supplier is either registered ({@link #supplierId}) or
+ * unregistered ({@link #supplierName}).
  */
 @Entity
 @Table(name = "good_receive_note", schema = "store")
@@ -37,8 +38,11 @@ public class GoodsReceipt extends BaseEntity {
     @Column(name = "invoice_number", length = 64)
     private String invoiceNumber;
 
-    @Column(name = "supplier_id", nullable = false)
+    @Column(name = "supplier_id")
     private UUID supplierId;
+
+    @Column(name = "supplier_name", length = 200)
+    private String supplierName;
 
     @Column(name = "store_keeper_id", nullable = false)
     private UUID storeKeeperId;
@@ -54,31 +58,32 @@ public class GoodsReceipt extends BaseEntity {
     @JoinColumn(name = "good_receive_note_id", nullable = false)
     private List<GoodsReceiptLine> lines = new ArrayList<>();
 
-    public GoodsReceipt(String grnNumber, String poNumber, String invoiceNumber, UUID supplierId,
-                        UUID storeKeeperId, Instant receivedAt) {
+    private GoodsReceipt(String grnNumber, String poNumber, String invoiceNumber, UUID supplierId,
+                         String supplierName, UUID storeKeeperId, Instant receivedAt) {
         this.grnNumber = grnNumber;
         this.poNumber = poNumber;
         this.invoiceNumber = invoiceNumber;
         this.supplierId = supplierId;
+        this.supplierName = supplierName;
         this.storeKeeperId = storeKeeperId;
         this.receivedAt = receivedAt != null ? receivedAt : Instant.now();
-        this.status = GrnStatus.DRAFT;
+    }
+
+    /**
+     * Creates a finalized GRN ({@code POSTED}). Stock is posted by the originating
+     * receival(s), so the GRN itself records no movements — add its lines with
+     * {@link #addLine(GoodsReceiptLine)} before saving.
+     */
+    public static GoodsReceipt generated(String grnNumber, String poNumber, String invoiceNumber,
+                                         UUID supplierId, String supplierName, UUID storeKeeperId,
+                                         Instant receivedAt) {
+        GoodsReceipt grn = new GoodsReceipt(grnNumber, poNumber, invoiceNumber, supplierId,
+                supplierName, storeKeeperId, receivedAt);
+        grn.status = GrnStatus.POSTED;
+        return grn;
     }
 
     public void addLine(GoodsReceiptLine line) {
         lines.add(line);
-    }
-
-    /** Marks the GRN as posted. Guards against double-posting. */
-    public void markPosted() {
-        if (status != GrnStatus.DRAFT) {
-            throw new BusinessRuleException("STORE_GRN_NOT_DRAFT",
-                    "Only a DRAFT goods receipt can be posted (current: " + status + ")");
-        }
-        if (lines.isEmpty()) {
-            throw new BusinessRuleException("STORE_GRN_EMPTY",
-                    "Cannot post a goods receipt with no lines");
-        }
-        this.status = GrnStatus.POSTED;
     }
 }

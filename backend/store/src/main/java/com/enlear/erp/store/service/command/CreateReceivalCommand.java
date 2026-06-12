@@ -5,11 +5,17 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** Intent to record a goods receipt (GRN) with one or more received lines. */
-public record CreateGoodsReceiptCommand(
+/**
+ * Intent to record a receival. The supplier is either registered
+ * ({@code supplierId}) or unregistered ({@code supplierName}) — exactly one.
+ * {@code allReceivedForPo} is only meaningful when {@code poNumber} is present.
+ */
+public record CreateReceivalCommand(
         String poNumber,
         String invoiceNumber,
         UUID supplierId,
+        String supplierName,
+        boolean allReceivedForPo,
         UUID storeKeeperId,
         Instant receivedAt,
         List<Line> lines) {
