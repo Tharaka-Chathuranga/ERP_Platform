@@ -47,7 +47,6 @@ export function ReceivalDetailPage() {
     <div>
       <PageHeader
         title={receival.receivalNumber}
-        subtitle="Item receival"
         actions={
           <Button
             variant="default"

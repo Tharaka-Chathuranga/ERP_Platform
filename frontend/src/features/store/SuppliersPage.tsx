@@ -26,7 +26,6 @@ export function SuppliersPage() {
     <div>
       <PageHeader
         title="Suppliers"
-        subtitle="Vendors and the items they supply"
         actions={
           <Button
             variant="default"

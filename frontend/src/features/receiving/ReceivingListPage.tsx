@@ -23,7 +23,6 @@ export function ReceivingListPage() {
     <div>
       <PageHeader
         title="Receiving"
-        subtitle="Receive items into the store"
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/receiving/new")}>
             New item receival

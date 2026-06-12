@@ -20,7 +20,6 @@ export function DeviationBoardPage() {
     <div>
       <PageHeader
         title="Defects"
-        subtitle="Deviation reports for damaged or non-conforming items"
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/defects/new")}>
             Report defect

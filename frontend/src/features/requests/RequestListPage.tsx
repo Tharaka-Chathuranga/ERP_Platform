@@ -34,7 +34,6 @@ export function RequestListPage() {
     <div>
       <PageHeader
         title="Requests"
-        subtitle="Borrow request processing list"
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => setNewOpen(true)}>
             New request

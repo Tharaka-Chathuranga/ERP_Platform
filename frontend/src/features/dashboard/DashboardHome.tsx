@@ -35,7 +35,6 @@ export function DashboardHome() {
     <div>
       <PageHeader
         title={`Welcome back, ${username ?? ""} 👋`}
-        subtitle="Your store at a glance"
       />
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
@@ -81,7 +80,7 @@ export function DashboardHome() {
             variant="light"
             onClick={() => navigate("/issuing/new")}
           >
-            New issue
+            New goods issue
           </Button>
           <Button
             leftSection={<IconAlertTriangle size={16} />}

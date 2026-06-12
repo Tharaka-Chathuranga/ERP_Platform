@@ -76,7 +76,6 @@ export function NewReceivalPage() {
     <div>
       <PageHeader
         title="New item receival"
-        subtitle="Receive items into the store — stock is updated on submit, and a GRN is generated for non-PO receivals or once a PO is fully received"
       />
       <Card withBorder radius="md" padding="lg">
         <Stack>
@@ -128,7 +127,6 @@ export function NewReceivalPage() {
             <Grid.Col span={{ base: 12, sm: 6 }}>
               <TextInput
                 label="PO number"
-                description="Leave empty for a non-PO receival (a GRN is generated immediately)"
                 value={poNumber}
                 onChange={(e) => setPoNumber(e.currentTarget.value)}
               />
@@ -137,7 +135,6 @@ export function NewReceivalPage() {
               <Grid.Col span={12}>
                 <Checkbox
                   label="All items received for this purchase order"
-                  description="Check only when this completes the PO — a GRN is generated covering every receival recorded against it"
                   checked={allReceivedForPo}
                   onChange={(e) => setAllReceivedForPo(e.currentTarget.checked)}
                 />

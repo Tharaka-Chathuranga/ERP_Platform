@@ -1,9 +1,20 @@
-import { AppShell, Avatar, Burger, Group, Menu, Text } from "@mantine/core";
+import { AppShell, Avatar, Burger, Group, Menu, Text, Title } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconLogout } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
+import { PageTitleProvider, usePageTitle } from "./PageTitle";
 import { useAuth } from "../auth/AuthContext";
+
+/** The current page's title, shown in the shared header (set via PageHeader). */
+function HeaderTitle() {
+  const { title } = usePageTitle();
+  return (
+    <Title order={3} fw={700} fz="xl" lineClamp={1} pl="md">
+      {title}
+    </Title>
+  );
+}
 
 /** App shell: brand header with the signed-in user, a collapsible left sidebar,
  *  and the routed content. The header is shared by every page. */
@@ -24,6 +35,7 @@ export function AppLayout() {
   }
 
   return (
+    <PageTitleProvider>
     <AppShell
       layout="alt"
       header={{ height: 56 }}
@@ -37,6 +49,8 @@ export function AppLayout() {
       <AppShell.Header withBorder={false}>
         <Group h="100%" px="md" gap="sm" wrap="nowrap">
           <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
+
+          <HeaderTitle />
 
           {/* User avatar + menu, pinned to the top-right corner. */}
           <Menu position="bottom-end" withArrow shadow="md" width={200}>
@@ -81,5 +95,6 @@ export function AppLayout() {
         <Outlet />
       </AppShell.Main>
     </AppShell>
+    </PageTitleProvider>
   );
 }

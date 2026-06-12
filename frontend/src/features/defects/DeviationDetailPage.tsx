@@ -83,7 +83,6 @@ export function DeviationDetailPage() {
     <div>
       <PageHeader
         title="Defect report"
-        subtitle={`Stage: ${dev.stage.replace(/_/g, " ")}`}
         actions={
           <Group>
             <Button
