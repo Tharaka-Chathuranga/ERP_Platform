@@ -24,5 +24,5 @@ export const NAV: NavItem[] = [
   { to: "/issuing", label: "Goods Issue", icon: IconPackageExport, color: "yellow", description: "Issue stock to users & record returns" },
   { to: "/store", label: "Store", icon: IconBuildingWarehouse, color: "brand", description: "Items & stock levels" },
   { to: "/defects", label: "Defects", icon: IconAlertTriangle, color: "red", description: "Report & triage deviations" },
-  { to: "/requests", label: "Requests", icon: IconClipboardList, color: "grape", description: "Process borrow requests" },
+  { to: "/requests", label: "Borrow Requests", icon: IconClipboardList, color: "grape", description: "Process borrow requests" },
 ];
