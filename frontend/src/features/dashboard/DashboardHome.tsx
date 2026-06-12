@@ -12,7 +12,7 @@ import { StatCard } from "../../components/StatCard";
 import { useAuth } from "../../auth/AuthContext";
 import { listIssues } from "../../api/store/issues";
 import { listDeviations } from "../../api/store/deviations";
-import { listGoodsReceipts } from "../../api/store/receiving";
+import { listReceivals } from "../../api/store/receiving";
 import { listItems } from "../../api/store/items";
 import { NAV } from "../../lib/nav";
 
@@ -28,7 +28,7 @@ export function DashboardHome() {
     queryKey: ["deviations", "INCOMING"],
     queryFn: () => listDeviations("INCOMING"),
   });
-  const recentGrns = useQuery({ queryKey: ["grns"], queryFn: () => listGoodsReceipts() });
+  const recentReceivals = useQuery({ queryKey: ["receivals"], queryFn: () => listReceivals() });
   const items = useQuery({ queryKey: ["items", ""], queryFn: () => listItems() });
 
   return (
@@ -41,35 +41,27 @@ export function DashboardHome() {
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
         <StatCard
           label="Pending approvals"
-          value={pendingIssues.data?.totalElements ?? "—"}
-          icon={<IconPackageExport size={24} />}
+          value={pendingIssues.data?.totalElements ?? 0}
+          icon={<IconPackageExport size={22} />}
           color="yellow"
-          to="/issuing"
-          hint="Issues awaiting approval"
         />
         <StatCard
           label="Incoming defects"
-          value={openDeviations.data?.length ?? "—"}
-          icon={<IconAlertTriangle size={24} />}
+          value={openDeviations.data?.length ?? 0}
+          icon={<IconAlertTriangle size={22} />}
           color="red"
-          to="/defects"
-          hint="Deviation reports to triage"
         />
         <StatCard
-          label="Goods receipts"
-          value={recentGrns.data?.totalElements ?? "—"}
-          icon={<IconPackageImport size={24} />}
+          label="Receivals"
+          value={recentReceivals.data?.totalElements ?? 0}
+          icon={<IconPackageImport size={22} />}
           color="teal"
-          to="/receiving"
-          hint="Total GRNs"
         />
         <StatCard
           label="Catalog items"
-          value={items.data?.totalElements ?? "—"}
-          icon={<IconBuildingWarehouse size={24} />}
+          value={items.data?.totalElements ?? 0}
+          icon={<IconBuildingWarehouse size={22} />}
           color="brand"
-          to="/store"
-          hint="Active items"
         />
       </SimpleGrid>
 
@@ -82,7 +74,7 @@ export function DashboardHome() {
             leftSection={<IconPackageImport size={16} />}
             onClick={() => navigate("/receiving/new")}
           >
-            New goods receipt
+            New item receival
           </Button>
           <Button
             leftSection={<IconPackageExport size={16} />}

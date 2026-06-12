@@ -4,8 +4,8 @@ import { AppLayout } from "./components/AppLayout";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardHome } from "./features/dashboard/DashboardHome";
 import { ReceivingListPage } from "./features/receiving/ReceivingListPage";
-import { NewGoodsReceiptPage } from "./features/receiving/NewGoodsReceiptPage";
-import { GoodsReceiptDetailPage } from "./features/receiving/GoodsReceiptDetailPage";
+import { NewReceivalPage } from "./features/receiving/NewReceivalPage";
+import { ReceivalDetailPage } from "./features/receiving/ReceivalDetailPage";
 import { IssueListPage } from "./features/issuing/IssueListPage";
 import { NewIssuePage } from "./features/issuing/NewIssuePage";
 import { IssueDetailPage } from "./features/issuing/IssueDetailPage";
@@ -39,8 +39,8 @@ export default function App() {
         <Route path="dashboard" element={<DashboardHome />} />
 
         <Route path="receiving" element={<ReceivingListPage />} />
-        <Route path="receiving/new" element={<NewGoodsReceiptPage />} />
-        <Route path="receiving/:id" element={<GoodsReceiptDetailPage />} />
+        <Route path="receiving/new" element={<NewReceivalPage />} />
+        <Route path="receiving/:id" element={<ReceivalDetailPage />} />
 
         <Route path="issuing" element={<IssueListPage />} />
         <Route path="issuing/new" element={<NewIssuePage />} />

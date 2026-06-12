@@ -1,6 +1,6 @@
 package com.enlear.erp.store.web.dto;
 
-import com.enlear.erp.store.service.command.CreateGoodsReceiptCommand;
+import com.enlear.erp.store.service.command.CreateReceivalCommand;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,10 +11,16 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-public record CreateGoodsReceiptRequest(
+/**
+ * Request to record a receival. Supply exactly one of {@code supplierId}
+ * (registered) or {@code supplierName} (unregistered) — the service enforces it.
+ */
+public record CreateReceivalRequest(
         @Size(max = 64) String poNumber,
         @Size(max = 64) String invoiceNumber,
-        @NotNull UUID supplierId,
+        UUID supplierId,
+        @Size(max = 200) String supplierName,
+        boolean allReceivedForPo,
         @NotNull UUID storeKeeperId,
         Instant receivedAt,
         @NotEmpty @Valid List<Line> lines) {
@@ -25,11 +31,11 @@ public record CreateGoodsReceiptRequest(
             @DecimalMin("0.0") BigDecimal unitCost) {
     }
 
-    public CreateGoodsReceiptCommand toCommand() {
-        return new CreateGoodsReceiptCommand(poNumber, invoiceNumber, supplierId,
-                storeKeeperId, receivedAt,
+    public CreateReceivalCommand toCommand() {
+        return new CreateReceivalCommand(poNumber, invoiceNumber, supplierId, supplierName,
+                allReceivedForPo, storeKeeperId, receivedAt,
                 lines.stream()
-                        .map(l -> new CreateGoodsReceiptCommand.Line(l.itemId(), l.quantity(), l.unitCost()))
+                        .map(l -> new CreateReceivalCommand.Line(l.itemId(), l.quantity(), l.unitCost()))
                         .toList());
     }
 }
