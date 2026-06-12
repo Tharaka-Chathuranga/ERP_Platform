@@ -33,10 +33,10 @@ export function RequestListPage() {
   return (
     <div>
       <PageHeader
-        title="Requests"
+        title="Borrow Requests"
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => setNewOpen(true)}>
-            New request
+            New borrow request
           </Button>
         }
       />
@@ -47,7 +47,7 @@ export function RequestListPage() {
         {isLoading ? (
           <Loader />
         ) : !data || data.length === 0 ? (
-          <EmptyState title="No requests" description="Borrow requests will appear here for processing." />
+          <EmptyState title="No borrow requests" description="Borrow requests will appear here for processing." />
         ) : (
           <Table highlightOnHover>
             <Table.Thead>
