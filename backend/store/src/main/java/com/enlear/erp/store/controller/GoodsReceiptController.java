@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Read access to generated GRNs. They are created by {@link
- * com.enlear.erp.store.service.ReceivalService} when items are received.
+ * com.enlear.erp.store.service.receival.ReceivalService} when items are received.
  */
 @RestController
 @RequestMapping("/api/store/goods-receipts")

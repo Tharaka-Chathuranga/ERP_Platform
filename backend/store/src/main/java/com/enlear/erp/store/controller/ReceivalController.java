@@ -1,7 +1,7 @@
 package com.enlear.erp.store.controller;
 
 import com.enlear.erp.shared.web.PageResponse;
-import com.enlear.erp.store.service.ReceivalService;
+import com.enlear.erp.store.service.receival.ReceivalService;
 import com.enlear.erp.store.controller.dto.CreateReceivalRequest;
 import com.enlear.erp.store.controller.dto.ReceivalResponses.ReceivalResponse;
 import jakarta.validation.Valid;
