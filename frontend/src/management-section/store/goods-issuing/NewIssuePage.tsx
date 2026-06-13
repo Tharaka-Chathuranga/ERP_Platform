@@ -6,7 +6,6 @@ import {
   Group,
   LoadingOverlay,
   Stack,
-  Stepper,
   Text,
 } from "@mantine/core";
 import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
@@ -26,15 +25,11 @@ import { notifyError, notifySuccess } from "@core/notify";
 import { createIssue } from "@store/goods-issuing/issuing.api";
 import type { Issue } from "@core/types";
 import { IssueItemCards } from "./IssueItemCards";
+import { IssueProgress } from "./IssueProgress";
 
 const roleLabel = (role: string) => (role === "ADMIN" ? "Administrator" : "Store Keeper");
 
-/**
- * Two-step goods-issue wizard:
- *  1. pick the borrowing user (filtered by department) and the items,
- *  2. on submit, create the issue and show a summary of the created document —
- *     including each item's per-line approval status.
- */
+
 export function NewIssuePage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -87,10 +82,7 @@ export function NewIssuePage() {
     <div>
       <PageHeader title="New goods issue" />
 
-      <Stepper active={active} mb="lg" allowNextStepsSelect={false}>
-        <Stepper.Step label="Borrowing user & items" description="Who is borrowing what" />
-        <Stepper.Step label="Summary" description="Issued items & status" />
-      </Stepper>
+      <IssueProgress status={created?.status ?? "DRAFT"} mb="lg" />
 
       {active === 0 && (
         <Card withBorder radius="md" padding="lg" pos="relative">
@@ -202,7 +194,7 @@ export function NewIssuePage() {
               leftSection={<IconExternalLink size={16} />}
               onClick={() => navigate(`/issuing/${created.id}`)}
             >
-              Open full issue
+              Issue the items
             </Button>
           </Group>
         </Stack>

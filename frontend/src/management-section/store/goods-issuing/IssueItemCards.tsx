@@ -6,15 +6,9 @@ import type { IssueLine } from "@core/types";
 interface IssueItemCardsProps {
   lines: IssueLine[];
   itemLabel: (itemId: string) => string;
-  /** Optional per-line footer, e.g. admin approve/reject actions for PENDING lines. */
   renderActions?: (line: IssueLine) => ReactNode;
 }
 
-/**
- * Grid of issued-item cards, each showing the line's per-line approval status
- * (Approved / Pending / Rejected). Shared by the new-issue summary step and the
- * issue detail page so both render the items identically.
- */
 export function IssueItemCards({ lines, itemLabel, renderActions }: IssueItemCardsProps) {
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>

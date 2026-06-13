@@ -4,7 +4,6 @@ import {
   Group,
   Loader,
   SimpleGrid,
-  Table,
   Text,
 } from "@mantine/core";
 import { IconArrowLeft, IconArrowRight, IconCheck, IconX } from "@tabler/icons-react";
@@ -12,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
+import { DataTable, type Column } from "@ui/data";
 import { useAuth } from "@auth/AuthContext";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import {
@@ -21,7 +21,7 @@ import {
   rejectDeviation,
 } from "@store/defects/deviations.api";
 import { notifyError, notifySuccess } from "@core/notify";
-import type { DeviationStage } from "@core/types";
+import type { DeviationItem, DeviationStage } from "@core/types";
 
 const NEXT_STAGE: Record<DeviationStage, DeviationStage | null> = {
   INCOMING: "IN_PROGRESS",
@@ -78,6 +78,11 @@ export function DeviationDetailPage() {
   if (!dev) return <Text>Not found.</Text>;
 
   const next = NEXT_STAGE[dev.stage];
+
+  const itemColumns: Column<DeviationItem>[] = [
+    { header: "Item", emphasis: true, render: (it) => itemLabel(it.itemId) },
+    { header: "Quantity", render: (it) => it.quantity },
+  ];
 
   return (
     <div>
@@ -144,22 +149,12 @@ export function DeviationDetailPage() {
         <Text fw={600} mb="sm">
           Affected items
         </Text>
-        <Table>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Item</Table.Th>
-              <Table.Th>Quantity</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {dev.items.map((it, idx) => (
-              <Table.Tr key={idx}>
-                <Table.Td>{itemLabel(it.itemId)}</Table.Td>
-                <Table.Td>{it.quantity}</Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
+        <DataTable
+          withCard={false}
+          columns={itemColumns}
+          data={dev.items}
+          rowKey={(it) => it.itemId}
+        />
       </Card>
     </div>
   );

@@ -6,7 +6,6 @@ import {
   Modal,
   NumberInput,
   Stack,
-  Stepper,
   Text,
 } from "@mantine/core";
 import { IconArrowLeft, IconCheck, IconPackageExport, IconX } from "@tabler/icons-react";
@@ -29,17 +28,8 @@ import {
   type ReturnLineInput,
 } from "@store/goods-issuing/issuing.api";
 import { notifyError, notifySuccess } from "@core/notify";
-import type { IssueStatus } from "@core/types";
 import { IssueItemCards } from "./IssueItemCards";
-
-const STEP_INDEX: Record<IssueStatus, number> = {
-  DRAFT: 0,
-  PENDING_APPROVAL: 1,
-  APPROVED: 2,
-  ISSUED: 3,
-  RETURNED: 3,
-  REJECTED: 1,
-};
+import { IssueProgress } from "./IssueProgress";
 
 export function IssueDetailPage() {
   const { id = "" } = useParams();
@@ -80,8 +70,6 @@ export function IssueDetailPage() {
     onSuccess: () => { notifySuccess("Stock issued"); invalidate(); },
     onError: notifyError,
   });
-
-  const active = issue ? STEP_INDEX[issue.status] : 0;
 
   return (
     <div>
@@ -154,15 +142,7 @@ export function IssueDetailPage() {
                   { label: "Store keeper", value: userLabel(issue.storeKeeperId) },
                 ]}
               />
-              <Stepper active={active} size="sm" mt="lg">
-                <Stepper.Step label="Draft" />
-                <Stepper.Step
-                  label={issue.status === "REJECTED" ? "Rejected" : "Approval"}
-                  color={issue.status === "REJECTED" ? "red" : undefined}
-                />
-                <Stepper.Step label="Approved" />
-                <Stepper.Step label="Issued" />
-              </Stepper>
+              <IssueProgress status={issue.status} mt="lg" />
             </Card>
 
             <Card withBorder radius="md" padding="lg">

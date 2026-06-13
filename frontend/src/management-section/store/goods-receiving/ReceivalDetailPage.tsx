@@ -1,11 +1,12 @@
-import { Badge, Button, Card, Group, Table, Text } from "@mantine/core";
+import { Badge, Button, Card, Group, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
-import { DefinitionList, type Definition } from "@ui/data/DefinitionList";
+import { DataTable, DefinitionList, type Column, type Definition } from "@ui/data";
+import type { ReceivalItem } from "@core/types";
 import { useItemLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { getGoodsReceipt, getReceival } from "@store/goods-receiving/receiving.api";
@@ -26,6 +27,12 @@ export function ReceivalDetailPage() {
     queryFn: () => getGoodsReceipt(receival!.goodReceiveNoteId!),
     enabled: !!receival?.goodReceiveNoteId,
   });
+
+  const lineColumns: Column<ReceivalItem>[] = [
+    { header: "Item", emphasis: true, render: (l) => itemLabel(l.itemId) },
+    { header: "Quantity", render: (l) => l.quantity },
+    { header: "Unit cost", render: (l) => l.unitCost ?? "—" },
+  ];
 
   const supplier = receival?.supplierId
     ? suppliers.data?.find((s) => s.id === receival.supplierId)
@@ -103,24 +110,12 @@ export function ReceivalDetailPage() {
               <Text fw={600} mb="sm">
                 Lines
               </Text>
-              <Table>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th>Item</Table.Th>
-                    <Table.Th>Quantity</Table.Th>
-                    <Table.Th>Unit cost</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {receival.lines.map((l) => (
-                    <Table.Tr key={l.id}>
-                      <Table.Td>{itemLabel(l.itemId)}</Table.Td>
-                      <Table.Td>{l.quantity}</Table.Td>
-                      <Table.Td>{l.unitCost ?? "—"}</Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+              <DataTable
+                withCard={false}
+                columns={lineColumns}
+                data={receival.lines}
+                rowKey={(l) => l.id}
+              />
             </Card>
           </>
         )}

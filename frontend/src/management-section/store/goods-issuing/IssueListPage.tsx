@@ -1,14 +1,16 @@
-import { useState } from "react";
-import { Button, Card, Loader, SegmentedControl, Table } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
+import { useMemo, useState } from "react";
+import { Button, Group, SegmentedControl, TextInput } from "@mantine/core";
+import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { useUserLabels } from "@core/hooks/useLookups";
+import { DataTable, PersonCell, StackedCell, type Column } from "@ui/data";
+import { useUsers } from "@core/hooks/useUsers";
 import { listIssues } from "@store/goods-issuing/issuing.api";
-import type { IssueStatus } from "@core/types";
+import type { Issue, IssueStatus, UserSummary } from "@core/types";
 
 const FILTERS: { label: string; value: string }[] = [
   { label: "All", value: "ALL" },
@@ -19,13 +21,70 @@ const FILTERS: { label: string; value: string }[] = [
 
 export function IssueListPage() {
   const navigate = useNavigate();
-  const userLabel = useUserLabels();
   const [filter, setFilter] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["issues", filter],
     queryFn: () => listIssues(filter === "ALL" ? undefined : (filter as IssueStatus)),
   });
+
+  const { data: users } = useUsers();
+  const userById = useMemo(() => {
+    const map = new Map<string, UserSummary>();
+    users?.forEach((u) => map.set(u.id, u));
+    return map;
+  }, [users]);
+  const nameOf = (id: string) => {
+    const u = userById.get(id);
+    return u?.displayName || u?.username || id.slice(0, 8);
+  };
+
+  const term = search.trim().toLowerCase();
+  const rows = (data?.content ?? []).filter(
+    (i) =>
+      !term ||
+      i.issueNumber.toLowerCase().includes(term) ||
+      nameOf(i.borrowingUserId).toLowerCase().includes(term),
+  );
+
+  const columns: Column<Issue>[] = [
+    {
+      header: "Borrowing user",
+      render: (i) => (
+        <PersonCell
+          name={nameOf(i.borrowingUserId)}
+          subtitle={userById.get(i.borrowingUserId)?.department ?? "No department"}
+        />
+      ),
+    },
+    {
+      header: "Issue",
+      render: (i) => (
+        <StackedCell
+          primary={i.issueNumber}
+          secondary={`${i.lines.length} ${i.lines.length === 1 ? "item" : "items"}`}
+        />
+      ),
+    },
+    { header: "Store keeper", render: (i) => nameOf(i.storeKeeperId) },
+    { header: "Status", render: (i) => <StatusBadge status={i.status} /> },
+    {
+      header: "Activity",
+      render: (i) => {
+        const when = i.issuedAt ?? i.approvedAt;
+        return when ? (
+          <StackedCell
+            primary={dayjs(when).format("MMM DD, YYYY")}
+            secondary={dayjs(when).format("h:mm A")}
+          />
+        ) : (
+          "—"
+        );
+      },
+    },
+  ];
 
   return (
     <div>
@@ -38,42 +97,34 @@ export function IssueListPage() {
         }
       />
 
-      <SegmentedControl data={FILTERS} value={filter} onChange={setFilter} mb="md" />
+      <Group gap="sm" mb="md">
+        <SegmentedControl data={FILTERS} value={filter} onChange={setFilter} />
+        <TextInput
+          leftSection={<IconSearch size={16} />}
+          placeholder="Search issue № or user…"
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          w={260}
+        />
+      </Group>
 
-      <Card withBorder radius="md" padding="lg">
-        {isLoading ? (
-          <Loader />
-        ) : !data || data.content.length === 0 ? (
-          <EmptyState title="No goods issues" description="Issue stock to a user to get started." />
-        ) : (
-          <Table highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Issue №</Table.Th>
-                <Table.Th>Borrowing user</Table.Th>
-                <Table.Th>Lines</Table.Th>
-                <Table.Th>Status</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {data.content.map((i) => (
-                <Table.Tr
-                  key={i.id}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigate(`/issuing/${i.id}`)}
-                >
-                  <Table.Td fw={600}>{i.issueNumber}</Table.Td>
-                  <Table.Td>{userLabel(i.borrowingUserId)}</Table.Td>
-                  <Table.Td>{i.lines.length}</Table.Td>
-                  <Table.Td>
-                    <StatusBadge status={i.status} />
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        )}
-      </Card>
+      <DataTable
+        columns={columns}
+        data={rows}
+        rowKey={(i) => i.id}
+        onRowClick={(i) => navigate(`/issuing/${i.id}`)}
+        loading={isLoading}
+        error={error}
+        selection={{ selected, onChange: setSelected }}
+        empty={
+          <EmptyState
+            title="No goods issues"
+            description={
+              term ? "No issues match your search." : "Issue stock to a user to get started."
+            }
+          />
+        }
+      />
     </div>
   );
 }
