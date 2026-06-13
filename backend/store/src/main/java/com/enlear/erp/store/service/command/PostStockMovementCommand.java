@@ -1,6 +1,6 @@
 package com.enlear.erp.store.service.command;
 
-import com.enlear.erp.store.domain.MovementType;
+import com.enlear.erp.store.model.MovementType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;

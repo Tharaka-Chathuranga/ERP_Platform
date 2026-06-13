@@ -1,7 +1,7 @@
 package com.enlear.erp.store.repository;
 
-import com.enlear.erp.store.domain.MovementType;
-import com.enlear.erp.store.domain.StockMovement;
+import com.enlear.erp.store.model.MovementType;
+import com.enlear.erp.store.model.StockMovement;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

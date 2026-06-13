@@ -2,8 +2,8 @@ package com.enlear.erp.store.service;
 
 import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
-import com.enlear.erp.store.domain.Supplier;
-import com.enlear.erp.store.domain.SupplierItem;
+import com.enlear.erp.store.model.Supplier;
+import com.enlear.erp.store.model.SupplierItem;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.repository.SupplierItemRepository;
 import com.enlear.erp.store.repository.SupplierRepository;

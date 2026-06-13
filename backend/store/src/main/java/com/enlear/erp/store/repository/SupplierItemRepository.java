@@ -1,6 +1,6 @@
 package com.enlear.erp.store.repository;
 
-import com.enlear.erp.store.domain.SupplierItem;
+import com.enlear.erp.store.model.SupplierItem;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

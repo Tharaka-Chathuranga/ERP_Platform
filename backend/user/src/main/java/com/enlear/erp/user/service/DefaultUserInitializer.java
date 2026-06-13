@@ -1,6 +1,6 @@
 package com.enlear.erp.user.service;
 
-import com.enlear.erp.user.domain.User;
+import com.enlear.erp.user.model.User;
 import com.enlear.erp.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

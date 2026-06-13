@@ -2,11 +2,11 @@ package com.enlear.erp.store.service;
 
 import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
-import com.enlear.erp.store.domain.GoodsReceipt;
-import com.enlear.erp.store.domain.GoodsReceiptLine;
-import com.enlear.erp.store.domain.MovementType;
-import com.enlear.erp.store.domain.Receival;
-import com.enlear.erp.store.domain.ReceivalItem;
+import com.enlear.erp.store.model.GoodsReceipt;
+import com.enlear.erp.store.model.GoodsReceiptLine;
+import com.enlear.erp.store.model.MovementType;
+import com.enlear.erp.store.model.Receival;
+import com.enlear.erp.store.model.ReceivalItem;
 import com.enlear.erp.store.repository.GoodsReceiptRepository;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.repository.ReceivalRepository;

@@ -2,10 +2,10 @@ package com.enlear.erp.store.service;
 
 import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
-import com.enlear.erp.store.domain.Issue;
-import com.enlear.erp.store.domain.IssueLine;
-import com.enlear.erp.store.domain.Item;
-import com.enlear.erp.store.domain.MovementType;
+import com.enlear.erp.store.model.Issue;
+import com.enlear.erp.store.model.IssueLine;
+import com.enlear.erp.store.model.Item;
+import com.enlear.erp.store.model.MovementType;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.service.command.CreateIssueCommand;
@@ -89,8 +89,8 @@ public class IssueService {
     /** Records returns of returnable lines, writing RECEIPT movements back in. */
     public Issue returnItems(ReturnItemsCommand cmd) {
         Issue issue = getIssue(cmd.issueId());
-        if (issue.getStatus() != com.enlear.erp.store.domain.IssueStatus.ISSUED
-                && issue.getStatus() != com.enlear.erp.store.domain.IssueStatus.RETURNED) {
+        if (issue.getStatus() != com.enlear.erp.store.model.IssueStatus.ISSUED
+                && issue.getStatus() != com.enlear.erp.store.model.IssueStatus.RETURNED) {
             throw new BusinessRuleException("STORE_ISSUE_NOT_ISSUED",
                     "Only an ISSUED document can have returns");
         }
@@ -126,7 +126,7 @@ public class IssueService {
 
     /** Issues filtered by status, or all issues when {@code status} is null. */
     @Transactional(readOnly = true)
-    public Page<Issue> list(com.enlear.erp.store.domain.IssueStatus status, Pageable pageable) {
+    public Page<Issue> list(com.enlear.erp.store.model.IssueStatus status, Pageable pageable) {
         return status == null
                 ? issues.findAllByOrderByCreatedAtDesc(pageable)
                 : issues.findByStatusOrderByCreatedAtDesc(status, pageable);

@@ -1,6 +1,6 @@
 package com.enlear.erp.store.repository;
 
-import com.enlear.erp.store.domain.Receival;
+import com.enlear.erp.store.model.Receival;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
