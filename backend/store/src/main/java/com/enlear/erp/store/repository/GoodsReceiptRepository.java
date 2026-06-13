@@ -1,6 +1,6 @@
 package com.enlear.erp.store.repository;
 
-import com.enlear.erp.store.domain.GoodsReceipt;
+import com.enlear.erp.store.model.GoodsReceipt;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

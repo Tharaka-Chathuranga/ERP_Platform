@@ -1,9 +1,3 @@
-// ── Root build ────────────────────────────────────────────────────
-// Applies common configuration to every module. Library modules
-// (shared, user, store) apply the Spring dependency-management
-// plugin for the BOM but are NOT executable. Only :bootstrap is a
-// runnable Spring Boot application.
-
 plugins {
     java
     id("org.springframework.boot") version "3.3.5" apply false

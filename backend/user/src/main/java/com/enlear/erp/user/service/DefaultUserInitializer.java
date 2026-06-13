@@ -1,6 +1,6 @@
 package com.enlear.erp.user.service;
 
-import com.enlear.erp.user.domain.User;
+import com.enlear.erp.user.model.User;
 import com.enlear.erp.user.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +36,25 @@ public class DefaultUserInitializer implements ApplicationRunner {
         if (users.count() > 0) {
             return;
         }
-        User admin = new User();
-        admin.setUsername("admin");
-        admin.setDisplayName("Administrator");
-        admin.setPasswordHash(passwordEncoder.encode("admin123"));
-        admin.setRole("ADMIN");
-        admin.setEnabled(true);
-        users.save(admin);
-
+        users.save(newUser("admin", "Administrator", "ADMIN", "Stores"));
         log.warn("Created default admin user 'admin' / 'admin123' — CHANGE THIS PASSWORD.");
+
+        users.save(newUser("k.silva", "Kasun Silva", "STORE_KEEPER", "Maintenance"));
+        users.save(newUser("n.perera", "Nimal Perera", "STORE_KEEPER", "Maintenance"));
+        users.save(newUser("a.fernando", "Amaya Fernando", "STORE_KEEPER", "Production"));
+        users.save(newUser("r.jayasuriya", "Ravi Jayasuriya", "STORE_KEEPER", "Production"));
+        users.save(newUser("s.bandara", "Sahan Bandara", "STORE_KEEPER", "Logistics"));
+        log.warn("Seeded demo store-keeper users (password 'admin123') for development.");
+    }
+
+    private User newUser(String username, String displayName, String role, String department) {
+        User user = new User();
+        user.setUsername(username);
+        user.setDisplayName(displayName);
+        user.setPasswordHash(passwordEncoder.encode("admin123"));
+        user.setRole(role);
+        user.setDepartment(department);
+        user.setEnabled(true);
+        return user;
     }
 }

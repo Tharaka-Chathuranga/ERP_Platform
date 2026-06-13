@@ -1,7 +1,7 @@
 package com.enlear.erp.store.service.command;
 
-import com.enlear.erp.store.domain.Location;
-import com.enlear.erp.store.domain.ValuationMethod;
+import com.enlear.erp.store.model.Location;
+import com.enlear.erp.store.model.ValuationMethod;
 import java.math.BigDecimal;
 import java.util.List;
 

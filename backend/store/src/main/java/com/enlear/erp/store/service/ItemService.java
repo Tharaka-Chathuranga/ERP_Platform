@@ -4,7 +4,7 @@ import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import com.enlear.erp.store.service.command.CreateItemCommand;
 import com.enlear.erp.store.repository.ItemRepository;
-import com.enlear.erp.store.domain.Item;
+import com.enlear.erp.store.model.Item;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

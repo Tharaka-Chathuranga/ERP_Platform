@@ -1,7 +1,7 @@
 package com.enlear.erp.store.repository;
 
-import com.enlear.erp.store.domain.DeviationRequest;
-import com.enlear.erp.store.domain.DeviationStage;
+import com.enlear.erp.store.model.DeviationRequest;
+import com.enlear.erp.store.model.DeviationStage;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;

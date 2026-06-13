@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Bridges our {@link com.enlear.erp.user.domain.User} aggregate to Spring
+ * Bridges our {@link com.enlear.erp.user.model.User} aggregate to Spring
  * Security's {@link UserDetails}, used by the authentication manager during the
  * username/password login exchange.
  */

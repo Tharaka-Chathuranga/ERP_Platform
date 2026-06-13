@@ -1,8 +1,8 @@
 package com.enlear.erp.store.service;
 
 import com.enlear.erp.shared.error.ResourceNotFoundException;
-import com.enlear.erp.store.domain.DeviationRequest;
-import com.enlear.erp.store.domain.DeviationStage;
+import com.enlear.erp.store.model.DeviationRequest;
+import com.enlear.erp.store.model.DeviationStage;
 import com.enlear.erp.store.repository.DeviationRequestRepository;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.service.command.CreateDeviationRequestCommand;

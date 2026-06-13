@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { api, getToken, setToken } from "../api/client";
-import type { LoginResponse } from "../types";
+import { api, getToken, setToken } from "@core/http/client";
+import type { LoginResponse } from "@core/types";
 
 interface StoredUser {
   userId: string;

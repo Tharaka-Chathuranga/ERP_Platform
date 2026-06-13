@@ -1,7 +1,7 @@
 package com.enlear.erp.store.repository;
 
-import com.enlear.erp.store.domain.Issue;
-import com.enlear.erp.store.domain.IssueStatus;
+import com.enlear.erp.store.model.Issue;
+import com.enlear.erp.store.model.IssueStatus;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

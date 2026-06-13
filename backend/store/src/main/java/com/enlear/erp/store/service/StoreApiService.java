@@ -1,7 +1,7 @@
 package com.enlear.erp.store.service;
 
-import com.enlear.erp.store.api.StoreApi;
-import com.enlear.erp.store.api.dto.StockLevelView;
+import com.enlear.erp.store.exposed.StoreApi;
+import com.enlear.erp.store.exposed.dto.StockLevelView;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

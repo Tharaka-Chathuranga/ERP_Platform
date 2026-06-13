@@ -1,7 +1,7 @@
 package com.enlear.erp.user.service;
 
-import com.enlear.erp.user.api.UserApi;
-import com.enlear.erp.user.api.dto.CurrentUser;
+import com.enlear.erp.user.exposed.UserApi;
+import com.enlear.erp.user.exposed.dto.CurrentUser;
 import com.enlear.erp.user.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Implements the public {@link UserApi} facade by delegating to the module's
- * repository, mapping the internal {@code User} aggregate to a boundary-safe
- * {@link CurrentUser} view.
- */
 @Service
 @Transactional(readOnly = true)
 public class UserApiService implements UserApi {
@@ -34,7 +29,15 @@ public class UserApiService implements UserApi {
         return users.findAll(Sort.by("username")).stream().map(UserApiService::toView).toList();
     }
 
-    private static CurrentUser toView(com.enlear.erp.user.domain.User u) {
-        return new CurrentUser(u.getId(), u.getUsername(), u.getDisplayName(), u.getRole());
+    @Override
+    public List<CurrentUser> listByDepartment(String department) {
+        return users.findByDepartmentOrderByUsername(department).stream()
+                .map(UserApiService::toView)
+                .toList();
+    }
+
+    private static CurrentUser toView(com.enlear.erp.user.model.User u) {
+        return new CurrentUser(
+                u.getId(), u.getUsername(), u.getDisplayName(), u.getRole(), u.getDepartment());
     }
 }

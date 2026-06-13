@@ -1,7 +1,7 @@
 package com.enlear.erp.store.service;
 
 import com.enlear.erp.shared.error.ResourceNotFoundException;
-import com.enlear.erp.store.domain.GoodsReceipt;
+import com.enlear.erp.store.model.GoodsReceipt;
 import com.enlear.erp.store.repository.GoodsReceiptRepository;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

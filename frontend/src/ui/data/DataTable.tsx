@@ -1,0 +1,136 @@
+import { Card, Checkbox, Table } from "@mantine/core";
+import { useMemo, type ReactNode } from "react";
+import { QueryBoundary } from "@ui/feedback/QueryBoundary";
+
+export interface Column<T> {
+  header: ReactNode;
+  render: (row: T) => ReactNode;
+  width?: number | string;
+  align?: "left" | "center" | "right";
+  emphasis?: boolean;
+}
+
+export interface Selection<T> {
+  /** Currently selected row keys. */
+  selected: Set<string>;
+  /** Called with the next selection whenever it changes. */
+  onChange: (next: Set<string>) => void;
+  /** Optional per-row guard; rows returning false can't be selected. */
+  selectable?: (row: T) => boolean;
+}
+
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[] | undefined;
+  rowKey: (row: T) => string;
+  onRowClick?: (row: T) => void;
+  loading?: boolean;
+  error?: unknown;
+  empty?: ReactNode;
+  withCard?: boolean;
+  /** Pass to render a leading checkbox column with select-all support. */
+  selection?: Selection<T>;
+  /** Highlights the row whose key matches (master/detail selection). */
+  activeRowKey?: string;
+}
+
+// Dimmed, uppercase column headers — the shared list-table look.
+const TH = { c: "dimmed", fz: "xs", tt: "uppercase", fw: 600 } as const;
+
+export function DataTable<T>({
+  columns,
+  data,
+  rowKey,
+  onRowClick,
+  loading,
+  error,
+  empty,
+  withCard = true,
+  selection,
+  activeRowKey,
+}: DataTableProps<T>) {
+  const rows = data ?? [];
+  const selectableRows = useMemo(
+    () => (selection?.selectable ? rows.filter(selection.selectable) : rows),
+    [rows, selection],
+  );
+  const allSelected =
+    !!selection && selectableRows.length > 0 && selectableRows.every((r) => selection.selected.has(rowKey(r)));
+  const someSelected =
+    !!selection && selectableRows.some((r) => selection.selected.has(rowKey(r))) && !allSelected;
+
+  const toggleAll = () =>
+    selection?.onChange(allSelected ? new Set() : new Set(selectableRows.map(rowKey)));
+  const toggleOne = (key: string) => {
+    if (!selection) return;
+    const next = new Set(selection.selected);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    selection.onChange(next);
+  };
+
+  const table = (
+    <QueryBoundary loading={loading} error={error} isEmpty={rows.length === 0} empty={empty}>
+      <Table highlightOnHover={!!onRowClick} verticalSpacing="md" horizontalSpacing="lg">
+        <Table.Thead>
+          <Table.Tr>
+            {selection && (
+              <Table.Th w={48}>
+                <Checkbox
+                  aria-label="Select all"
+                  checked={allSelected}
+                  indeterminate={someSelected}
+                  onChange={toggleAll}
+                />
+              </Table.Th>
+            )}
+            {columns.map((c, i) => (
+              <Table.Th key={i} w={c.width} ta={c.align} {...TH}>
+                {c.header}
+              </Table.Th>
+            ))}
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {rows.map((row) => {
+            const key = rowKey(row);
+            const canSelect = !selection?.selectable || selection.selectable(row);
+            return (
+              <Table.Tr
+                key={key}
+                bg={activeRowKey === key ? "var(--mantine-color-brand-0)" : undefined}
+                style={onRowClick ? { cursor: "pointer" } : undefined}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                {selection && (
+                  <Table.Td onClick={(e) => e.stopPropagation()}>
+                    {canSelect && (
+                      <Checkbox
+                        aria-label="Select row"
+                        checked={selection.selected.has(key)}
+                        onChange={() => toggleOne(key)}
+                      />
+                    )}
+                  </Table.Td>
+                )}
+                {columns.map((c, i) => (
+                  <Table.Td key={i} fw={c.emphasis ? 600 : undefined} ta={c.align}>
+                    {c.render(row)}
+                  </Table.Td>
+                ))}
+              </Table.Tr>
+            );
+          })}
+        </Table.Tbody>
+      </Table>
+    </QueryBoundary>
+  );
+
+  return withCard ? (
+    <Card withBorder radius="md" padding={0}>
+      {table}
+    </Card>
+  ) : (
+    table
+  );
+}

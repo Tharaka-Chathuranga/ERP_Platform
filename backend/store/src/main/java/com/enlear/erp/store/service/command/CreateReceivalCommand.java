@@ -5,11 +5,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Intent to record a receival. The supplier is either registered
- * ({@code supplierId}) or unregistered ({@code supplierName}) — exactly one.
- * {@code allReceivedForPo} is only meaningful when {@code poNumber} is present.
- */
 public record CreateReceivalCommand(
         String poNumber,
         String invoiceNumber,
@@ -18,8 +13,8 @@ public record CreateReceivalCommand(
         boolean allReceivedForPo,
         UUID storeKeeperId,
         Instant receivedAt,
-        List<Line> lines) {
+        List<ReceivalItem> receivalItems) {
 
-    public record Line(UUID itemId, BigDecimal quantity, BigDecimal unitCost) {
+    public record ReceivalItem(UUID itemId, BigDecimal quantity, BigDecimal unitCost) {
     }
 }

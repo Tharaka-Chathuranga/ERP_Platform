@@ -1,7 +1,7 @@
 package com.enlear.erp.store.service;
 
 import com.enlear.erp.shared.error.ResourceNotFoundException;
-import com.enlear.erp.store.domain.BorrowRequest;
+import com.enlear.erp.store.model.BorrowRequest;
 import com.enlear.erp.store.repository.BorrowRequestRepository;
 import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.service.command.CreateBorrowRequestCommand;
@@ -55,7 +55,7 @@ public class BorrowRequestService {
 
     /** Borrow requests filtered by status, or all when {@code status} is null. */
     @Transactional(readOnly = true)
-    public List<BorrowRequest> list(com.enlear.erp.store.domain.BorrowRequestStatus status) {
+    public List<BorrowRequest> list(com.enlear.erp.store.model.BorrowRequestStatus status) {
         return status == null
                 ? requests.findAll(org.springframework.data.domain.Sort.by(
                         org.springframework.data.domain.Sort.Direction.DESC, "requestedAt"))
