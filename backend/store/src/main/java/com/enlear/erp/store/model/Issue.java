@@ -2,6 +2,7 @@ package com.enlear.erp.store.model;
 
 import com.enlear.erp.shared.model.BaseEntity;
 import com.enlear.erp.shared.error.BusinessRuleException;
+import com.enlear.erp.shared.error.ResourceNotFoundException;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,36 +55,77 @@ public class Issue extends BaseEntity {
     @JoinColumn(name = "issue_id", nullable = false)
     private List<IssueLine> lines = new ArrayList<>();
 
-    public Issue(String issueNumber, UUID borrowingUserId, UUID storeKeeperId,
-                 boolean requiresApproval) {
+    public Issue(String issueNumber, UUID borrowingUserId, UUID storeKeeperId) {
         this.issueNumber = issueNumber;
         this.borrowingUserId = borrowingUserId;
         this.storeKeeperId = storeKeeperId;
-        this.status = requiresApproval ? IssueStatus.PENDING_APPROVAL : IssueStatus.APPROVED;
+        this.status = IssueStatus.DRAFT;
     }
 
     public void addLine(IssueLine line) {
         lines.add(line);
     }
 
-    public void approve(UUID approverId) {
-        if (status != IssueStatus.PENDING_APPROVAL) {
-            throw new BusinessRuleException("STORE_ISSUE_NOT_PENDING",
-                    "Only a PENDING_APPROVAL issue can be approved (current: " + status + ")");
+    /**
+     * Recomputes the document status from its lines: any PENDING line keeps the
+     * whole document PENDING_APPROVAL; otherwise it is APPROVED when at least one
+     * line is approved, or REJECTED when every line was rejected. No-op once the
+     * document has been ISSUED or RETURNED.
+     */
+    public void recomputeStatus() {
+        if (status == IssueStatus.ISSUED || status == IssueStatus.RETURNED) {
+            return;
         }
-        this.status = IssueStatus.APPROVED;
-        this.approvedByUserId = approverId;
-        this.approvedAt = Instant.now();
+        boolean anyPending = lines.stream().anyMatch(IssueLine::isPending);
+        boolean anyApproved = lines.stream().anyMatch(IssueLine::isApproved);
+        if (anyPending) {
+            this.status = IssueStatus.PENDING_APPROVAL;
+        } else if (anyApproved) {
+            this.status = IssueStatus.APPROVED;
+        } else {
+            this.status = IssueStatus.REJECTED;
+        }
     }
 
+    /** Approves or rejects a single line, then re-derives the document status. */
+    public void decideLine(UUID lineId, boolean approve, UUID approverId) {
+        IssueLine line = lines.stream()
+                .filter(l -> l.getId().equals(lineId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("IssueLine", lineId));
+        if (approve) {
+            line.approve(approverId);
+        } else {
+            line.reject(approverId);
+        }
+        recordDecision(approverId);
+    }
+
+    /** Approves every still-pending line (whole-document "approve all"). */
+    public void approve(UUID approverId) {
+        requirePending();
+        lines.stream().filter(IssueLine::isPending).forEach(l -> l.approve(approverId));
+        recordDecision(approverId);
+    }
+
+    /** Rejects every still-pending line (whole-document "reject all"). */
     public void reject(UUID approverId) {
+        requirePending();
+        lines.stream().filter(IssueLine::isPending).forEach(l -> l.reject(approverId));
+        recordDecision(approverId);
+    }
+
+    private void requirePending() {
         if (status != IssueStatus.PENDING_APPROVAL) {
             throw new BusinessRuleException("STORE_ISSUE_NOT_PENDING",
-                    "Only a PENDING_APPROVAL issue can be rejected (current: " + status + ")");
+                    "Only a PENDING_APPROVAL issue can be decided (current: " + status + ")");
         }
-        this.status = IssueStatus.REJECTED;
+    }
+
+    private void recordDecision(UUID approverId) {
         this.approvedByUserId = approverId;
         this.approvedAt = Instant.now();
+        recomputeStatus();
     }
 
     /** Marks the issue as physically issued. Guards state and emptiness. */

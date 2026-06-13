@@ -60,3 +60,22 @@ export async function returnIssueItems(id: string, lines: ReturnLineInput[]): Pr
   const { data } = await api.post<Issue>(`/store/issues/${id}/returns`, { lines });
   return data;
 }
+
+export interface LineDecisionInput {
+  lineId: string;
+  approve: boolean;
+}
+
+/** Approves/rejects individual lines; the document status is re-derived server-side. */
+export async function decideIssueLines(
+  id: string,
+  approverId: string,
+  decisions: LineDecisionInput[],
+): Promise<Issue> {
+  const { data } = await api.post<Issue>(
+    `/store/issues/${id}/line-decisions`,
+    { decisions },
+    { params: { approverId } },
+  );
+  return data;
+}

@@ -4,16 +4,15 @@ import com.enlear.erp.shared.model.BaseEntity;
 import com.enlear.erp.shared.error.BusinessRuleException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * A single issued item within an {@link Issue}. Returnable lines track how much
- * has come back so far ({@code returnedQuantity}). Part of the Issue aggregate.
- */
 @Entity
 @Table(name = "issues_item", schema = "store")
 @Getter
@@ -32,14 +31,51 @@ public class IssueLine extends BaseEntity {
     @Column(name = "returned_quantity", nullable = false, precision = 19, scale = 4)
     private BigDecimal returnedQuantity = BigDecimal.ZERO;
 
-    public IssueLine(UUID itemId, BigDecimal quantity, boolean returnable) {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", nullable = false, length = 20)
+    private IssueLineStatus approvalStatus = IssueLineStatus.APPROVED;
+
+    @Column(name = "approved_by_user_id")
+    private UUID approvedByUserId;
+
+    @Column(name = "approved_at")
+    private Instant approvedAt;
+
+    public IssueLine(UUID itemId, BigDecimal quantity, boolean returnable,
+                     boolean requiresApproval) {
         this.itemId = itemId;
         this.quantity = quantity;
         this.returnable = returnable;
         this.returnedQuantity = BigDecimal.ZERO;
+        this.approvalStatus = requiresApproval ? IssueLineStatus.PENDING : IssueLineStatus.APPROVED;
     }
 
-    /** Records a return of {@code qty} units, guarding against over-returning. */
+    public void approve(UUID approverId) {
+        decide(IssueLineStatus.APPROVED, approverId);
+    }
+
+    public void reject(UUID approverId) {
+        decide(IssueLineStatus.REJECTED, approverId);
+    }
+
+    private void decide(IssueLineStatus decision, UUID approverId) {
+        if (approvalStatus != IssueLineStatus.PENDING) {
+            throw new BusinessRuleException("STORE_LINE_NOT_PENDING",
+                    "Only a PENDING line can be decided (current: " + approvalStatus + ")");
+        }
+        this.approvalStatus = decision;
+        this.approvedByUserId = approverId;
+        this.approvedAt = Instant.now();
+    }
+
+    public boolean isApproved() {
+        return approvalStatus == IssueLineStatus.APPROVED;
+    }
+
+    public boolean isPending() {
+        return approvalStatus == IssueLineStatus.PENDING;
+    }
+
     public void recordReturn(BigDecimal qty) {
         if (!returnable) {
             throw new BusinessRuleException("STORE_LINE_NOT_RETURNABLE",

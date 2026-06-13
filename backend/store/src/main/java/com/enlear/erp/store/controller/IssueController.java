@@ -3,6 +3,7 @@ package com.enlear.erp.store.controller;
 import com.enlear.erp.shared.web.PageResponse;
 import com.enlear.erp.store.service.IssueService;
 import com.enlear.erp.store.controller.dto.CreateIssueRequest;
+import com.enlear.erp.store.controller.dto.DecideIssueLinesRequest;
 import com.enlear.erp.store.controller.dto.IssueResponses.IssueResponse;
 import com.enlear.erp.store.controller.dto.ReturnItemsRequest;
 import jakarta.validation.Valid;
@@ -49,6 +50,14 @@ public class IssueController {
     @PreAuthorize("hasRole('ADMIN')")
     public IssueResponse reject(@PathVariable UUID id, @RequestParam UUID approverId) {
         return IssueResponse.from(issues.reject(id, approverId));
+    }
+
+    /** Approve/reject individual lines; the document status is re-derived. */
+    @PostMapping("/{id}/line-decisions")
+    @PreAuthorize("hasRole('ADMIN')")
+    public IssueResponse decideLines(@PathVariable UUID id, @RequestParam UUID approverId,
+                                     @Valid @RequestBody DecideIssueLinesRequest request) {
+        return IssueResponse.from(issues.decideLines(request.toCommand(id, approverId)));
     }
 
     /** Physically issue an APPROVED document — posts ISSUE movements. */

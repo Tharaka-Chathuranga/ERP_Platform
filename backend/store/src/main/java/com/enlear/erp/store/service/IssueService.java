@@ -9,10 +9,12 @@ import com.enlear.erp.store.model.MovementType;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.service.command.CreateIssueCommand;
+import com.enlear.erp.store.service.command.DecideIssueLinesCommand;
 import com.enlear.erp.store.service.command.PostStockMovementCommand;
 import com.enlear.erp.store.service.command.ReturnItemsCommand;
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -44,20 +46,15 @@ public class IssueService {
                     "An issue must have at least one line");
         }
 
-        boolean requiresApproval = false;
+        Issue issue = new Issue(generateIssueNumber(), cmd.borrowingUserId(),
+                cmd.storeKeeperId());
         for (CreateIssueCommand.Line line : cmd.lines()) {
             Item item = items.findById(line.itemId())
                     .orElseThrow(() -> new ResourceNotFoundException("Item", line.itemId()));
-            if (item.isApprovalRequiredForIssue()) {
-                requiresApproval = true;
-            }
+            issue.addLine(new IssueLine(line.itemId(), line.quantity(), line.returnable(),
+                    item.isApprovalRequiredForIssue()));
         }
-
-        Issue issue = new Issue(generateIssueNumber(), cmd.borrowingUserId(),
-                cmd.storeKeeperId(), requiresApproval);
-        for (CreateIssueCommand.Line line : cmd.lines()) {
-            issue.addLine(new IssueLine(line.itemId(), line.quantity(), line.returnable()));
-        }
+        issue.recomputeStatus();
         return issues.save(issue);
     }
 
@@ -73,11 +70,23 @@ public class IssueService {
         return issues.save(issue);
     }
 
-    /** Posts ISSUE movements for an APPROVED issue and marks it ISSUED. */
+    /** Approves/rejects individual lines, then re-derives the document status. */
+    public Issue decideLines(DecideIssueLinesCommand cmd) {
+        Issue issue = getIssue(cmd.issueId());
+        for (DecideIssueLinesCommand.Decision d : cmd.decisions()) {
+            issue.decideLine(d.lineId(), d.approve(), cmd.approverId());
+        }
+        return issues.save(issue);
+    }
+
+    /** Posts ISSUE movements for the APPROVED lines of an issue and marks it ISSUED. */
     public Issue issue(UUID id) {
         Issue issue = getIssue(id);
         issue.markIssued();
         for (IssueLine line : issue.getLines()) {
+            if (!line.isApproved()) {
+                continue; // rejected lines never leave the store
+            }
             stock.postMovement(new PostStockMovementCommand(
                     line.getItemId(), MovementType.ISSUE,
                     line.getQuantity(), null, issue.getIssueNumber(),
@@ -115,21 +124,28 @@ public class IssueService {
 
     @Transactional(readOnly = true)
     public Issue getIssue(UUID id) {
-        return issues.findById(id)
+        Issue issue = issues.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Issue", id));
+        Hibernate.initialize(issue.getLines());
+        return issue;
     }
 
     @Transactional(readOnly = true)
     public Page<Issue> listForUser(UUID borrowingUserId, Pageable pageable) {
-        return issues.findByBorrowingUserIdOrderByCreatedAtDesc(borrowingUserId, pageable);
+        return withLines(issues.findByBorrowingUserIdOrderByCreatedAtDesc(borrowingUserId, pageable));
     }
 
     /** Issues filtered by status, or all issues when {@code status} is null. */
     @Transactional(readOnly = true)
     public Page<Issue> list(com.enlear.erp.store.model.IssueStatus status, Pageable pageable) {
-        return status == null
+        return withLines(status == null
                 ? issues.findAllByOrderByCreatedAtDesc(pageable)
-                : issues.findByStatusOrderByCreatedAtDesc(status, pageable);
+                : issues.findByStatusOrderByCreatedAtDesc(status, pageable));
+    }
+
+    private Page<Issue> withLines(Page<Issue> page) {
+        page.forEach(issue -> Hibernate.initialize(issue.getLines()));
+        return page;
     }
 
     private String generateIssueNumber() {

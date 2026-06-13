@@ -2,6 +2,7 @@ package com.enlear.erp.store.controller.dto;
 
 import com.enlear.erp.store.model.Issue;
 import com.enlear.erp.store.model.IssueLine;
+import com.enlear.erp.store.model.IssueLineStatus;
 import com.enlear.erp.store.model.IssueStatus;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -16,11 +17,13 @@ public final class IssueResponses {
 
     public record IssueLineResponse(
             UUID id, UUID itemId, BigDecimal quantity, boolean returnable,
-            BigDecimal returnedQuantity) {
+            BigDecimal returnedQuantity, IssueLineStatus approvalStatus,
+            UUID approvedByUserId, Instant approvedAt) {
 
         public static IssueLineResponse from(IssueLine l) {
             return new IssueLineResponse(l.getId(), l.getItemId(), l.getQuantity(),
-                    l.isReturnable(), l.getReturnedQuantity());
+                    l.isReturnable(), l.getReturnedQuantity(), l.getApprovalStatus(),
+                    l.getApprovedByUserId(), l.getApprovedAt());
         }
     }
 

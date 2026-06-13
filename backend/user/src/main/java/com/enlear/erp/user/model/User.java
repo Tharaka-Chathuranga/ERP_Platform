@@ -8,11 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * An application user. Stores a BCrypt password hash (never the plaintext) and a
- * single role (e.g. {@code ADMIN}, {@code STORE_KEEPER}) used to build the
- * security authority at login.
- */
 @Entity
 @Table(name = "users", schema = "users")
 @Getter
@@ -31,6 +26,9 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, length = 64)
     private String role;
+
+    @Column(length = 100)
+    private String department;
 
     @Column(nullable = false)
     private boolean enabled = true;

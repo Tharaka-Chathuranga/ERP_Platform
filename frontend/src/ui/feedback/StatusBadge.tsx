@@ -22,13 +22,15 @@ const COLORS: Record<string, string> = {
   INACTIVE: "gray",
 };
 
-function label(status: string): string {
-  return status.replace(/_/g, " ");
+function label(status?: string): string {
+  return (status ?? "—").replace(/_/g, " ");
 }
 
-export function StatusBadge({ status }: { status: string }) {
+// `status` is intentionally tolerant of undefined: a stale/partial API response
+// (e.g. a backend that predates a new status field) must not crash the page.
+export function StatusBadge({ status }: { status?: string }) {
   return (
-    <Badge color={COLORS[status] ?? "gray"} variant="light" radius="sm">
+    <Badge color={COLORS[status ?? ""] ?? "gray"} variant="light" radius="sm">
       {label(status)}
     </Badge>
   );

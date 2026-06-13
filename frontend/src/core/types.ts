@@ -15,6 +15,8 @@ export interface UserSummary {
   username: string;
   displayName: string;
   role: string;
+  /** Organisational unit; optional until the user has one assigned. */
+  department?: string;
 }
 
 export type ValuationMethod = "FIFO" | "WEIGHTED_AVERAGE" | "STANDARD_COST";
@@ -146,12 +148,18 @@ export type IssueStatus =
   | "REJECTED"
   | "RETURNED";
 
+/** Per-line approval state, independent of the document status. */
+export type IssueLineStatus = "PENDING" | "APPROVED" | "REJECTED";
+
 export interface IssueLine {
   id: string;
   itemId: string;
   quantity: number;
   returnable: boolean;
   returnedQuantity: number;
+  approvalStatus: IssueLineStatus;
+  approvedByUserId?: string;
+  approvedAt?: string;
 }
 
 export interface Issue {

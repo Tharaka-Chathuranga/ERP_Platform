@@ -7,11 +7,20 @@ interface UserSelectProps {
   label?: string;
   placeholder?: string;
   error?: string;
+  department?: string;
+  disabled?: boolean;
 }
 
-/** Searchable user picker. Returns the user id. */
-export function UserSelect({ value, onChange, label, placeholder, error }: UserSelectProps) {
-  const { data, isLoading } = useUsers();
+export function UserSelect({
+  value,
+  onChange,
+  label,
+  placeholder,
+  error,
+  department,
+  disabled,
+}: UserSelectProps) {
+  const { data, isLoading } = useUsers(department);
   const options =
     data?.map((u) => ({
       value: u.id,
@@ -26,7 +35,7 @@ export function UserSelect({ value, onChange, label, placeholder, error }: UserS
       data={options}
       value={value}
       onChange={onChange}
-      disabled={isLoading}
+      disabled={disabled || isLoading}
       nothingFoundMessage="No users"
       error={error}
       comboboxProps={{ withinPortal: true }}

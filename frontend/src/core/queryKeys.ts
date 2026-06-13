@@ -34,7 +34,7 @@ export const qk = {
   supplierItems: (id: string) => ["supplier", id, "items"] as const,
 
   // ── Users ──
-  users: () => ["users"] as const,
+  users: (department?: string) => filtered("users", department),
 
   // ── Receivals & GRNs ──
   receivals: (supplierId?: string) => filtered("receivals", supplierId),
