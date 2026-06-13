@@ -1,18 +1,14 @@
-package com.enlear.erp.store.service;
+package com.enlear.erp.store.service.issue;
 
 import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import com.enlear.erp.store.model.Issue;
 import com.enlear.erp.store.model.IssueLine;
-import com.enlear.erp.store.model.Item;
-import com.enlear.erp.store.model.MovementType;
-import com.enlear.erp.store.repository.ItemRepository;
+import com.enlear.erp.store.model.IssueStatus;
 import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.service.command.CreateIssueCommand;
 import com.enlear.erp.store.service.command.DecideIssueLinesCommand;
-import com.enlear.erp.store.service.command.PostStockMovementCommand;
 import com.enlear.erp.store.service.command.ReturnItemsCommand;
-import java.time.Instant;
 import java.util.UUID;
 import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
@@ -20,41 +16,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Issuing / borrowing of stock. An issue needing approval (any line whose item
- * is {@code approvalRequiredForIssue}) starts PENDING_APPROVAL; otherwise it is
- * auto-APPROVED. Issuing writes ISSUE movements; returning writes RECEIPT moves.
- */
 @Service
 @Transactional
 public class IssueService {
 
     private final IssueRepository issues;
-    private final ItemRepository items;
-    private final StockService stock;
+    private final IssueValidator validator;
+    private final IssueFactory factory;
+    private final IssueMovementCreator movements;
 
-    public IssueService(IssueRepository issues,
-                        ItemRepository items, StockService stock) {
+    public IssueService(IssueRepository issues, IssueValidator validator,
+                        IssueFactory factory, IssueMovementCreator movements) {
         this.issues = issues;
-        this.items = items;
-        this.stock = stock;
+        this.validator = validator;
+        this.factory = factory;
+        this.movements = movements;
     }
 
     public Issue createIssue(CreateIssueCommand cmd) {
-        if (cmd.lines() == null || cmd.lines().isEmpty()) {
-            throw new BusinessRuleException("STORE_ISSUE_EMPTY",
-                    "An issue must have at least one line");
-        }
-
-        Issue issue = new Issue(generateIssueNumber(), cmd.borrowingUserId(),
-                cmd.storeKeeperId());
-        for (CreateIssueCommand.Line line : cmd.lines()) {
-            Item item = items.findById(line.itemId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Item", line.itemId()));
-            issue.addLine(new IssueLine(line.itemId(), line.quantity(), line.returnable(),
-                    item.isApprovalRequiredForIssue()));
-        }
-        issue.recomputeStatus();
+        validator.validate(cmd);
+        Issue issue = factory.build(cmd);
         return issues.save(issue);
     }
 
@@ -83,23 +64,14 @@ public class IssueService {
     public Issue issue(UUID id) {
         Issue issue = getIssue(id);
         issue.markIssued();
-        for (IssueLine line : issue.getLines()) {
-            if (!line.isApproved()) {
-                continue; // rejected lines never leave the store
-            }
-            stock.postMovement(new PostStockMovementCommand(
-                    line.getItemId(), MovementType.ISSUE,
-                    line.getQuantity(), null, issue.getIssueNumber(),
-                    Instant.now()));
-        }
+        movements.postIssue(issue);
         return issues.save(issue);
     }
 
     /** Records returns of returnable lines, writing RECEIPT movements back in. */
     public Issue returnItems(ReturnItemsCommand cmd) {
         Issue issue = getIssue(cmd.issueId());
-        if (issue.getStatus() != com.enlear.erp.store.model.IssueStatus.ISSUED
-                && issue.getStatus() != com.enlear.erp.store.model.IssueStatus.RETURNED) {
+        if (issue.getStatus() != IssueStatus.ISSUED && issue.getStatus() != IssueStatus.RETURNED) {
             throw new BusinessRuleException("STORE_ISSUE_NOT_ISSUED",
                     "Only an ISSUED document can have returns");
         }
@@ -109,10 +81,7 @@ public class IssueService {
                     .findFirst()
                     .orElseThrow(() -> new ResourceNotFoundException("IssueLine", ret.itemId()));
             line.recordReturn(ret.quantity());
-            stock.postMovement(new PostStockMovementCommand(
-                    line.getItemId(), MovementType.RECEIPT,
-                    ret.quantity(), null, issue.getIssueNumber(),
-                    Instant.now()));
+            movements.postReturn(issue, line, ret.quantity());
         }
         boolean allReturned = issue.getLines().stream()
                 .allMatch(l -> l.getReturnedQuantity().compareTo(l.getQuantity()) >= 0);
@@ -137,7 +106,7 @@ public class IssueService {
 
     /** Issues filtered by status, or all issues when {@code status} is null. */
     @Transactional(readOnly = true)
-    public Page<Issue> list(com.enlear.erp.store.model.IssueStatus status, Pageable pageable) {
+    public Page<Issue> list(IssueStatus status, Pageable pageable) {
         return withLines(status == null
                 ? issues.findAllByOrderByCreatedAtDesc(pageable)
                 : issues.findByStatusOrderByCreatedAtDesc(status, pageable));
@@ -146,9 +115,5 @@ public class IssueService {
     private Page<Issue> withLines(Page<Issue> page) {
         page.forEach(issue -> Hibernate.initialize(issue.getLines()));
         return page;
-    }
-
-    private String generateIssueNumber() {
-        return "ISS-" + Instant.now().toEpochMilli();
     }
 }

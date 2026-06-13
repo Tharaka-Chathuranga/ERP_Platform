@@ -1,7 +1,7 @@
 package com.enlear.erp.store.controller;
 
 import com.enlear.erp.shared.web.PageResponse;
-import com.enlear.erp.store.service.IssueService;
+import com.enlear.erp.store.service.issue.IssueService;
 import com.enlear.erp.store.controller.dto.CreateIssueRequest;
 import com.enlear.erp.store.controller.dto.DecideIssueLinesRequest;
 import com.enlear.erp.store.controller.dto.IssueResponses.IssueResponse;

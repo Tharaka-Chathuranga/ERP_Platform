@@ -66,12 +66,6 @@ public class Issue extends BaseEntity {
         lines.add(line);
     }
 
-    /**
-     * Recomputes the document status from its lines: any PENDING line keeps the
-     * whole document PENDING_APPROVAL; otherwise it is APPROVED when at least one
-     * line is approved, or REJECTED when every line was rejected. No-op once the
-     * document has been ISSUED or RETURNED.
-     */
     public void recomputeStatus() {
         if (status == IssueStatus.ISSUED || status == IssueStatus.RETURNED) {
             return;

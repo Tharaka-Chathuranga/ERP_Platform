@@ -1,6 +1,7 @@
 package com.enlear.erp.store.model;
 
 import com.enlear.erp.shared.model.BaseEntity;
+import com.enlear.erp.shared.error.BusinessRuleException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,15 +15,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-/**
- * A stock-keeping item (product/material). Identified to users by its unique
- * {@code itemCode}. Carries the master data needed for inventory control, a
- * {@code reorderLevel} used to flag low stock, control flags, and the storage
- * bins it occupies (embedded JSONB — see {@link Location}).
- *
- * <p>On-hand quantity is NOT stored here: it is derived by summing the
- * append-only stock-movement ledger.
- */
+
 @Entity
 @Table(name = "items", schema = "store")
 @Getter
@@ -38,11 +31,9 @@ public class Item extends BaseEntity {
     @Column(length = 1000)
     private String description;
 
-    /** Unit of measure, e.g. EACH, KG, LITRE, BOX. */
     @Column(name = "unit_of_measure", nullable = false, length = 16)
     private String unitOfMeasure;
 
-    /** Standard unit price / valuation reference for the item. */
     @Column(name = "unit_price", nullable = false, precision = 19, scale = 4)
     private BigDecimal unitPrice = BigDecimal.ZERO;
 
@@ -56,15 +47,15 @@ public class Item extends BaseEntity {
     @Column(name = "reorder_level", nullable = false, precision = 19, scale = 4)
     private BigDecimal reorderLevel = BigDecimal.ZERO;
 
-    /** Flags the item as critical (e.g. safety stock / heightened controls). */
+    @Column(name = "quantity_on_hand", nullable = false, precision = 19, scale = 4)
+    private BigDecimal quantityOnHand = BigDecimal.ZERO;
+
     @Column(name = "is_critical_item", nullable = false)
     private boolean criticalItem = false;
 
-    /** When true, issuing this item requires an approval step. */
     @Column(name = "is_approval_required_for_issue", nullable = false)
     private boolean approvalRequiredForIssue = false;
 
-    /** Storage bins, persisted as a JSONB array. */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "locations", nullable = false, columnDefinition = "jsonb")
     private List<Location> locations = new ArrayList<>();
@@ -101,5 +92,15 @@ public class Item extends BaseEntity {
 
     public void updateLocations(List<Location> newLocations) {
         this.locations = newLocations != null ? new ArrayList<>(newLocations) : new ArrayList<>();
+    }
+
+    public void adjustOnHand(BigDecimal signedDelta) {
+        BigDecimal next = quantityOnHand.add(signedDelta);
+        if (next.signum() < 0) {
+            throw new BusinessRuleException("STORE_INSUFFICIENT_STOCK",
+                    "Insufficient stock: on hand %s, requested change %s"
+                            .formatted(quantityOnHand, signedDelta));
+        }
+        this.quantityOnHand = next;
     }
 }
