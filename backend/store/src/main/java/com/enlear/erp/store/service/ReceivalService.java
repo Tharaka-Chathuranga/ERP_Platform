@@ -14,8 +14,11 @@ import com.enlear.erp.store.repository.SupplierRepository;
 import com.enlear.erp.store.service.command.CreateReceivalCommand;
 import com.enlear.erp.store.service.command.PostStockMovementCommand;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,12 +44,14 @@ public class ReceivalService {
     }
 
     public Receival create(CreateReceivalCommand cmd) {
+
         if (cmd.receivalItems() == null || cmd.receivalItems().isEmpty()) {
             throw new BusinessRuleException("STORE_RECEIVAL_EMPTY",
                     "A receival must have at least one line");
         }
 
         boolean registered = cmd.supplierId() != null;
+        
         boolean unregistered = cmd.supplierName() != null && !cmd.supplierName().isBlank();
         if (registered == unregistered) {
             throw new BusinessRuleException("STORE_RECEIVAL_SUPPLIER",
@@ -62,22 +67,25 @@ public class ReceivalService {
                 cmd.allReceivedForPo(), cmd.storeKeeperId(),
                 cmd.receivedAt() != null ? cmd.receivedAt() : Instant.now());
 
+        Set<UUID> requestedItemIds = cmd.receivalItems().stream()
+                .map(CreateReceivalCommand.ReceivalItem::itemId)
+                .collect(Collectors.toSet());
+        Set<UUID> existingItemIds = new HashSet<>(items.findExistingIds(requestedItemIds));
+
         for (CreateReceivalCommand.ReceivalItem item : cmd.receivalItems()) {
-            if (!items.existsById(item.itemId())) {
+            if (!existingItemIds.contains(item.itemId())) {
                 throw new ResourceNotFoundException("Item", item.itemId());
             }
             receival.addLine(new ReceivalItem(item.itemId(), item.quantity(), item.unitCost()));
         }
         receivals.save(receival);
 
-        // Always: record the inventory effect on the stock ledger.
         for (ReceivalItem line : receival.getLines()) {
             stock.postMovement(new PostStockMovementCommand(line.getItemId(), MovementType.RECEIPT,
                     line.getQuantity(), line.getUnitCost(), receival.getReceivalNumber(),
                     receival.getReceivedAt()));
         }
 
-        // Conditionally generate the GRN.
         if (!receival.hasPurchaseOrder()) {
             generateGrn(receival, List.of(receival));
         } else if (cmd.allReceivedForPo()) {
@@ -86,11 +94,7 @@ public class ReceivalService {
         return receival;
     }
 
-    /**
-     * Generates a POSTED GRN covering every line of {@code sources}, using
-     * {@code header} for the supplier/PO/invoice context, then links each source
-     * receival to it. No stock is posted here.
-     */
+
     private GoodsReceipt generateGrn(Receival header, List<Receival> sources) {
         GoodsReceipt grn = GoodsReceipt.generated(generateGrnNumber(), header.getPoNumber(),
                 header.getInvoiceNumber(), header.getSupplierId(), header.getSupplierName(),

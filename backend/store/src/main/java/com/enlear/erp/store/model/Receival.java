@@ -14,13 +14,6 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * A receival: the physical "goods arrived at the store" event (header + lines).
- * Always recorded, and posting it writes a RECEIPT stock movement per line. The
- * supplier is either registered ({@link #supplierId}) or unregistered
- * ({@link #supplierName}) — never both. A {@code good_receive_note_id} is set
- * once the receival has been rolled into a generated GRN.
- */
 @Entity
 @Table(name = "item_receival", schema = "store")
 @Getter
@@ -75,7 +68,6 @@ public class Receival extends BaseEntity {
         lines.add(line);
     }
 
-    /** Links this receival to the GRN it was rolled into. */
     public void attachGrn(UUID grnId) {
         this.goodReceiveNoteId = grnId;
     }

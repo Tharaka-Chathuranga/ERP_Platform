@@ -9,11 +9,6 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * A single received item within a {@link Receival}. Part of the receival
- * aggregate — created and persisted via its parent (the FK column
- * {@code item_receival_id} is owned by the parent's {@code @OneToMany}).
- */
 @Entity
 @Table(name = "item_receival_item", schema = "store")
 @Getter
