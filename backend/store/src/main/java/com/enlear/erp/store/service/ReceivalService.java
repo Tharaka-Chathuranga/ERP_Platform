@@ -21,21 +21,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Item receiving. Recording a receival is one transaction that:
- * <ol>
- *   <li>persists the receival header + lines,</li>
- *   <li>posts a {@code RECEIPT} stock movement per line (the real inventory effect), and</li>
- *   <li>conditionally generates a GRN:
- *     <ul>
- *       <li>no PO → a GRN for this receival immediately;</li>
- *       <li>PO + "all received" → one GRN aggregating every open receival for the PO;</li>
- *       <li>PO + partial → no GRN yet.</li>
- *     </ul>
- *   </li>
- * </ol>
- * GRN generation writes no stock — the receival already did, so it cannot double-count.
- */
 @Service
 @Transactional
 public class ReceivalService {
@@ -56,7 +41,7 @@ public class ReceivalService {
     }
 
     public Receival create(CreateReceivalCommand cmd) {
-        if (cmd.lines() == null || cmd.lines().isEmpty()) {
+        if (cmd.receivalItems() == null || cmd.receivalItems().isEmpty()) {
             throw new BusinessRuleException("STORE_RECEIVAL_EMPTY",
                     "A receival must have at least one line");
         }
@@ -77,11 +62,11 @@ public class ReceivalService {
                 cmd.allReceivedForPo(), cmd.storeKeeperId(),
                 cmd.receivedAt() != null ? cmd.receivedAt() : Instant.now());
 
-        for (CreateReceivalCommand.Line line : cmd.lines()) {
-            if (!items.existsById(line.itemId())) {
-                throw new ResourceNotFoundException("Item", line.itemId());
+        for (CreateReceivalCommand.ReceivalItem item : cmd.receivalItems()) {
+            if (!items.existsById(item.itemId())) {
+                throw new ResourceNotFoundException("Item", item.itemId());
             }
-            receival.addLine(new ReceivalItem(line.itemId(), line.quantity(), line.unitCost()));
+            receival.addLine(new ReceivalItem(item.itemId(), item.quantity(), item.unitCost()));
         }
         receivals.save(receival);
 

@@ -53,7 +53,7 @@ export function NewReceivalPage() {
         invoiceNumber: invoiceNumber.trim() || undefined,
         allReceivedForPo: hasPo && allReceivedForPo,
         receivedAt: receivedAt ? receivedAt.toISOString() : undefined,
-        lines: validLines.map((l) => ({
+        receivalItems: validLines.map((l) => ({
           itemId: l.itemId!,
           quantity: Number(l.quantity),
           unitCost: l.unitCost === "" || l.unitCost == null ? undefined : Number(l.unitCost),
