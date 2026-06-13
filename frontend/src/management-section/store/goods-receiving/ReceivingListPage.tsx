@@ -1,23 +1,63 @@
 import { useMemo } from "react";
-import { Badge, Button, Card, Loader, Table } from "@mantine/core";
+import { Badge, Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
+import { DataTable, type Column } from "@ui/data/DataTable";
+import { qk } from "@core/queryKeys";
+import type { Receival } from "@core/types";
 import { listReceivals } from "@store/goods-receiving/receiving.api";
 import { listSuppliers } from "@store/inventory/suppliers.api";
 
 export function ReceivingListPage() {
   const navigate = useNavigate();
-  const { data, isLoading } = useQuery({ queryKey: ["receivals"], queryFn: () => listReceivals() });
-  const suppliers = useQuery({ queryKey: ["suppliers"], queryFn: listSuppliers });
+  const { data, isLoading, error } = useQuery({
+    queryKey: qk.receivals(),
+    queryFn: () => listReceivals(),
+  });
+  const suppliers = useQuery({ queryKey: qk.suppliers(), queryFn: listSuppliers });
 
   const supplierName = useMemo(() => {
     const map = new Map(suppliers.data?.map((s) => [s.id, `${s.code} — ${s.name}`]));
     return (id?: string, name?: string) => (id ? map.get(id) ?? id.slice(0, 8) : name ?? "—");
   }, [suppliers.data]);
+
+  const columns: Column<Receival>[] = [
+    { header: "Receival №", emphasis: true, render: (r) => r.receivalNumber },
+    {
+      header: "Supplier",
+      render: (r) => (
+        <>
+          {supplierName(r.supplierId, r.supplierName)}
+          {!r.supplierId && r.supplierName && (
+            <Badge ml="xs" size="xs" variant="light" color="gray">
+              Unregistered
+            </Badge>
+          )}
+        </>
+      ),
+    },
+    { header: "PO №", render: (r) => r.poNumber || "—" },
+    { header: "Invoice", render: (r) => r.invoiceNumber || "—" },
+    { header: "Lines", render: (r) => r.lines.length },
+    { header: "Received", render: (r) => dayjs(r.receivedAt).format("YYYY-MM-DD") },
+    {
+      header: "GRN",
+      render: (r) =>
+        r.goodReceiveNoteId ? (
+          <Badge size="sm" variant="light" color="green">
+            Generated
+          </Badge>
+        ) : (
+          <Badge size="sm" variant="light" color="yellow">
+            Pending
+          </Badge>
+        ),
+    },
+  ];
 
   return (
     <div>
@@ -30,10 +70,14 @@ export function ReceivingListPage() {
         }
       />
 
-      <Card withBorder radius="md" padding="lg">
-        {isLoading ? (
-          <Loader />
-        ) : !data || data.content.length === 0 ? (
+      <DataTable
+        columns={columns}
+        data={data?.content}
+        rowKey={(r) => r.id}
+        onRowClick={(r) => navigate(`/receiving/${r.id}`)}
+        loading={isLoading}
+        error={error}
+        empty={
           <EmptyState
             title="No receivals yet"
             description="Receive items into the store — stock is updated immediately and a GRN is generated automatically."
@@ -43,56 +87,8 @@ export function ReceivingListPage() {
               </Button>
             }
           />
-        ) : (
-          <Table highlightOnHover>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Receival №</Table.Th>
-                <Table.Th>Supplier</Table.Th>
-                <Table.Th>PO №</Table.Th>
-                <Table.Th>Invoice</Table.Th>
-                <Table.Th>Lines</Table.Th>
-                <Table.Th>Received</Table.Th>
-                <Table.Th>GRN</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {data.content.map((r) => (
-                <Table.Tr
-                  key={r.id}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigate(`/receiving/${r.id}`)}
-                >
-                  <Table.Td fw={600}>{r.receivalNumber}</Table.Td>
-                  <Table.Td>
-                    {supplierName(r.supplierId, r.supplierName)}
-                    {!r.supplierId && r.supplierName && (
-                      <Badge ml="xs" size="xs" variant="light" color="gray">
-                        Unregistered
-                      </Badge>
-                    )}
-                  </Table.Td>
-                  <Table.Td>{r.poNumber || "—"}</Table.Td>
-                  <Table.Td>{r.invoiceNumber || "—"}</Table.Td>
-                  <Table.Td>{r.lines.length}</Table.Td>
-                  <Table.Td>{dayjs(r.receivedAt).format("YYYY-MM-DD")}</Table.Td>
-                  <Table.Td>
-                    {r.goodReceiveNoteId ? (
-                      <Badge size="sm" variant="light" color="green">
-                        Generated
-                      </Badge>
-                    ) : (
-                      <Badge size="sm" variant="light" color="yellow">
-                        Pending
-                      </Badge>
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
-        )}
-      </Card>
+        }
+      />
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { useAuth } from "@auth/AuthContext";
 import { listSuppliers } from "@store/inventory/suppliers.api";
 import { createReceival } from "@store/goods-receiving/receiving.api";
 import { notifyError, notifySuccess } from "@core/notify";
+import { qk } from "@core/queryKeys";
 
 type SupplierSource = "registered" | "unregistered";
 
@@ -27,7 +28,7 @@ export function NewReceivalPage() {
   const qc = useQueryClient();
   const { userId } = useAuth();
 
-  const suppliers = useQuery({ queryKey: ["suppliers"], queryFn: listSuppliers });
+  const suppliers = useQuery({ queryKey: qk.suppliers(), queryFn: listSuppliers });
   const [source, setSource] = useState<SupplierSource>("registered");
   const [supplierId, setSupplierId] = useState<string | null>(null);
   const [supplierName, setSupplierName] = useState("");
@@ -65,8 +66,8 @@ export function NewReceivalPage() {
           ? `Receival ${receival.receivalNumber} recorded — GRN generated`
           : `Receival ${receival.receivalNumber} recorded`,
       );
-      qc.invalidateQueries({ queryKey: ["receivals"] });
-      qc.invalidateQueries({ queryKey: ["grns"] });
+      qc.invalidateQueries({ queryKey: qk.receivals() });
+      qc.invalidateQueries({ queryKey: qk.goodsReceipts() });
       navigate(`/receiving/${receival.id}`);
     },
     onError: notifyError,
