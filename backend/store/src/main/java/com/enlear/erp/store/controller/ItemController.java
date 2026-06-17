@@ -3,6 +3,7 @@ package com.enlear.erp.store.controller;
 import com.enlear.erp.shared.web.PageResponse;
 import com.enlear.erp.store.controller.dto.CreateItemRequest;
 import com.enlear.erp.store.controller.dto.StoreResponses.ItemResponse;
+import com.enlear.erp.store.controller.dto.UpdateItemRequest;
 import com.enlear.erp.store.service.ItemService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,6 +55,12 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ItemResponse get(@PathVariable UUID id) {
         return ItemResponse.from(items.getItem(id));
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ItemResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateItemRequest request) {
+        return ItemResponse.from(items.updateItem(id, request.toCommand()));
     }
 
     @DeleteMapping("/{id}")

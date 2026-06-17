@@ -69,4 +69,16 @@ public class SupplierService {
     public List<SupplierItem> listItemsForSupplier(UUID supplierId) {
         return supplierItems.findBySupplierId(supplierId);
     }
+
+    public Supplier activate(UUID id) {
+        Supplier supplier = getSupplier(id);
+        supplier.activate();
+        return suppliers.save(supplier);
+    }
+
+    public Supplier deactivate(UUID id) {
+        Supplier supplier = getSupplier(id);
+        supplier.deactivate();
+        return suppliers.save(supplier);
+    }
 }

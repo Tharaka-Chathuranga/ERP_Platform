@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     boolean existsByUsername(String username);
 
     List<User> findByDepartmentOrderByUsername(String department);
+
+    /** Number of enabled users holding the given role — used to protect the last admin. */
+    long countByRoleAndEnabledTrue(String role);
 }

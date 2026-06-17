@@ -3,6 +3,7 @@ package com.enlear.erp.store.service;
 import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import com.enlear.erp.store.service.command.CreateItemCommand;
+import com.enlear.erp.store.service.command.UpdateItemCommand;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.model.Item;
 import java.util.UUID;
@@ -46,6 +47,13 @@ public class ItemService {
                     search, search, pageable);
         }
         return items.findAll(pageable);
+    }
+
+    public Item updateItem(UUID id, UpdateItemCommand cmd) {
+        Item item = getItem(id);
+        item.updateDetails(cmd.name(), cmd.description(), cmd.category(), cmd.reorderLevel(),
+                cmd.criticalItem(), cmd.approvalRequiredForIssue());
+        return items.save(item);
     }
 
     public void deactivateItem(UUID id) {
