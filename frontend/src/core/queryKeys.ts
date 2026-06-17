@@ -28,6 +28,10 @@ export const qk = {
   onHand: (itemId: string) => ["item", itemId, "on-hand"] as const,
   movements: (itemId: string) => ["item", itemId, "movements"] as const,
 
+  // ── Stock movements (cross-item reporting) ──
+  allMovements: () => ["movements"] as const,
+  movementSummary: () => ["movements", "summary"] as const,
+
   // ── Suppliers ──
   suppliers: () => ["suppliers"] as const,
   supplier: (id: string) => ["supplier", id] as const,

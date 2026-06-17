@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { api, getToken, setToken } from "@core/http/client";
 import type { LoginResponse } from "@core/types";
 
@@ -6,6 +6,25 @@ interface StoredUser {
   userId: string;
   username: string;
   role: string;
+}
+
+const USER_KEY = "erp.user";
+
+/**
+ * Restore a previously stored session synchronously, so it's present on the
+ * very first render. Doing this in a useEffect instead would leave the first
+ * render unauthenticated and bounce the user to /login on every refresh.
+ */
+function restoreUser(): StoredUser | null {
+  if (!getToken()) return null;
+  const cached = localStorage.getItem(USER_KEY);
+  if (!cached) return null;
+  try {
+    return JSON.parse(cached) as StoredUser;
+  } catch {
+    localStorage.removeItem(USER_KEY);
+    return null;
+  }
 }
 
 interface AuthState {
@@ -19,19 +38,9 @@ interface AuthState {
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
-const USER_KEY = "erp.user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<StoredUser | null>(null);
-
-  // Restore a previously stored session on first load.
-  useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const cached = localStorage.getItem(USER_KEY);
-      if (cached) setUser(JSON.parse(cached) as StoredUser);
-    }
-  }, []);
+  const [user, setUser] = useState<StoredUser | null>(restoreUser);
 
   async function login(username: string, password: string) {
     const { data } = await api.post<LoginResponse>("/auth/login", { username, password });

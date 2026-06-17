@@ -68,6 +68,13 @@ export interface StockMovement {
   occurredAt: string;
 }
 
+/** Received vs issued totals for a single item. */
+export interface ItemMovementSummary {
+  itemId: string;
+  received: number;
+  issued: number;
+}
+
 // ── Suppliers ──
 export type SupplierStatus = "ACTIVE" | "INACTIVE";
 

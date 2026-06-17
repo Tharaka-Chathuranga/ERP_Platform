@@ -4,9 +4,8 @@ import { IssueListPage, NewIssuePage, IssueDetailPage } from "./goods-issuing";
 import { ItemsPage, SuppliersPage } from "./inventory";
 import { DeviationBoardPage, NewDeviationPage, DeviationDetailPage } from "./defects";
 import { RequestListPage, RequestDetailPage } from "./borrow-requests";
+import { StockMovementsPage, StockMovementDetailPage } from "./stock-movements";
 
-/** Route subtree owned by the Store management section. The app shell mounts
- *  this under the authenticated AppLayout — the section decides its own paths. */
 export const storeRoutes = (
   <>
     <Route path="receiving" element={<ReceivingListPage />} />
@@ -23,6 +22,9 @@ export const storeRoutes = (
     <Route path="defects" element={<DeviationBoardPage />} />
     <Route path="defects/new" element={<NewDeviationPage />} />
     <Route path="defects/:id" element={<DeviationDetailPage />} />
+
+    <Route path="movements" element={<StockMovementsPage />} />
+    <Route path="movements/detail" element={<StockMovementDetailPage />} />
 
     <Route path="requests" element={<RequestListPage />} />
     <Route path="requests/:id" element={<RequestDetailPage />} />

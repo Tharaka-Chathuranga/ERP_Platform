@@ -52,4 +52,9 @@ public final class StoreResponses {
                     m.getOccurredAt());
         }
     }
+
+    /** Received (RECEIPT) vs issued (ISSUE) totals for a single item. */
+    public record ItemMovementSummaryResponse(
+            UUID itemId, BigDecimal received, BigDecimal issued) {
+    }
 }
