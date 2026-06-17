@@ -1,9 +1,16 @@
 import { useMemo, useState } from "react";
-import { Alert, Grid, Group, SegmentedControl, SimpleGrid } from "@mantine/core";
+import { Alert, Grid, SegmentedControl, SimpleGrid } from "@mantine/core";
 import { AreaChart, BarChart } from "@mantine/charts";
-import { IconInfoCircle } from "@tabler/icons-react";
+import {
+  IconArrowsExchange,
+  IconInfoCircle,
+  IconPackageExport,
+  IconPackageImport,
+  IconTrendingUp,
+} from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@ui/layout/PageHeader";
+import { StatCard } from "@ui/feedback/StatCard";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { useCriticalItems, useItemCodes } from "@core/hooks/useLookups";
@@ -15,7 +22,9 @@ import {
   inPeriod,
   type Period,
 } from "./movementStats";
-import { MovementLogNavCard, SectionCard, SummaryCard, TopItemsCard } from "./MovementCards";
+import { MovementLogNavCard, SectionCard, TopItemsCard } from "./MovementCards";
+
+const fmt = (n: number) => n.toLocaleString();
 
 const PERIODS: { label: string; value: Period }[] = [
   { label: "This week", value: "week" },
@@ -50,14 +59,16 @@ export function StockMovementsPage() {
 
   return (
     <div>
-      <Group justify="space-between" align="center" mb="md" wrap="wrap">
-        <PageHeader title="Stock Movements" />
-        <SegmentedControl
-          value={period}
-          onChange={(v) => setPeriod(v as Period)}
-          data={PERIODS}
-        />
-      </Group>
+      <PageHeader
+        title="Stock Movements"
+        actions={
+          <SegmentedControl
+            value={period}
+            onChange={(v) => setPeriod(v as Period)}
+            data={PERIODS}
+          />
+        }
+      />
 
       {truncated && (
         <Alert
@@ -65,7 +76,7 @@ export function StockMovementsPage() {
           variant="light"
           radius="md"
           icon={<IconInfoCircle size={18} />}
-          mb="md"
+          mb="lg"
         >
           Showing the latest {fetched.toLocaleString()} of {total.toLocaleString()} movements.
           Stats reflect that slice.
@@ -79,7 +90,37 @@ export function StockMovementsPage() {
         isEmpty={stats.totals.count === 0}
         empty={<EmptyState title={`No movements ${periodLabel}`} description="Receiving and issuing stock records movements here." />}
       >
-        <SimpleGrid cols={{ base: 1, lg: 3 }} mb="xl">
+        {/* SECTION 1 — KPI tiles */}
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
+          <StatCard
+            label="Movements"
+            value={fmt(stats.totals.count)}
+            icon={<IconArrowsExchange size={22} />}
+            color="brand"
+            hint={`${fmt(stats.totals.itemsMoved)} items moved`}
+          />
+          <StatCard
+            label="Total in"
+            value={fmt(stats.totals.in)}
+            icon={<IconPackageImport size={22} />}
+            color="teal"
+          />
+          <StatCard
+            label="Total out"
+            value={fmt(stats.totals.out)}
+            icon={<IconPackageExport size={22} />}
+            color="red"
+          />
+          <StatCard
+            label="Net change"
+            value={`${stats.totals.net > 0 ? "+" : ""}${fmt(stats.totals.net)}`}
+            icon={<IconTrendingUp size={22} />}
+            color={stats.totals.net >= 0 ? "teal" : "red"}
+          />
+        </SimpleGrid>
+
+        {/* SECTION 2 — Top items */}
+        <SimpleGrid cols={{ base: 1, lg: 2 }} mb="lg">
           <TopItemsCard
             title="Top 5 moved items"
             subtitle="Busiest items — critical or not."
@@ -94,11 +135,10 @@ export function StockMovementsPage() {
             itemCode={itemCode}
             emptyTitle="No critical items moved"
           />
-          <SummaryCard totals={stats.totals} />
         </SimpleGrid>
 
-        {/* SECTION 2 — Trends */}
-        <Grid mb="xl">
+        {/* SECTION 3 — Trends */}
+        <Grid mb="lg">
           <Grid.Col span={{ base: 12, lg: 6 }}>
             <SectionCard title="In vs out over time" subtitle={`Daily inflow and outflow, ${periodLabel}.`}>
               {stats.byDay.length === 0 ? (
@@ -139,7 +179,7 @@ export function StockMovementsPage() {
           </Grid.Col>
         </Grid>
 
-        {/* SECTION 3 — Detail log (own page) */}
+        {/* SECTION 4 — Detail log (own page) */}
         <MovementLogNavCard to="/movements/detail" count={total} />
       </QueryBoundary>
     </div>

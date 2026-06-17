@@ -1,9 +1,10 @@
 import { Badge, Card, Group, Stack, Text, ThemeIcon } from "@mantine/core";
+import { useHover } from "@mantine/hooks";
 import { IconArrowRight, IconClipboardList } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import type { ItemMovement, MovementTotals } from "./movementStats";
+import type { ItemMovement } from "./movementStats";
 
 const fmt = (n: number) => n.toLocaleString();
 
@@ -18,7 +19,7 @@ export function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <Card withBorder radius="md" padding="lg" h="100%">
+    <Card withBorder radius="md" padding="lg" shadow="xs" h="100%">
       <Text fw={600} mb={subtitle ? 4 : "md"}>
         {title}
       </Text>
@@ -29,6 +30,41 @@ export function SectionCard({
       )}
       {children}
     </Card>
+  );
+}
+
+/** One item row in the mini-table: a full-bleed hover highlight that ignores
+ *  the card padding, separated from the row above by a hairline rule. */
+function TopItemRow({ row, itemCode }: { row: ItemMovement; itemCode: (id: string) => string }) {
+  const { hovered, ref } = useHover();
+  return (
+    <Group
+      ref={ref}
+      justify="space-between"
+      py={10}
+      style={{
+        marginInline: "calc(-1 * var(--mantine-spacing-lg))",
+        paddingInline: "var(--mantine-spacing-lg)",
+        borderTop: "1px solid var(--mantine-color-default-border)",
+        backgroundColor: hovered ? "var(--mantine-color-default-hover)" : "transparent",
+        transition: "background-color 120ms ease",
+      }}
+    >
+      <Text fw={500}>{itemCode(row.itemId)}</Text>
+      <Group gap="xl">
+        <Text c="teal.7" w={48} ta="right" style={{ fontVariantNumeric: "tabular-nums" }}>
+          {fmt(row.in)}
+        </Text>
+        <Text c="red.7" w={48} ta="right" style={{ fontVariantNumeric: "tabular-nums" }}>
+          {fmt(row.out)}
+        </Text>
+        <Group w={56} justify="flex-end">
+          <Badge color={row.ratio >= 1 ? "red" : "gray"} variant="light" radius="sm">
+            {Number.isFinite(row.ratio) ? row.ratio.toFixed(2) : "∞"}
+          </Badge>
+        </Group>
+      </Group>
+    </Group>
   );
 }
 
@@ -52,7 +88,7 @@ export function TopItemsCard({
         <EmptyState title={emptyTitle} />
       ) : (
         <Stack gap={0}>
-          <Group justify="space-between" px={4} pb={6}>
+          <Group justify="space-between" pb={8}>
             <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
               Item
             </Text>
@@ -69,28 +105,7 @@ export function TopItemsCard({
             </Group>
           </Group>
           {rows.map((r) => (
-            <Group
-              key={r.itemId}
-              justify="space-between"
-              px={4}
-              py={8}
-              style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
-            >
-              <Text fw={500}>{itemCode(r.itemId)}</Text>
-              <Group gap="xl">
-                <Text c="teal.7" w={48} ta="right">
-                  {fmt(r.in)}
-                </Text>
-                <Text c="red.7" w={48} ta="right">
-                  {fmt(r.out)}
-                </Text>
-                <Group w={56} justify="flex-end">
-                  <Badge color={r.ratio >= 1 ? "red" : "gray"} variant="light" radius="sm">
-                    {Number.isFinite(r.ratio) ? r.ratio.toFixed(2) : "∞"}
-                  </Badge>
-                </Group>
-              </Group>
-            </Group>
+            <TopItemRow key={r.itemId} row={r} itemCode={itemCode} />
           ))}
         </Stack>
       )}
@@ -98,42 +113,24 @@ export function TopItemsCard({
   );
 }
 
-/** The aggregate counts for the selected period. */
-export function SummaryCard({ totals }: { totals: MovementTotals }) {
-  const rows: { label: string; value: number; color?: string; signed?: boolean }[] = [
-    { label: "Items moved", value: totals.itemsMoved },
-    { label: "Movements", value: totals.count },
-    { label: "Total in", value: totals.in, color: "teal.7" },
-    { label: "Total out", value: totals.out, color: "red.7" },
-    { label: "Net change", value: totals.net, color: totals.net >= 0 ? "teal.7" : "red.7", signed: true },
-  ];
-  return (
-    <SectionCard title="Summary">
-      <Stack gap="sm">
-        {rows.map((r) => (
-          <Group key={r.label} justify="space-between">
-            <Text c="dimmed">{r.label}</Text>
-            <Text fw={700} c={r.color}>
-              {r.signed && r.value > 0 ? "+" : ""}
-              {fmt(r.value)}
-            </Text>
-          </Group>
-        ))}
-      </Stack>
-    </SectionCard>
-  );
-}
-
 /** Clickable card that routes to the full movement-detail log. */
 export function MovementLogNavCard({ to, count }: { to: string; count: number }) {
+  const { hovered, ref } = useHover();
   return (
     <Card
+      ref={ref}
       component={Link}
       to={to}
       withBorder
       radius="md"
       padding="lg"
-      style={{ cursor: "pointer", textDecoration: "none" }}
+      shadow={hovered ? "md" : "xs"}
+      style={{
+        textDecoration: "none",
+        transform: hovered ? "translateY(-2px)" : "none",
+        borderColor: hovered ? "var(--mantine-color-grape-4)" : undefined,
+        transition: "transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease",
+      }}
     >
       <Group justify="space-between" wrap="nowrap">
         <Group wrap="nowrap">
@@ -149,7 +146,16 @@ export function MovementLogNavCard({ to, count }: { to: string; count: number })
             </Text>
           </div>
         </Group>
-        <ThemeIcon color="gray" variant="subtle" size={32} radius="md">
+        <ThemeIcon
+          color="gray"
+          variant="subtle"
+          size={32}
+          radius="md"
+          style={{
+            transform: hovered ? "translateX(4px)" : "none",
+            transition: "transform 150ms ease",
+          }}
+        >
           <IconArrowRight size={20} />
         </ThemeIcon>
       </Group>

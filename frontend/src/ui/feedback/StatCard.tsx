@@ -1,4 +1,5 @@
 import { Card, Group, Text, ThemeIcon } from "@mantine/core";
+import { useHover } from "@mantine/hooks";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -13,29 +14,39 @@ interface StatCardProps {
 
 export function StatCard({ label, value, icon, color = "brand", to, hint }: StatCardProps) {
   const navigate = useNavigate();
+  const { hovered, ref } = useHover();
+  const interactive = Boolean(to);
+  const lifted = interactive && hovered;
+
   return (
     <Card
+      ref={ref}
       withBorder
-      padding="md"
+      padding="lg"
       radius="md"
+      shadow={lifted ? "md" : "xs"}
       onClick={to ? () => navigate(to) : undefined}
-      style={{ cursor: to ? "pointer" : "default" }}
+      style={{
+        cursor: interactive ? "pointer" : "default",
+        transform: lifted ? "translateY(-2px)" : "none",
+        transition: "transform 150ms ease, box-shadow 150ms ease",
+      }}
     >
-      <Group justify="space-between" align="center" wrap="nowrap">
+      <Group justify="space-between" align="flex-start" wrap="nowrap">
         <div style={{ minWidth: 0 }}>
-          <Text size="xs" c="dimmed" tt="uppercase" fw={600} truncate>
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600} truncate style={{ letterSpacing: "0.05em" }}>
             {label}
           </Text>
-          <Text fw={700} size="26px" lh={1.1} mt={2}>
+          <Text fw={700} fz={30} lh={1.1} mt={6} style={{ fontVariantNumeric: "tabular-nums" }}>
             {value}
           </Text>
           {hint && (
-            <Text size="xs" c="dimmed" mt={2} truncate>
+            <Text size="xs" c="dimmed" mt={6} truncate>
               {hint}
             </Text>
           )}
         </div>
-        <ThemeIcon color={color} variant="light" size={36} radius="md">
+        <ThemeIcon color={color} variant="light" size={44} radius="md">
           {icon}
         </ThemeIcon>
       </Group>
