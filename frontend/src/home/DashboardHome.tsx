@@ -17,7 +17,7 @@ import { listItems } from "@store/inventory/items.api";
 import { NAV } from "@nav/nav.registry";
 
 export function DashboardHome() {
-  const { username } = useAuth();
+  const { username, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const pendingIssues = useQuery({
@@ -98,7 +98,7 @@ export function DashboardHome() {
         Sections
       </Text>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-        {NAV.filter((n) => n.to !== "/dashboard").map(({ to, label, icon: Icon, color, description }) => (
+        {NAV.filter((n) => n.to !== "/dashboard" && (!n.adminOnly || isAdmin)).map(({ to, label, icon: Icon, color, description }) => (
           <Card
             key={to}
             withBorder

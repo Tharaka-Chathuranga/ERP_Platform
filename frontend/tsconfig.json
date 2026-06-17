@@ -12,6 +12,7 @@
       "@app/*": ["src/app/*"],
       "@auth/*": ["src/auth/*"],
       "@store/*": ["src/management-section/store/*"],
+      "@admin/*": ["src/management-section/admin/*"],
       "@home/*": ["src/home/*"],
       "@ui/*": ["src/ui/*"],
       "@core/*": ["src/core/*"],

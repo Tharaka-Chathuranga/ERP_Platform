@@ -224,3 +224,71 @@ export interface Page<T> {
   totalPages: number;
   last: boolean;
 }
+
+// ── Admin: stock count-adjustment requests ──
+export type CountAdjustmentStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface CountAdjustmentRequest {
+  id: string;
+  itemId: string;
+  currentQuantity: number;
+  requestedQuantity: number;
+  reason?: string;
+  status: CountAdjustmentStatus;
+  requestedByUserId: string;
+  requestedAt: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+}
+
+// ── Admin: dashboard aggregations ──
+export interface DashboardSummary {
+  activeItemCount: number;
+  inactiveItemCount: number;
+  supplierCount: number;
+  totalInventoryValue: number;
+  lowStockItemCount: number;
+  pendingIssueApprovalCount: number;
+  pendingDeviationCount: number;
+  pendingBorrowRequestCount: number;
+  pendingCountAdjustmentCount: number;
+  receivalCount: number;
+}
+
+export interface LowStockItem {
+  itemId: string;
+  itemCode: string;
+  name: string;
+  unitOfMeasure: string;
+  quantityOnHand: number;
+  reorderLevel: number;
+  criticalItem: boolean;
+}
+
+export interface MovementTrendPoint {
+  /** ISO timestamp at the start of the day bucket. */
+  day: string;
+  received: number;
+  issued: number;
+}
+
+/** A single defective item line flattened out of its deviation request. */
+export interface DeviationItemRow {
+  requestId: string;
+  itemId: string;
+  quantity: number;
+  status: DeviationStatus;
+  stage: DeviationStage;
+  reason?: string;
+  requestedAt: string;
+}
+
+// ── Admin: user management (full view, includes `enabled`) ──
+export interface AdminUser {
+  id: string;
+  username: string;
+  displayName?: string;
+  role: string;
+  department?: string;
+  enabled: boolean;
+}

@@ -16,6 +16,8 @@ export interface NavItem {
   icon: Icon;
   color: string;
   description: string;
+  /** When true, the entry is only shown to administrators. */
+  adminOnly?: boolean;
 }
 
 export const NAV: NavItem[] = [

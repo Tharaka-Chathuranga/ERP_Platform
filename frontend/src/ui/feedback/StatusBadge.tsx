@@ -20,6 +20,7 @@ const COLORS: Record<string, string> = {
   // Item / supplier
   ACTIVE: "green",
   INACTIVE: "gray",
+  CRITICAL: "red",
 };
 
 function label(status?: string): string {

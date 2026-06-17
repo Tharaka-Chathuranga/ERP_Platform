@@ -1,6 +1,8 @@
 import { ActionIcon, Box, Group, NavLink, Stack, Title, Tooltip } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
+import { useAuth } from "@auth/AuthContext";
 import { NAV } from "@nav/nav.registry";
 
 /**
@@ -18,6 +20,11 @@ export function Sidebar({
   onNavigate?: () => void;
 }) {
   const location = useLocation();
+  const { isAdmin } = useAuth();
+
+  // Admin-only entries are hidden from non-administrators; the routes are also
+  // guarded server-side and by RequireAdmin, this just keeps the nav honest.
+  const items = useMemo(() => NAV.filter((n) => !n.adminOnly || isAdmin), [isAdmin]);
 
   return (
     <Box pos="relative" h="100%">
@@ -50,7 +57,7 @@ export function Sidebar({
       </Group>
 
       <Stack gap={4}>
-        {NAV.map(({ to, label, icon: Icon }) => {
+        {items.map(({ to, label, icon: Icon }) => {
           const active = location.pathname === to || location.pathname.startsWith(to + "/");
           const link = (
             <NavLink

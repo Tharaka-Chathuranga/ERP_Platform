@@ -10,6 +10,7 @@ export default defineConfig({
       "@app": r("./src/app"),
       "@auth": r("./src/auth"),
       "@store": r("./src/management-section/store"),
+      "@admin": r("./src/management-section/admin"),
       "@home": r("./src/home"),
       "@ui": r("./src/ui"),
       "@core": r("./src/core"),

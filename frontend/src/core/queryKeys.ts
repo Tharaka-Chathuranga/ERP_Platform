@@ -57,4 +57,18 @@ export const qk = {
   // ── Deviation (defect) requests ──
   deviations: (stage?: string) => filtered("deviations", stage),
   deviation: (id: string) => ["deviation", id] as const,
+
+  // ── Admin: dashboard ──
+  adminSummary: () => ["admin", "summary"] as const,
+  lowStock: () => ["admin", "low-stock"] as const,
+  movementTrend: (days: number) => ["admin", "movement-trend", days] as const,
+  defectItems: (stage?: string) => filtered("admin-defect-items", stage),
+
+  // ── Admin: count-adjustment requests ──
+  countRequests: (status?: string) => filtered("count-requests", status),
+  countRequest: (id: string) => ["count-request", id] as const,
+
+  // ── Admin: user management ──
+  adminUsers: () => ["admin", "users"] as const,
+  adminUser: (id: string) => ["admin", "user", id] as const,
 } as const;
