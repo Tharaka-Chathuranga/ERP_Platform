@@ -15,8 +15,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ItemRepository extends JpaRepository<Item, UUID> {
 
-    Optional<Item> findByItemCode(String itemCode);
-
     boolean existsByItemCode(String itemCode);
 
     Page<Item> findByNameContainingIgnoreCaseOrItemCodeContainingIgnoreCase(
