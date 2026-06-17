@@ -16,4 +16,6 @@ public interface IssueRepository extends JpaRepository<Issue, UUID> {
     Page<Issue> findByStatusOrderByCreatedAtDesc(IssueStatus status, Pageable pageable);
 
     Page<Issue> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    long countByStatus(IssueStatus status);
 }

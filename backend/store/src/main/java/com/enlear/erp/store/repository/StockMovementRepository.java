@@ -3,6 +3,7 @@ package com.enlear.erp.store.repository;
 import com.enlear.erp.store.model.MovementType;
 import com.enlear.erp.store.model.StockMovement;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,31 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, UU
     /** Projection for {@link #sumByItem}. */
     interface ItemMovementTotals {
         UUID getItemId();
+
+        BigDecimal getReceived();
+
+        BigDecimal getIssued();
+    }
+
+    /**
+     * Received vs issued totals bucketed by day since {@code since}, oldest day
+     * first — the data behind the movement-trend chart. Native query because the
+     * day bucketing ({@code date_trunc}) is database-specific.
+     */
+    @Query(value = """
+            select date_trunc('day', occurred_at) as day,
+                   coalesce(sum(case when type = 'RECEIPT' then quantity else 0 end), 0) as received,
+                   coalesce(sum(case when type = 'ISSUE' then quantity else 0 end), 0) as issued
+            from store.stock_movements
+            where occurred_at >= :since
+            group by date_trunc('day', occurred_at)
+            order by day
+            """, nativeQuery = true)
+    List<DailyMovementTotals> dailyTotalsSince(@Param("since") Instant since);
+
+    /** Projection for {@link #dailyTotalsSince}. */
+    interface DailyMovementTotals {
+        Instant getDay();
 
         BigDecimal getReceived();
 

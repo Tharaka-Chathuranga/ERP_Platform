@@ -1,7 +1,9 @@
 package com.enlear.erp.store.repository;
 
 import com.enlear.erp.store.model.Item;
+import com.enlear.erp.store.model.ItemStatus;
 import jakarta.persistence.LockModeType;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +28,23 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from Item i where i.id = :id")
     Optional<Item> findByIdForUpdate(@Param("id") UUID id);
+
+    long countByStatus(ItemStatus status);
+
+    /** Total value of active stock on hand (quantity × unit price). */
+    @Query("select coalesce(sum(i.quantityOnHand * i.unitPrice), 0) from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE")
+    BigDecimal totalInventoryValue();
+
+    @Query("select count(i) from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.quantityOnHand < i.reorderLevel")
+    long countLowStock();
+
+    /** Active items below their reorder level, biggest shortfall first. */
+    @Query("select i from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.quantityOnHand < i.reorderLevel "
+            + "order by (i.quantityOnHand - i.reorderLevel) asc")
+    List<Item> findLowStock();
 }

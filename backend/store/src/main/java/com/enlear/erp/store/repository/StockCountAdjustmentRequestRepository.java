@@ -12,4 +12,6 @@ public interface StockCountAdjustmentRequestRepository
     List<StockCountAdjustmentRequest> findAllByOrderByRequestedAtDesc();
 
     List<StockCountAdjustmentRequest> findByStatusOrderByRequestedAtDesc(CountAdjustmentStatus status);
+
+    long countByStatus(CountAdjustmentStatus status);
 }
