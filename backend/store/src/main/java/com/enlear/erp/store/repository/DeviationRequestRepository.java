@@ -15,7 +15,11 @@ public interface DeviationRequestRepository extends JpaRepository<DeviationReque
 
     List<DeviationRequest> findByStageOrderByRequestedAtDesc(DeviationStage stage);
 
+    List<DeviationRequest> findByStatusOrderByRequestedAtDesc(DeviationStatus status);
+
     long countByStatus(DeviationStatus status);
+
+    long countByStage(DeviationStage stage);
 
     /** Every defective item line across all deviation requests, newest first. */
     @Query("select r.id as requestId, di.itemId as itemId, di.quantity as quantity, "
