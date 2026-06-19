@@ -1,6 +1,7 @@
 import { api } from "@core/http/client";
 import type {
   Item,
+  LowStockItem,
   MovementType,
   OnHand,
   Page,
@@ -43,6 +44,30 @@ export async function getItem(id: string): Promise<Item> {
 
 export async function createItem(input: CreateItemInput): Promise<Item> {
   const { data } = await api.post<Item>("/store/items", input);
+  return data;
+}
+
+export interface UpdateItemInput {
+  name: string;
+  description?: string;
+  category?: string;
+  reorderLevel: number;
+  criticalItem: boolean;
+  approvalRequiredForIssue: boolean;
+}
+
+export async function updateItem(id: string, input: UpdateItemInput): Promise<Item> {
+  const { data } = await api.patch<Item>(`/store/items/${id}`, input);
+  return data;
+}
+
+export async function deactivateItem(id: string): Promise<void> {
+  await api.delete(`/store/items/${id}`);
+}
+
+/** Active items below their reorder level — the shared low-stock warning list. */
+export async function getLowStockItems(): Promise<LowStockItem[]> {
+  const { data } = await api.get<LowStockItem[]>("/store/items/low-stock");
   return data;
 }
 

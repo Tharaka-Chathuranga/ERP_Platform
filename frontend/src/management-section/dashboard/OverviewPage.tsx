@@ -10,19 +10,20 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useItemLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
+import { getLowStockItems } from "@store/inventory/items.api";
 import { getMovementSummary } from "@store/stock-movements/movements.api";
 import { DataTable } from "@ui/data/DataTable";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { StatCard } from "@ui/feedback/StatCard";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { LowStockItem } from "@core/types";
-import { getDashboardSummary, getLowStockItems, getMovementTrend } from "./dashboard.api";
+import { getDashboardSummary, getMovementTrend } from "./dashboard.api";
 import { MovementTrendChart } from "./MovementTrendChart";
 import { TopMoversChart } from "./TopMoversChart";
 
 const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
 
-export function AdminOverviewPage() {
+export function OverviewPage() {
   const itemLabel = useItemLabels();
 
   const summary = useQuery({ queryKey: qk.adminSummary(), queryFn: getDashboardSummary });
@@ -42,14 +43,14 @@ export function AdminOverviewPage() {
           value={s?.activeItemCount ?? 0}
           icon={<IconBuildingWarehouse size={22} />}
           color="brand"
-          to="/admin/store"
+          to="/store"
         />
         <StatCard
           label="Low stock"
           value={s?.lowStockItemCount ?? 0}
           icon={<IconAlertTriangle size={22} />}
           color="red"
-          to="/admin/store"
+          to="/warnings"
           hint="Below reorder level"
         />
         <StatCard
@@ -69,14 +70,14 @@ export function AdminOverviewPage() {
           value={s?.pendingDeviationCount ?? 0}
           icon={<IconBug size={22} />}
           color="grape"
-          to="/admin/store"
+          to="/defects"
         />
         <StatCard
           label="Count requests"
           value={s?.pendingCountAdjustmentCount ?? 0}
           icon={<IconClipboardCheck size={22} />}
           color="indigo"
-          to="/admin/store"
+          to="/count-requests"
           hint="Awaiting approval"
         />
       </SimpleGrid>

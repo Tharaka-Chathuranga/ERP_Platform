@@ -7,7 +7,7 @@ import { DataTable } from "@ui/data/DataTable";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { AdminUser } from "@core/types";
-import { listAdminUsers } from "./users.admin.api";
+import { listUsers } from "./users.api";
 import { UserFormModal } from "./UserFormModal";
 
 export function UserListPage() {
@@ -15,7 +15,7 @@ export function UserListPage() {
   const [creating, setCreating] = useState(false);
   const { data, isLoading, error } = useQuery({
     queryKey: qk.adminUsers(),
-    queryFn: listAdminUsers,
+    queryFn: listUsers,
   });
 
   return (
@@ -30,7 +30,7 @@ export function UserListPage() {
         loading={isLoading}
         error={error}
         rowKey={(r) => r.id}
-        onRowClick={(r) => navigate(`/admin/users/${r.id}`)}
+        onRowClick={(r) => navigate(`/users/${r.id}`)}
         columns={[
           { header: "Username", render: (r) => r.username, emphasis: true },
           { header: "Name", render: (r) => r.displayName ?? "—" },

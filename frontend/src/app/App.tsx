@@ -1,22 +1,16 @@
-import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import type { ReactNode } from "react";
 import { useAuth } from "@auth/AuthContext";
 import { AppLayout } from "@ui/layout/AppLayout";
 import { LoginPage } from "@screens/LoginPage";
 import { DashboardHome } from "@home/DashboardHome";
 import { storeRoutes } from "@store/store.routes";
-import { adminRoutes } from "@admin/admin.routes";
+import { usersRoutes } from "@users/users.routes";
+import { dashboardRoutes } from "@dashboard/dashboard.routes";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-}
-
-/** Layout-route guard for the admin section: non-admins are bounced to the
- *  dashboard. The backend enforces the same with @PreAuthorize. */
-function RequireAdmin() {
-  const { isAdmin } = useAuth();
-  return isAdmin ? <Outlet /> : <Navigate to="/dashboard" replace />;
 }
 
 export default function App() {
@@ -34,11 +28,11 @@ export default function App() {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardHome />} />
 
-        {/* Each management section contributes its own route subtree */}
+        {/* Each management feature contributes its own route subtree;
+            permission-gated routes guard themselves via RequirePermission. */}
         {storeRoutes}
-
-        {/* Admin section, gated to administrators */}
-        <Route element={<RequireAdmin />}>{adminRoutes}</Route>
+        {usersRoutes}
+        {dashboardRoutes}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

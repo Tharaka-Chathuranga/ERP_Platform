@@ -57,4 +57,15 @@ public final class StoreResponses {
     public record ItemMovementSummaryResponse(
             UUID itemId, BigDecimal received, BigDecimal issued) {
     }
+
+    /** An active item whose on-hand has fallen below its reorder level. */
+    public record LowStockItemResponse(
+            UUID itemId, String itemCode, String name, String unitOfMeasure,
+            BigDecimal quantityOnHand, BigDecimal reorderLevel, boolean criticalItem) {
+
+        public static LowStockItemResponse from(Item i) {
+            return new LowStockItemResponse(i.getId(), i.getItemCode(), i.getName(),
+                    i.getUnitOfMeasure(), i.getQuantityOnHand(), i.getReorderLevel(), i.isCriticalItem());
+        }
+    }
 }

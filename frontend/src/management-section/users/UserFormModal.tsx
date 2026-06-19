@@ -5,7 +5,7 @@ import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { DepartmentSelect } from "@ui/primitives/DepartmentSelect";
 import type { AdminUser } from "@core/types";
-import { createUser, updateUser } from "./users.admin.api";
+import { createUser, updateUser } from "./users.api";
 
 const ROLES = [
   { value: "ADMIN", label: "Admin" },
@@ -95,13 +95,7 @@ export function UserFormModal({ opened, onClose, user }: UserFormModalProps) {
           value={displayName}
           onChange={(e) => setDisplayName(e.currentTarget.value)}
         />
-        <Select
-          label="Role"
-          data={ROLES}
-          value={role}
-          onChange={setRole}
-          allowDeselect={false}
-        />
+        <Select label="Role" data={ROLES} value={role} onChange={setRole} allowDeselect={false} />
         <DepartmentSelect label="Department" value={department} onChange={setDepartment} />
         <Group justify="flex-end">
           <Button variant="default" onClick={onClose}>

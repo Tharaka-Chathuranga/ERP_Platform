@@ -3,7 +3,7 @@ import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
-import { createSupplier } from "@store/inventory/suppliers.api";
+import { createSupplier } from "./suppliers.api";
 
 /** Creates a new supplier. */
 export function SupplierFormModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {

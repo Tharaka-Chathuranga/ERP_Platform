@@ -1,7 +1,7 @@
 import { api } from "@core/http/client";
 import type { AdminUser } from "@core/types";
 
-// ── Admin user management. Mirrors /api/admin/users. ──
+// ── User management. Mirrors /api/admin/users. ──
 
 export interface CreateUserInput {
   username: string;
@@ -17,12 +17,12 @@ export interface UpdateUserInput {
   department?: string;
 }
 
-export async function listAdminUsers(): Promise<AdminUser[]> {
+export async function listUsers(): Promise<AdminUser[]> {
   const { data } = await api.get<AdminUser[]>("/admin/users");
   return data;
 }
 
-export async function getAdminUser(id: string): Promise<AdminUser> {
+export async function getUser(id: string): Promise<AdminUser> {
   const { data } = await api.get<AdminUser>(`/admin/users/${id}`);
   return data;
 }

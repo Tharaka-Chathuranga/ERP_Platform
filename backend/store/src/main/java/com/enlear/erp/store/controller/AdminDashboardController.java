@@ -2,7 +2,6 @@ package com.enlear.erp.store.controller;
 
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DashboardSummaryResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DeviationItemRowResponse;
-import com.enlear.erp.store.controller.dto.AdminDashboardResponses.LowStockItemResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.MovementTrendPointResponse;
 import com.enlear.erp.store.model.DeviationStage;
 import com.enlear.erp.store.service.AdminDashboardQueryService;
@@ -31,11 +30,6 @@ public class AdminDashboardController {
     @GetMapping("/summary")
     public DashboardSummaryResponse summary() {
         return dashboard.summary();
-    }
-
-    @GetMapping("/low-stock")
-    public List<LowStockItemResponse> lowStock() {
-        return dashboard.lowStockItems();
     }
 
     @GetMapping("/movement-trend")

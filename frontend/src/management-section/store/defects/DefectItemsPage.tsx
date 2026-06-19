@@ -6,13 +6,14 @@ import { useItemLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { DataTable } from "@ui/data/DataTable";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
+import { PageHeader } from "@ui/layout/PageHeader";
 import type { DeviationItemRow, DeviationStage } from "@core/types";
-import { getDefectItems } from "../overview/dashboard.api";
+import { getDefectItems } from "./deviations.api";
 
 const FILTERS = ["ALL", "INCOMING", "IN_PROGRESS", "FINAL"] as const;
 
 /** Flattened view of every defective item line across all deviation requests. */
-export function DefectItemsTab() {
+export function DefectItemsPage() {
   const itemLabel = useItemLabels();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("ALL");
 
@@ -23,7 +24,8 @@ export function DefectItemsTab() {
   });
 
   return (
-    <>
+    <div>
+      <PageHeader title="Defect items" />
       <Group mb="md">
         <SegmentedControl
           value={filter}
@@ -47,6 +49,6 @@ export function DefectItemsTab() {
           { header: "Status", render: (r) => <StatusBadge status={r.status} /> },
         ]}
       />
-    </>
+    </div>
   );
 }

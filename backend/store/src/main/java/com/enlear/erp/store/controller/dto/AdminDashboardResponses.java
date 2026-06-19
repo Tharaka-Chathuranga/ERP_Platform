@@ -2,7 +2,6 @@ package com.enlear.erp.store.controller.dto;
 
 import com.enlear.erp.store.model.DeviationStage;
 import com.enlear.erp.store.model.DeviationStatus;
-import com.enlear.erp.store.model.Item;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
@@ -25,17 +24,6 @@ public final class AdminDashboardResponses {
             long pendingBorrowRequestCount,
             long pendingCountAdjustmentCount,
             long receivalCount) {
-    }
-
-    /** An active item whose on-hand has fallen below its reorder level. */
-    public record LowStockItemResponse(
-            UUID itemId, String itemCode, String name, String unitOfMeasure,
-            BigDecimal quantityOnHand, BigDecimal reorderLevel, boolean criticalItem) {
-
-        public static LowStockItemResponse from(Item i) {
-            return new LowStockItemResponse(i.getId(), i.getItemCode(), i.getName(),
-                    i.getUnitOfMeasure(), i.getQuantityOnHand(), i.getReorderLevel(), i.isCriticalItem());
-        }
     }
 
     /** Received vs issued totals for a single day. */

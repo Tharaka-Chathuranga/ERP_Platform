@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatCard } from "@ui/feedback/StatCard";
 import { useAuth } from "@auth/AuthContext";
+import { useCan } from "@auth/useCan";
 import { listIssues } from "@store/goods-issuing/issuing.api";
 import { listDeviations } from "@store/defects/deviations.api";
 import { listReceivals } from "@store/goods-receiving/receiving.api";
@@ -17,7 +18,8 @@ import { listItems } from "@store/inventory/items.api";
 import { NAV } from "@nav/nav.registry";
 
 export function DashboardHome() {
-  const { username, isAdmin } = useAuth();
+  const { username } = useAuth();
+  const can = useCan();
   const navigate = useNavigate();
 
   const pendingIssues = useQuery({
@@ -98,7 +100,7 @@ export function DashboardHome() {
         Sections
       </Text>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-        {NAV.filter((n) => n.to !== "/dashboard" && (!n.adminOnly || isAdmin)).map(({ to, label, icon: Icon, color, description }) => (
+        {NAV.filter((n) => n.to !== "/dashboard" && (!n.requiredPermission || can(n.requiredPermission))).map(({ to, label, icon: Icon, color, description }) => (
           <Card
             key={to}
             withBorder

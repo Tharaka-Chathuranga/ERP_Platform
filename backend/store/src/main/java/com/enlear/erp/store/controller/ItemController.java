@@ -3,10 +3,12 @@ package com.enlear.erp.store.controller;
 import com.enlear.erp.shared.web.PageResponse;
 import com.enlear.erp.store.controller.dto.CreateItemRequest;
 import com.enlear.erp.store.controller.dto.StoreResponses.ItemResponse;
+import com.enlear.erp.store.controller.dto.StoreResponses.LowStockItemResponse;
 import com.enlear.erp.store.controller.dto.UpdateItemRequest;
 import com.enlear.erp.store.service.ItemService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -49,6 +51,13 @@ public class ItemController {
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "itemCode") Pageable pageable) {
         return PageResponse.of(items.listItems(search, pageable), ItemResponse::from);
+    }
+
+    /** Active items below their reorder level — the shared low-stock warning list. */
+    @GetMapping("/low-stock")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    public List<LowStockItemResponse> lowStock() {
+        return items.lowStockItems().stream().map(LowStockItemResponse::from).toList();
     }
 
     @GetMapping("/{id}")

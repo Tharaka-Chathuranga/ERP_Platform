@@ -1,13 +1,5 @@
 import { useState } from "react";
-import {
-  Anchor,
-  Button,
-  Card,
-  Group,
-  Modal,
-  PasswordInput,
-  Stack,
-} from "@mantine/core";
+import { Anchor, Button, Card, Group, Modal, PasswordInput, Stack } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,12 +10,7 @@ import { DefinitionList } from "@ui/data/DefinitionList";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
-import {
-  disableUser,
-  enableUser,
-  getAdminUser,
-  resetUserPassword,
-} from "./users.admin.api";
+import { disableUser, enableUser, getUser, resetUserPassword } from "./users.api";
 import { UserFormModal } from "./UserFormModal";
 
 export function UserDetailPage() {
@@ -36,7 +23,7 @@ export function UserDetailPage() {
 
   const { data: user, isLoading, error } = useQuery({
     queryKey: qk.adminUser(id),
-    queryFn: () => getAdminUser(id),
+    queryFn: () => getUser(id),
     enabled: !!id,
   });
 
@@ -94,7 +81,7 @@ export function UserDetailPage() {
         component="button"
         type="button"
         mb="md"
-        onClick={() => navigate("/admin/users")}
+        onClick={() => navigate("/users")}
         style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
       >
         <IconArrowLeft size={16} /> Back to users

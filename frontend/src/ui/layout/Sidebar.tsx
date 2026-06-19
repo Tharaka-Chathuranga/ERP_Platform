@@ -2,13 +2,17 @@ import { ActionIcon, Box, Group, NavLink, Stack, Title, Tooltip } from "@mantine
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-import { useAuth } from "@auth/AuthContext";
-import { NAV } from "@nav/nav.registry";
+import { useCan } from "@auth/useCan";
+import { GROUP_META, NAV, type NavItem } from "@nav/nav.registry";
+
+type NavBlock =
+  | { kind: "leaf"; item: NavItem }
+  | { kind: "group"; name: string; items: NavItem[] };
 
 /**
- * Main navigation. When `collapsed` the labels are hidden and each entry shrinks
- * to an icon rail with a hover tooltip; otherwise it shows the full icon+label.
- * The expand/minimize toggle floats on the sidebar's right edge at the top.
+ * Main navigation. Entries sharing a `group` are nested under one collapsible
+ * parent so a feature area (e.g. Store) shows as a single item with sub-options
+ * instead of many flat rows. When `collapsed`, the rail flattens to leaf icons.
  */
 export function Sidebar({
   collapsed = false,
@@ -20,11 +24,46 @@ export function Sidebar({
   onNavigate?: () => void;
 }) {
   const location = useLocation();
-  const { isAdmin } = useAuth();
+  const can = useCan();
 
-  // Admin-only entries are hidden from non-administrators; the routes are also
-  // guarded server-side and by RequireAdmin, this just keeps the nav honest.
-  const items = useMemo(() => NAV.filter((n) => !n.adminOnly || isAdmin), [isAdmin]);
+  // Only entries the user is allowed to see.
+  const items = useMemo(
+    () => NAV.filter((n) => !n.requiredPermission || can(n.requiredPermission)),
+    [can],
+  );
+
+  // Arrange into ordered blocks: ungrouped leaves stay inline; grouped entries
+  // collapse into a single parent emitted at the position of their first member.
+  const blocks = useMemo<NavBlock[]>(() => {
+    const out: NavBlock[] = [];
+    const seen = new Set<string>();
+    for (const item of items) {
+      if (!item.group) {
+        out.push({ kind: "leaf", item });
+      } else if (!seen.has(item.group)) {
+        seen.add(item.group);
+        out.push({
+          kind: "group",
+          name: item.group,
+          items: items.filter((i) => i.group === item.group),
+        });
+      }
+    }
+    return out;
+  }, [items]);
+
+  // The active entry is the most specific (longest) matching path, so e.g.
+  // /store/suppliers highlights "Suppliers" rather than also "Items" (/store).
+  const activeTo = useMemo(() => {
+    let best: string | null = null;
+    for (const { to } of items) {
+      const matches = location.pathname === to || location.pathname.startsWith(to + "/");
+      if (matches && to.length > (best?.length ?? -1)) best = to;
+    }
+    return best;
+  }, [items, location.pathname]);
+
+  const isActive = (to: string) => to === activeTo;
 
   return (
     <Box pos="relative" h="100%">
@@ -56,38 +95,73 @@ export function Sidebar({
         </Title>
       </Group>
 
-      <Stack gap={4}>
-        {items.map(({ to, label, icon: Icon }) => {
-          const active = location.pathname === to || location.pathname.startsWith(to + "/");
-          const link = (
-            <NavLink
-              key={to}
-              component={RouterNavLink}
-              to={to}
-              label={collapsed ? undefined : label}
-              active={active}
-              leftSection={<Icon size={20} />}
-              onClick={onNavigate}
-              variant="light"
-              aria-label={label}
-              styles={
-                collapsed
-                  ? { section: { marginInlineEnd: 0 }, body: { display: "none" } }
-                  : undefined
-              }
-              style={collapsed ? { justifyContent: "center" } : undefined}
-            />
-          );
-
-          return collapsed ? (
+      {/* Collapsed rail: flatten everything to leaf icons with tooltips. */}
+      {collapsed ? (
+        <Stack gap={4}>
+          {items.map(({ to, label, icon: Icon }) => (
             <Tooltip key={to} label={label} position="right" withArrow>
-              {link}
+              <NavLink
+                component={RouterNavLink}
+                to={to}
+                active={isActive(to)}
+                leftSection={<Icon size={20} />}
+                onClick={onNavigate}
+                variant="light"
+                aria-label={label}
+                styles={{ section: { marginInlineEnd: 0 }, body: { display: "none" } }}
+                style={{ justifyContent: "center" }}
+              />
             </Tooltip>
-          ) : (
-            link
-          );
-        })}
-      </Stack>
+          ))}
+        </Stack>
+      ) : (
+        <Stack gap={4}>
+          {blocks.map((block) => {
+            if (block.kind === "leaf") {
+              const { to, label, icon: Icon } = block.item;
+              return (
+                <NavLink
+                  key={to}
+                  component={RouterNavLink}
+                  to={to}
+                  label={label}
+                  active={isActive(to)}
+                  leftSection={<Icon size={20} />}
+                  onClick={onNavigate}
+                  variant="light"
+                />
+              );
+            }
+
+            const meta = GROUP_META[block.name];
+            const GroupIcon = meta?.icon;
+            const groupActive = block.items.some((i) => isActive(i.to));
+            return (
+              <NavLink
+                key={block.name}
+                label={block.name}
+                leftSection={GroupIcon ? <GroupIcon size={20} /> : undefined}
+                childrenOffset={28}
+                defaultOpened={groupActive}
+                variant="light"
+              >
+                {block.items.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    component={RouterNavLink}
+                    to={to}
+                    label={label}
+                    active={isActive(to)}
+                    leftSection={<Icon size={18} />}
+                    onClick={onNavigate}
+                    variant="light"
+                  />
+                ))}
+              </NavLink>
+            );
+          })}
+        </Stack>
+      )}
     </Box>
   );
 }

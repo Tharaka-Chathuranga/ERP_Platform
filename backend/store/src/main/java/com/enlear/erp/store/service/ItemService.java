@@ -6,6 +6,7 @@ import com.enlear.erp.store.service.command.CreateItemCommand;
 import com.enlear.erp.store.service.command.UpdateItemCommand;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.model.Item;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,11 @@ public class ItemService {
     public Item getItem(UUID id) {
         return items.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Item", id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Item> lowStockItems() {
+        return items.findLowStock();
     }
 
     @Transactional(readOnly = true)

@@ -3,12 +3,14 @@ import { Anchor, Group, SegmentedControl } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useAuth } from "@auth/AuthContext";
+import { Can } from "@auth/Can";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { AppButton } from "@ui/buttons/AppButton";
 import { DataTable } from "@ui/data/DataTable";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
+import { PageHeader } from "@ui/layout/PageHeader";
 import type { CountAdjustmentRequest, CountAdjustmentStatus } from "@core/types";
 import {
   approveCountRequest,
@@ -19,7 +21,9 @@ import { CountRequestModal } from "./CountRequestModal";
 
 const FILTERS = ["ALL", "PENDING", "APPROVED", "REJECTED"] as const;
 
-export function CountRequestsTab() {
+/** Stock count-adjustment requests. Both roles can raise/view; only users with
+ *  `count:approve` see the approve/reject actions. */
+export function CountRequestsPage() {
   const qc = useQueryClient();
   const { userId } = useAuth();
   const itemLabel = useItemLabels();
@@ -61,14 +65,18 @@ export function CountRequestsTab() {
   const busy = approve.isPending || reject.isPending;
 
   return (
-    <>
-      <Group justify="space-between" mb="md">
+    <div>
+      <PageHeader
+        title="Count requests"
+        actions={<AppButton label="New count request" onClick={() => setCreating(true)} />}
+      />
+
+      <Group mb="md">
         <SegmentedControl
           value={filter}
           onChange={(v) => setFilter(v as (typeof FILTERS)[number])}
           data={FILTERS.map((f) => ({ value: f, label: f.charAt(0) + f.slice(1).toLowerCase() }))}
         />
-        <AppButton label="New count request" onClick={() => setCreating(true)} />
       </Group>
 
       <DataTable<CountAdjustmentRequest>
@@ -89,25 +97,27 @@ export function CountRequestsTab() {
             align: "right",
             render: (r) =>
               r.status === "PENDING" ? (
-                <Group gap="xs" justify="flex-end" wrap="nowrap">
-                  <Anchor component="button" type="button" onClick={() => !busy && approve.mutate(r.id)}>
-                    Approve
-                  </Anchor>
-                  <Anchor
-                    component="button"
-                    type="button"
-                    c="red"
-                    onClick={() => !busy && reject.mutate(r.id)}
-                  >
-                    Reject
-                  </Anchor>
-                </Group>
+                <Can perform="count:approve">
+                  <Group gap="xs" justify="flex-end" wrap="nowrap">
+                    <Anchor component="button" type="button" onClick={() => !busy && approve.mutate(r.id)}>
+                      Approve
+                    </Anchor>
+                    <Anchor
+                      component="button"
+                      type="button"
+                      c="red"
+                      onClick={() => !busy && reject.mutate(r.id)}
+                    >
+                      Reject
+                    </Anchor>
+                  </Group>
+                </Can>
               ) : null,
           },
         ]}
       />
 
       <CountRequestModal opened={creating} onClose={() => setCreating(false)} />
-    </>
+    </div>
   );
 }

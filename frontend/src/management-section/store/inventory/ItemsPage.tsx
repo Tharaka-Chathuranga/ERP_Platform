@@ -1,27 +1,43 @@
 import { useState } from "react";
-import { Badge, Button, Card, Grid, Group, Text, TextInput } from "@mantine/core";
+import { Anchor, Badge, Button, Card, Grid, Group, Text, TextInput } from "@mantine/core";
 import { IconBuildingStore, IconPlus, IconSearch } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, type Column } from "@ui/data";
-import { useAuth } from "@auth/AuthContext";
-import { listItems } from "@store/inventory/items.api";
+import { useCan } from "@auth/useCan";
+import { qk } from "@core/queryKeys";
+import { notifyError, notifySuccess } from "@core/notify";
+import { deactivateItem, listItems } from "@store/inventory/items.api";
 import type { Item } from "@core/types";
 import { StockPanel } from "./StockPanel";
 import { CreateItemModal } from "./CreateItemModal";
+import { ItemEditModal } from "./ItemEditModal";
 
 export function ItemsPage() {
-  const { isAdmin } = useAuth();
+  const can = useCan();
+  const canEdit = can("item:edit");
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Item | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<Item | null>(null);
 
   const items = useQuery({
     queryKey: ["items", search],
     queryFn: () => listItems(search || undefined),
+  });
+
+  const deactivate = useMutation({
+    mutationFn: (id: string) => deactivateItem(id),
+    onSuccess: () => {
+      notifySuccess("Item deactivated");
+      qc.invalidateQueries({ queryKey: ["items"] });
+      qc.invalidateQueries({ queryKey: qk.adminSummary() });
+    },
+    onError: notifyError,
   });
 
   const columns: Column<Item>[] = [
@@ -47,6 +63,25 @@ export function ItemsPage() {
     },
   ];
 
+  if (canEdit) {
+    columns.push({
+      header: "",
+      align: "right",
+      render: (i) => (
+        <Group gap="xs" justify="flex-end" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
+          <Anchor component="button" type="button" onClick={() => setEditing(i)}>
+            Edit
+          </Anchor>
+          {i.status === "ACTIVE" && (
+            <Anchor component="button" type="button" c="red" onClick={() => deactivate.mutate(i.id)}>
+              Deactivate
+            </Anchor>
+          )}
+        </Group>
+      ),
+    });
+  }
+
   return (
     <div>
       <PageHeader
@@ -60,7 +95,7 @@ export function ItemsPage() {
             >
               Suppliers
             </Button>
-            {isAdmin && (
+            {canEdit && (
               <Button leftSection={<IconPlus size={16} />} onClick={() => setCreateOpen(true)}>
                 New item
               </Button>
@@ -102,6 +137,7 @@ export function ItemsPage() {
       </Grid>
 
       <CreateItemModal opened={createOpen} onClose={() => setCreateOpen(false)} />
+      <ItemEditModal item={editing} onClose={() => setEditing(null)} />
     </div>
   );
 }
