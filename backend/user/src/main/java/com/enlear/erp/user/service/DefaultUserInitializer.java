@@ -45,6 +45,9 @@ public class DefaultUserInitializer implements ApplicationRunner {
         users.save(newUser("r.jayasuriya", "Ravi Jayasuriya", "STORE_KEEPER", "Production"));
         users.save(newUser("s.bandara", "Sahan Bandara", "STORE_KEEPER", "Logistics"));
         log.warn("Seeded demo store-keeper users (password 'admin123') for development.");
+
+        users.save(newUser("q.wijesinghe", "Dilani Wijesinghe", "QUALITY_ASSURANCE", "Quality"));
+        log.warn("Seeded demo quality-assurance user (password 'admin123') for development.");
     }
 
     private User newUser(String username, String displayName, String role, String department) {
