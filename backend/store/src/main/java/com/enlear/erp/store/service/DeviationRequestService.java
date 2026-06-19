@@ -3,6 +3,7 @@ package com.enlear.erp.store.service;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import com.enlear.erp.store.model.DeviationRequest;
 import com.enlear.erp.store.model.DeviationStage;
+import com.enlear.erp.store.model.DeviationStatus;
 import com.enlear.erp.store.repository.DeviationRequestRepository;
 import com.enlear.erp.store.repository.ItemRepository;
 import com.enlear.erp.store.service.command.CreateDeviationRequestCommand;
@@ -57,9 +58,6 @@ public class DeviationRequestService {
     public DeviationRequest get(UUID id) {
         DeviationRequest req = requests.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("DeviationRequest", id));
-        // Load the lazy items collection while the session is open, so the
-        // controller can map it to a DTO after the transaction closes
-        // (open-in-view is disabled). Mirrors IssueService.
         Hibernate.initialize(req.getItems());
         return req;
     }
@@ -67,6 +65,13 @@ public class DeviationRequestService {
     @Transactional(readOnly = true)
     public List<DeviationRequest> listByStage(DeviationStage stage) {
         List<DeviationRequest> found = requests.findByStageOrderByRequestedAtDesc(stage);
+        found.forEach(req -> Hibernate.initialize(req.getItems()));
+        return found;
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeviationRequest> listByStatus(DeviationStatus status) {
+        List<DeviationRequest> found = requests.findByStatusOrderByRequestedAtDesc(status);
         found.forEach(req -> Hibernate.initialize(req.getItems()));
         return found;
     }
