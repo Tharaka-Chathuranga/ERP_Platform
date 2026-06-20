@@ -1,5 +1,5 @@
-import { Box, Card, Checkbox, Table } from "@mantine/core";
-import { useMemo, type ReactNode } from "react";
+import { Box, Card, Checkbox, Collapse, Table } from "@mantine/core";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 
 export interface Column<T> {
@@ -34,6 +34,8 @@ interface DataTableProps<T> {
   activeRowKey?: string;
   /** Returns a background CSS value for a given row; ignored when activeRowKey matches. */
   rowBg?: (row: T) => string | undefined;
+  /** Returns content to show in a collapsible detail row revealed on hover. */
+  expandOnHover?: (row: T) => ReactNode;
 }
 
 // Dimmed, uppercase column headers — the shared list-table look.
@@ -51,8 +53,11 @@ export function DataTable<T>({
   selection,
   activeRowKey,
   rowBg,
+  expandOnHover,
 }: DataTableProps<T>) {
   const rows = data ?? [];
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const totalCols = columns.length + (selection ? 1 : 0);
   const selectableRows = useMemo(
     () => (selection?.selectable ? rows.filter(selection.selectable) : rows),
     [rows, selection],
@@ -76,7 +81,7 @@ export function DataTable<T>({
     <QueryBoundary loading={loading} error={error} isEmpty={rows.length === 0} empty={empty}>
       <Box style={{ overflowX: "auto" }}>
         <Table
-          highlightOnHover={!!onRowClick}
+          highlightOnHover={!!onRowClick || !!expandOnHover}
           verticalSpacing="md"
           horizontalSpacing="lg"
           withRowBorders
@@ -106,29 +111,48 @@ export function DataTable<T>({
               const key = rowKey(row);
               const canSelect = !selection?.selectable || selection.selectable(row);
               return (
-                <Table.Tr
-                  key={key}
-                  bg={activeRowKey === key ? "var(--mantine-color-brand-light)" : rowBg?.(row)}
-                  style={onRowClick ? { cursor: "pointer" } : undefined}
-                  onClick={onRowClick ? () => onRowClick(row) : undefined}
-                >
-                  {selection && (
-                    <Table.Td onClick={(e) => e.stopPropagation()}>
-                      {canSelect && (
-                        <Checkbox
-                          aria-label="Select row"
-                          checked={selection.selected.has(key)}
-                          onChange={() => toggleOne(key)}
-                        />
-                      )}
-                    </Table.Td>
+                <Fragment key={key}>
+                  <Table.Tr
+                    bg={activeRowKey === key ? "var(--mantine-color-brand-light)" : rowBg?.(row)}
+                    style={onRowClick ? { cursor: "pointer" } : undefined}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    onMouseEnter={expandOnHover ? () => setHoveredKey(key) : undefined}
+                    onMouseLeave={expandOnHover ? (e) => {
+                      const rel = e.relatedTarget as HTMLElement | null;
+                      if (!rel?.closest?.(`[data-expand-key="${key}"]`)) setHoveredKey(null);
+                    } : undefined}
+                  >
+                    {selection && (
+                      <Table.Td onClick={(e) => e.stopPropagation()}>
+                        {canSelect && (
+                          <Checkbox
+                            aria-label="Select row"
+                            checked={selection.selected.has(key)}
+                            onChange={() => toggleOne(key)}
+                          />
+                        )}
+                      </Table.Td>
+                    )}
+                    {columns.map((c, i) => (
+                      <Table.Td key={i} fw={c.emphasis ? 600 : undefined} ta={c.align}>
+                        {c.render(row)}
+                      </Table.Td>
+                    ))}
+                  </Table.Tr>
+                  {expandOnHover && (
+                    <Table.Tr
+                      data-expand-key={key}
+                      onMouseEnter={() => setHoveredKey(key)}
+                      onMouseLeave={() => setHoveredKey(null)}
+                    >
+                      <Table.Td colSpan={totalCols} p={0}>
+                        <Collapse in={hoveredKey === key}>
+                          {expandOnHover(row)}
+                        </Collapse>
+                      </Table.Td>
+                    </Table.Tr>
                   )}
-                  {columns.map((c, i) => (
-                    <Table.Td key={i} fw={c.emphasis ? 600 : undefined} ta={c.align}>
-                      {c.render(row)}
-                    </Table.Td>
-                  ))}
-                </Table.Tr>
+                </Fragment>
               );
             })}
           </Table.Tbody>

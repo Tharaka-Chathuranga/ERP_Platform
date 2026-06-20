@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Group, Text } from "@mantine/core";
+import { Box, Button, Group, Stack, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import dayjs from "dayjs";
@@ -81,7 +81,6 @@ export function CountRequestsPage() {
     { header: "Item", render: (r) => itemLabel(r.itemId), emphasis: true },
     { header: "Current", render: (r) => r.currentQuantity, align: "right" },
     { header: "Requested", render: (r) => r.requestedQuantity, align: "right" },
-    { header: "Reason", render: (r) => r.reason ?? "—" },
     { header: "By", render: (r) => userLabel(r.requestedByUserId) },
     { header: "Raised", render: (r) => dayjs(r.requestedAt).format("MMM D, HH:mm") },
     { header: "Status", render: (r) => <StatusBadge status={r.status} /> },
@@ -128,6 +127,14 @@ export function CountRequestsPage() {
         error={error}
         rowKey={(r) => r.id}
         columns={columns}
+        expandOnHover={(r) => (
+          <Box px="lg" py="sm" bg="var(--mantine-color-default-hover)">
+            <Stack gap={2}>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Reason</Text>
+              <Text size="sm">{r.reason ?? "No reason provided"}</Text>
+            </Stack>
+          </Box>
+        )}
       />
 
       <CountRequestModal opened={creating} onClose={() => setCreating(false)} />
