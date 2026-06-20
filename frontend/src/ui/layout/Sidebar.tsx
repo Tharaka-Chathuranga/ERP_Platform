@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Group, NavLink, Stack, Title, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Divider, Group, NavLink, Stack, Text, Tooltip } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
@@ -9,11 +9,6 @@ type NavBlock =
   | { kind: "leaf"; item: NavItem }
   | { kind: "group"; name: string; items: NavItem[] };
 
-/**
- * Main navigation. Entries sharing a `group` are nested under one collapsible
- * parent so a feature area (e.g. Store) shows as a single item with sub-options
- * instead of many flat rows. When `collapsed`, the rail flattens to leaf icons.
- */
 export function Sidebar({
   collapsed = false,
   onToggle,
@@ -26,14 +21,11 @@ export function Sidebar({
   const location = useLocation();
   const can = useCan();
 
-  // Only entries the user is allowed to see.
   const items = useMemo(
     () => NAV.filter((n) => !n.requiredPermission || can(n.requiredPermission)),
     [can],
   );
 
-  // Arrange into ordered blocks: ungrouped leaves stay inline; grouped entries
-  // collapse into a single parent emitted at the position of their first member.
   const blocks = useMemo<NavBlock[]>(() => {
     const out: NavBlock[] = [];
     const seen = new Set<string>();
@@ -52,8 +44,6 @@ export function Sidebar({
     return out;
   }, [items]);
 
-  // The active entry is the most specific (longest) matching path, so e.g.
-  // /store/suppliers highlights "Suppliers" rather than also "Items" (/store).
   const activeTo = useMemo(() => {
     let best: string | null = null;
     for (const { to } of items) {
@@ -89,13 +79,47 @@ export function Sidebar({
         </Tooltip>
       )}
 
-      <Group h={40} mb="md" px={collapsed ? 0 : "xs"} justify={collapsed ? "center" : "flex-start"}>
-        <Title order={4} c="brand">
-          {collapsed ? "ERP" : "ERP Platform"}
-        </Title>
+      {/* Brand mark */}
+      <Group
+        h={52}
+        mb="xs"
+        px={collapsed ? 0 : "xs"}
+        justify={collapsed ? "center" : "flex-start"}
+        align="center"
+        gap="sm"
+        wrap="nowrap"
+      >
+        <Box
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            background: "linear-gradient(135deg, var(--mantine-color-brand-5) 0%, var(--mantine-color-brand-8) 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            boxShadow: "0 2px 8px rgba(44, 75, 128, 0.3)",
+          }}
+        >
+          <Text fw={800} fz={16} c="white" lh={1} style={{ userSelect: "none" }}>
+            E
+          </Text>
+        </Box>
+        {!collapsed && (
+          <div>
+            <Text fw={700} fz="sm" lh={1.2} c="dark.8">
+              ERP Platform
+            </Text>
+            <Text fz={10} c="dimmed" lh={1.3} style={{ letterSpacing: "0.02em" }}>
+              Enterprise Resource
+            </Text>
+          </div>
+        )}
       </Group>
 
-      {/* Collapsed rail: flatten everything to leaf icons with tooltips. */}
+      <Divider mb="sm" />
+
       {collapsed ? (
         <Stack gap={4}>
           {items.map(({ to, label, icon: Icon }) => (

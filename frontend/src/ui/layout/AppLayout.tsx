@@ -1,4 +1,4 @@
-import { AppShell, Avatar, Burger, Group, Menu, Text, Title } from "@mantine/core";
+import { AppShell, Avatar, Burger, Divider, Group, Menu, Text, Title } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconLogout } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -6,14 +6,12 @@ import { Sidebar } from "./Sidebar";
 import { PageTitleProvider, usePageTitle } from "./PageTitle";
 import { useAuth } from "@auth/AuthContext";
 
-/** Human-readable label per role string, shown in the header user menu. */
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Administrator",
   STORE_KEEPER: "Store Keeper",
   QUALITY_ASSURANCE: "Quality Assurance",
 };
 
-/** The current page's title, shown in the shared header (set via PageHeader). */
 function HeaderTitle() {
   const { title } = usePageTitle();
   return (
@@ -23,8 +21,6 @@ function HeaderTitle() {
   );
 }
 
-/** App shell: brand header with the signed-in user, a collapsible left sidebar,
- *  and the routed content. The header is shared by every page. */
 export function AppLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
@@ -32,7 +28,6 @@ export function AppLayout() {
   const { username, role, logout } = useAuth();
   const navigate = useNavigate();
 
-  // On mobile the navbar is a full-width overlay; on desktop it can shrink to an icon rail.
   const expanded = isMobile || desktopOpened;
   const initials = (username ?? "?").trim().slice(0, 2).toUpperCase();
 
@@ -43,65 +38,81 @@ export function AppLayout() {
 
   return (
     <PageTitleProvider>
-    <AppShell
-      layout="alt"
-      header={{ height: 56 }}
-      navbar={{
-        width: expanded ? 240 : 72,
-        breakpoint: "sm",
-        collapsed: { mobile: !mobileOpened, desktop: false },
-      }}
-      padding="lg"
-    >
-      <AppShell.Header withBorder={false}>
-        <Group h="100%" px="md" gap="sm" wrap="nowrap">
-          <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
+      <AppShell
+        layout="alt"
+        header={{ height: 64 }}
+        navbar={{
+          width: expanded ? 260 : 72,
+          breakpoint: "sm",
+          collapsed: { mobile: !mobileOpened, desktop: false },
+        }}
+        padding="lg"
+        styles={{
+          header: {
+            background: "white",
+            borderBottom: "1px solid var(--mantine-color-gray-2)",
+            boxShadow: "0 1px 4px rgba(0, 0, 0, 0.06)",
+          },
+          navbar: {
+            background: "var(--mantine-color-gray-0)",
+            borderRight: "1px solid var(--mantine-color-gray-2)",
+          },
+          main: {
+            background: "var(--mantine-color-gray-0)",
+          },
+        }}
+      >
+        <AppShell.Header withBorder={false}>
+          <Group h="100%" px="lg" gap="sm" wrap="nowrap">
+            <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
 
-          <HeaderTitle />
+            <HeaderTitle />
 
-          {/* User avatar + menu, pinned to the top-right corner. */}
-          <Menu position="bottom-end" withArrow shadow="md" width={200}>
-            <Menu.Target>
-              <Group gap="xs" ml="auto" wrap="nowrap" style={{ cursor: "pointer" }}>
-                <div style={{ textAlign: "right", lineHeight: 1.2 }}>
-                  <Text size="sm" fw={600} visibleFrom="xs">
-                    {username}
-                  </Text>
-                  <Text size="xs" c="dimmed" visibleFrom="xs">
-                    {ROLE_LABELS[role ?? ""] ?? "Store Keeper"}
-                  </Text>
-                </div>
-                <Avatar color="brand" radius="xl" size={36}>
-                  {initials}
-                </Avatar>
-              </Group>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Label>Signed in as {username}</Menu.Label>
-              <Menu.Item
-                color="red"
-                leftSection={<IconLogout size={16} />}
-                onClick={handleLogout}
-              >
-                Logout
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        </Group>
-      </AppShell.Header>
+            <Group gap="sm" ml="auto" wrap="nowrap" align="center">
+              <Divider orientation="vertical" style={{ height: 28 }} />
+              <Menu position="bottom-end" withArrow shadow="md" width={200}>
+                <Menu.Target>
+                  <Group gap="xs" wrap="nowrap" style={{ cursor: "pointer" }}>
+                    <div style={{ textAlign: "right", lineHeight: 1.2 }}>
+                      <Text size="sm" fw={600} visibleFrom="xs">
+                        {username}
+                      </Text>
+                      <Text size="xs" c="dimmed" visibleFrom="xs">
+                        {ROLE_LABELS[role ?? ""] ?? "Store Keeper"}
+                      </Text>
+                    </div>
+                    <Avatar color="brand" radius="xl" size={38}>
+                      {initials}
+                    </Avatar>
+                  </Group>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Signed in as {username}</Menu.Label>
+                  <Menu.Item
+                    color="red"
+                    leftSection={<IconLogout size={16} />}
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </Group>
+          </Group>
+        </AppShell.Header>
 
-      <AppShell.Navbar p="sm" style={{ overflow: "visible" }}>
-        <Sidebar
-          collapsed={!expanded}
-          onToggle={toggleDesktop}
-          onNavigate={mobileOpened ? toggleMobile : undefined}
-        />
-      </AppShell.Navbar>
+        <AppShell.Navbar p="sm" style={{ overflow: "visible" }}>
+          <Sidebar
+            collapsed={!expanded}
+            onToggle={toggleDesktop}
+            onNavigate={mobileOpened ? toggleMobile : undefined}
+          />
+        </AppShell.Navbar>
 
-      <AppShell.Main>
-        <Outlet />
-      </AppShell.Main>
-    </AppShell>
+        <AppShell.Main>
+          <Outlet />
+        </AppShell.Main>
+      </AppShell>
     </PageTitleProvider>
   );
 }
