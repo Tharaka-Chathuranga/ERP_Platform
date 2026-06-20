@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Divider, Group, NavLink, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Group, NavLink, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight, type Icon } from "@tabler/icons-react";
 import { type ComponentType, useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";

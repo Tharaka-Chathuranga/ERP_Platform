@@ -10,10 +10,10 @@ export async function getQaDefectSummary(): Promise<QaDefectSummary> {
 }
 
 export async function listDeviationsByStatus(
-  status: DeviationStatus,
+  status?: DeviationStatus,
 ): Promise<DeviationRequest[]> {
   const { data } = await api.get<DeviationRequest[]>("/store/deviation-requests/by-status", {
-    params: { status },
+    params: status ? { status } : undefined,
   });
   return data;
 }

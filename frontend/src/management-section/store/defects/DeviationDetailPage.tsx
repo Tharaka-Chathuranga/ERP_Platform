@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Button,
   Card,
@@ -11,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
-import { DataTable, type Column } from "@ui/data";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { useAuth } from "@auth/AuthContext";
 import { useCan } from "@auth/useCan";
 import { DEFECT_APPROVE } from "@auth/permissions";
@@ -51,6 +52,8 @@ export function DeviationDetailPage() {
   const canApprove = can(DEFECT_APPROVE);
   const itemLabel = useItemLabels();
   const userLabel = useUserLabels();
+
+  const [search, setSearch] = useState("");
 
   const { data: dev, isLoading } = useQuery({
     queryKey: ["deviation", id],
@@ -149,10 +152,11 @@ export function DeviationDetailPage() {
         <Text fw={600} mb="sm">
           Affected items
         </Text>
+        <TableToolbar search={{ value: search, onChange: setSearch, placeholder: "Search item…" }} />
         <DataTable
           withCard={false}
           columns={itemColumns}
-          data={dev.items}
+          data={dev.items.filter(it => { const term = search.trim().toLowerCase(); return !term || itemLabel(it.itemId).toLowerCase().includes(term); })}
           rowKey={(it) => it.itemId}
         />
       </Card>

@@ -1,4 +1,5 @@
 export * from "./ItemsPage";
+export * from "./ItemDetailPage";
 export * from "./SuppliersPage";
 export * from "./WarningsPage";
 export * from "./CreateItemModal";

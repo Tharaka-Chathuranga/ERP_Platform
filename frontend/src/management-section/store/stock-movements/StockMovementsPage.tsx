@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Alert, Grid, SegmentedControl, SimpleGrid } from "@mantine/core";
+import { Alert, Grid, SimpleGrid } from "@mantine/core";
 import { AreaChart, BarChart } from "@mantine/charts";
 import {
   IconArrowsExchange,
@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { PageHeader } from "@ui/layout/PageHeader";
+import { TableToolbar } from "@ui/data";
 import { StatCard } from "@ui/feedback/StatCard";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { EmptyState } from "@ui/feedback/EmptyState";
@@ -59,15 +60,14 @@ export function StockMovementsPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Stock Movements"
-        actions={
-          <SegmentedControl
-            value={period}
-            onChange={(v) => setPeriod(v as Period)}
-            data={PERIODS}
-          />
-        }
+      <PageHeader title="Stock Movements" />
+      <TableToolbar
+        filters={[{
+          label: "Period",
+          value: period,
+          onChange: (v) => setPeriod(v as Period),
+          options: PERIODS,
+        }]}
       />
 
       {truncated && (

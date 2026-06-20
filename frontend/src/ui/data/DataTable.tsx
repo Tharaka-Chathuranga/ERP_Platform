@@ -32,6 +32,8 @@ interface DataTableProps<T> {
   selection?: Selection<T>;
   /** Highlights the row whose key matches (master/detail selection). */
   activeRowKey?: string;
+  /** Returns a background CSS value for a given row; ignored when activeRowKey matches. */
+  rowBg?: (row: T) => string | undefined;
 }
 
 // Dimmed, uppercase column headers — the shared list-table look.
@@ -48,6 +50,7 @@ export function DataTable<T>({
   withCard = true,
   selection,
   activeRowKey,
+  rowBg,
 }: DataTableProps<T>) {
   const rows = data ?? [];
   const selectableRows = useMemo(
@@ -105,7 +108,7 @@ export function DataTable<T>({
               return (
                 <Table.Tr
                   key={key}
-                  bg={activeRowKey === key ? "var(--mantine-color-brand-light)" : undefined}
+                  bg={activeRowKey === key ? "var(--mantine-color-brand-light)" : rowBg?.(row)}
                   style={onRowClick ? { cursor: "pointer" } : undefined}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                 >

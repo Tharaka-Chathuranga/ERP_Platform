@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Anchor, Group, SegmentedControl } from "@mantine/core";
+import { Anchor, Group } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useAuth } from "@auth/AuthContext";
@@ -9,7 +9,7 @@ import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { AppButton } from "@ui/buttons/AppButton";
-import { DataTable } from "@ui/data/DataTable";
+import { DataTable, TableToolbar } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { CountAdjustmentRequest, CountAdjustmentStatus } from "@core/types";
@@ -30,6 +30,7 @@ export function CountRequestsPage() {
   const itemLabel = useItemLabels();
   const userLabel = useUserLabels();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("PENDING");
+  const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
 
   const status = filter === "ALL" ? undefined : (filter as CountAdjustmentStatus);
@@ -65,23 +66,32 @@ export function CountRequestsPage() {
 
   const busy = approve.isPending || reject.isPending;
 
+  const term = search.trim().toLowerCase();
+  const filtered = (data ?? []).filter(
+    (r) =>
+      !term ||
+      itemLabel(r.itemId).toLowerCase().includes(term) ||
+      userLabel(r.requestedByUserId).toLowerCase().includes(term) ||
+      (r.reason ?? "").toLowerCase().includes(term),
+  );
+
   return (
     <div>
-      <PageHeader
-        title="Count requests"
+      <PageHeader title="Count requests" />
+
+      <TableToolbar
+        filters={[{
+          label: "Status",
+          value: filter,
+          onChange: (v) => setFilter(v as (typeof FILTERS)[number]),
+          options: FILTERS.map((f) => ({ value: f, label: f.charAt(0) + f.slice(1).toLowerCase() })),
+        }]}
+        search={{ value: search, onChange: setSearch, placeholder: "Search item, user or reason…" }}
         actions={<AppButton label="New count request" onClick={() => setCreating(true)} />}
       />
 
-      <Group mb="md">
-        <SegmentedControl
-          value={filter}
-          onChange={(v) => setFilter(v as (typeof FILTERS)[number])}
-          data={FILTERS.map((f) => ({ value: f, label: f.charAt(0) + f.slice(1).toLowerCase() }))}
-        />
-      </Group>
-
       <DataTable<CountAdjustmentRequest>
-        data={data}
+        data={filtered}
         loading={isLoading}
         error={error}
         rowKey={(r) => r.id}

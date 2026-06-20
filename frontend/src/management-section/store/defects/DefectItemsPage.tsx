@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Group, SegmentedControl, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useItemLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import { DataTable } from "@ui/data/DataTable";
+import { DataTable, TableToolbar } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { DeviationItemRow, DeviationStage } from "@core/types";
@@ -16,6 +16,7 @@ const FILTERS = ["ALL", "INCOMING", "IN_PROGRESS", "FINAL"] as const;
 export function DefectItemsPage() {
   const itemLabel = useItemLabels();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("ALL");
+  const [search, setSearch] = useState("");
 
   const stage = filter === "ALL" ? undefined : (filter as DeviationStage);
   const { data, isLoading, error } = useQuery({
@@ -23,19 +24,29 @@ export function DefectItemsPage() {
     queryFn: () => getDefectItems(stage),
   });
 
+  const term = search.trim().toLowerCase();
+  const filtered = (data ?? []).filter(
+    (r) =>
+      !term ||
+      itemLabel(r.itemId).toLowerCase().includes(term) ||
+      (r.reason ?? "").toLowerCase().includes(term),
+  );
+
   return (
     <div>
       <PageHeader title="Defect items" />
-      <Group mb="md">
-        <SegmentedControl
-          value={filter}
-          onChange={(v) => setFilter(v as (typeof FILTERS)[number])}
-          data={FILTERS.map((f) => ({ value: f, label: f.replace(/_/g, " ") }))}
-        />
-      </Group>
+      <TableToolbar
+        filters={[{
+          label: "Stage",
+          value: filter,
+          onChange: (v) => setFilter(v as (typeof FILTERS)[number]),
+          options: FILTERS.map((f) => ({ value: f, label: f.replace(/_/g, " ") })),
+        }]}
+        search={{ value: search, onChange: setSearch, placeholder: "Search item or reason…" }}
+      />
 
       <DataTable<DeviationItemRow>
-        data={data}
+        data={filtered}
         loading={isLoading}
         error={error}
         rowKey={(r) => `${r.requestId}:${r.itemId}`}

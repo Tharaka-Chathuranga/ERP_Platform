@@ -1,4 +1,4 @@
-import { ActionIcon, AppShell, Avatar, Burger, Divider, Group, Menu, Text, useMantineColorScheme } from "@mantine/core";
+import { ActionIcon, AppShell, Avatar, Box, Burger, Divider, Group, Menu, Text, useMantineColorScheme } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconLogout, IconMoon, IconSun } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -102,7 +102,9 @@ export function AppLayout() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <Outlet />
+          <Box ml="md" >
+            <Outlet />
+          </Box>
         </AppShell.Main>
       </AppShell>
   );

@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Anchor, Button, Card, Grid, Group, Text } from "@mantine/core";
-import { IconArrowLeft, IconPlus } from "@tabler/icons-react";
+import { Anchor, Button, Card, Grid, Text } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { DataTable, type Column } from "@ui/data";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { useCan } from "@auth/useCan";
 import { useItemLabels } from "@core/hooks/useLookups";
 import { SUPPLIER_MANAGE } from "@auth/permissions";
@@ -21,12 +20,12 @@ import type { Supplier, SupplierItem } from "@core/types";
 import { SupplierFormModal } from "./SupplierFormModal";
 
 export function SuppliersPage() {
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const canManage = useCan()(SUPPLIER_MANAGE);
   const itemLabel = useItemLabels();
   const [selected, setSelected] = useState<Supplier | null>(null);
   const [creating, setCreating] = useState(false);
+  const [search, setSearch] = useState("");
 
   const suppliers = useQuery({ queryKey: ["suppliers"], queryFn: listSuppliers });
   const supplierItems = useQuery({
@@ -77,25 +76,23 @@ export function SuppliersPage() {
     { header: "Lead days", render: (si) => si.leadTimeDays ?? "—" },
   ];
 
+  const term = search.trim().toLowerCase();
+  const filteredSuppliers = (suppliers.data ?? []).filter(
+    (s) => s.code.toLowerCase().includes(term) || s.name.toLowerCase().includes(term),
+  );
+
   return (
     <div>
-      <PageHeader
-        title="Suppliers"
+      <PageHeader title="Suppliers" />
+
+      <TableToolbar
+        search={{ value: search, onChange: setSearch, placeholder: "Search code or name…" }}
         actions={
-          <Group>
-            <Button
-              variant="default"
-              leftSection={<IconArrowLeft size={16} />}
-              onClick={() => navigate("/store")}
-            >
-              Back to items
+          canManage && (
+            <Button leftSection={<IconPlus size={16} />} onClick={() => setCreating(true)}>
+              New supplier
             </Button>
-            {canManage && (
-              <Button leftSection={<IconPlus size={16} />} onClick={() => setCreating(true)}>
-                New supplier
-              </Button>
-            )}
-          </Group>
+          )
         }
       />
 
@@ -103,7 +100,7 @@ export function SuppliersPage() {
         <Grid.Col span={{ base: 12, md: 6 }}>
           <DataTable
             columns={supplierColumns}
-            data={suppliers.data}
+            data={filteredSuppliers}
             rowKey={(s) => s.id}
             onRowClick={setSelected}
             activeRowKey={selected?.id}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Badge, Button, Card, Group, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
@@ -5,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
-import { DataTable, DefinitionList, type Column, type Definition } from "@ui/data";
+import { DataTable, DefinitionList, TableToolbar, type Column, type Definition } from "@ui/data";
 import type { ReceivalItem } from "@core/types";
 import { useItemLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
@@ -15,6 +16,7 @@ import { listSuppliers } from "@store/inventory/suppliers.api";
 export function ReceivalDetailPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
   const itemLabel = useItemLabels();
 
   const { data: receival, isLoading, error } = useQuery({
@@ -110,10 +112,11 @@ export function ReceivalDetailPage() {
               <Text fw={600} mb="sm">
                 Lines
               </Text>
+              <TableToolbar search={{ value: search, onChange: setSearch, placeholder: "Search item…" }} />
               <DataTable
                 withCard={false}
                 columns={lineColumns}
-                data={receival.lines}
+                data={receival.lines.filter(l => { const term = search.trim().toLowerCase(); return !term || itemLabel(l.itemId).toLowerCase().includes(term); })}
                 rowKey={(l) => l.id}
               />
             </Card>
