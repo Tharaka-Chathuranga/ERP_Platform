@@ -56,4 +56,8 @@ public class Supplier extends BaseEntity {
     public void deactivate() {
         this.status = SupplierStatus.INACTIVE;
     }
+
+    public void activate() {
+        this.status = SupplierStatus.ACTIVE;
+    }
 }

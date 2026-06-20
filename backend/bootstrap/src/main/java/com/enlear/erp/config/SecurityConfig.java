@@ -1,6 +1,7 @@
 package com.enlear.erp.config;
 
 import com.enlear.erp.shared.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,6 +51,8 @@ public class SecurityConfig {
                         // itself drives auth via the token it holds.
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(
+                        (req, res, authEx) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED)))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

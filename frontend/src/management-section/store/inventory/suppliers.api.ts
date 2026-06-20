@@ -29,3 +29,13 @@ export async function createSupplier(input: CreateSupplierInput): Promise<Suppli
   const { data } = await api.post<Supplier>("/store/suppliers", input);
   return data;
 }
+
+export async function activateSupplier(id: string): Promise<Supplier> {
+  const { data } = await api.post<Supplier>(`/store/suppliers/${id}/activate`);
+  return data;
+}
+
+export async function deactivateSupplier(id: string): Promise<Supplier> {
+  const { data } = await api.post<Supplier>(`/store/suppliers/${id}/deactivate`);
+  return data;
+}

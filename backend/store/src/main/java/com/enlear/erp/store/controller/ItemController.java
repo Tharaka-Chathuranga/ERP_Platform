@@ -3,9 +3,12 @@ package com.enlear.erp.store.controller;
 import com.enlear.erp.shared.web.PageResponse;
 import com.enlear.erp.store.controller.dto.CreateItemRequest;
 import com.enlear.erp.store.controller.dto.StoreResponses.ItemResponse;
+import com.enlear.erp.store.controller.dto.StoreResponses.LowStockItemResponse;
+import com.enlear.erp.store.controller.dto.UpdateItemRequest;
 import com.enlear.erp.store.service.ItemService;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -13,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,17 +46,30 @@ public class ItemController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER','QUALITY_ASSURANCE')")
     public PageResponse<ItemResponse> list(
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "itemCode") Pageable pageable) {
         return PageResponse.of(items.listItems(search, pageable), ItemResponse::from);
     }
 
+    /** Active items below their reorder level — the shared low-stock warning list. */
+    @GetMapping("/low-stock")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    public List<LowStockItemResponse> lowStock() {
+        return items.lowStockItems().stream().map(LowStockItemResponse::from).toList();
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
     public ItemResponse get(@PathVariable UUID id) {
         return ItemResponse.from(items.getItem(id));
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ItemResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateItemRequest request) {
+        return ItemResponse.from(items.updateItem(id, request.toCommand()));
     }
 
     @DeleteMapping("/{id}")

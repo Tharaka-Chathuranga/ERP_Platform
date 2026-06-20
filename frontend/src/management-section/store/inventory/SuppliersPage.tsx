@@ -1,20 +1,32 @@
 import { useState } from "react";
-import { Button, Card, Grid, Text } from "@mantine/core";
-import { IconArrowLeft } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
+import { Anchor, Button, Card, Grid, Group, Text } from "@mantine/core";
+import { IconArrowLeft, IconPlus } from "@tabler/icons-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, type Column } from "@ui/data";
+import { useCan } from "@auth/useCan";
 import { useItemLabels } from "@core/hooks/useLookups";
-import { listSupplierItems, listSuppliers } from "@store/inventory/suppliers.api";
+import { SUPPLIER_MANAGE } from "@auth/permissions";
+import { notifyError, notifySuccess } from "@core/notify";
+import {
+  activateSupplier,
+  deactivateSupplier,
+  listSupplierItems,
+  listSuppliers,
+} from "@store/inventory/suppliers.api";
 import type { Supplier, SupplierItem } from "@core/types";
+import { SupplierFormModal } from "./SupplierFormModal";
 
 export function SuppliersPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const canManage = useCan()(SUPPLIER_MANAGE);
   const itemLabel = useItemLabels();
   const [selected, setSelected] = useState<Supplier | null>(null);
+  const [creating, setCreating] = useState(false);
 
   const suppliers = useQuery({ queryKey: ["suppliers"], queryFn: listSuppliers });
   const supplierItems = useQuery({
@@ -23,11 +35,41 @@ export function SuppliersPage() {
     enabled: !!selected,
   });
 
+  const toggle = useMutation({
+    mutationFn: (s: Supplier) =>
+      s.status === "ACTIVE" ? deactivateSupplier(s.id) : activateSupplier(s.id),
+    onSuccess: () => {
+      notifySuccess("Supplier updated");
+      qc.invalidateQueries({ queryKey: ["suppliers"] });
+    },
+    onError: notifyError,
+  });
+
   const supplierColumns: Column<Supplier>[] = [
     { header: "Code", emphasis: true, render: (s) => s.code },
     { header: "Name", render: (s) => s.name },
     { header: "Status", render: (s) => <StatusBadge status={s.status} /> },
   ];
+
+  if (canManage) {
+    supplierColumns.push({
+      header: "",
+      align: "right",
+      render: (s) => (
+        <Anchor
+          component="button"
+          type="button"
+          c={s.status === "ACTIVE" ? "red" : "green"}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!toggle.isPending) toggle.mutate(s);
+          }}
+        >
+          {s.status === "ACTIVE" ? "Deactivate" : "Activate"}
+        </Anchor>
+      ),
+    });
+  }
 
   const itemColumns: Column<SupplierItem>[] = [
     { header: "Item", render: (si) => itemLabel(si.itemId) },
@@ -40,13 +82,20 @@ export function SuppliersPage() {
       <PageHeader
         title="Suppliers"
         actions={
-          <Button
-            variant="default"
-            leftSection={<IconArrowLeft size={16} />}
-            onClick={() => navigate("/store")}
-          >
-            Back to items
-          </Button>
+          <Group>
+            <Button
+              variant="default"
+              leftSection={<IconArrowLeft size={16} />}
+              onClick={() => navigate("/store")}
+            >
+              Back to items
+            </Button>
+            {canManage && (
+              <Button leftSection={<IconPlus size={16} />} onClick={() => setCreating(true)}>
+                New supplier
+              </Button>
+            )}
+          </Group>
         }
       />
 
@@ -91,6 +140,8 @@ export function SuppliersPage() {
           </Card>
         </Grid.Col>
       </Grid>
+
+      <SupplierFormModal opened={creating} onClose={() => setCreating(false)} />
     </div>
   );
 }

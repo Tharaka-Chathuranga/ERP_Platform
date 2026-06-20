@@ -1,6 +1,7 @@
 package com.enlear.erp.store.controller;
 
 import com.enlear.erp.store.model.DeviationStage;
+import com.enlear.erp.store.model.DeviationStatus;
 import com.enlear.erp.store.service.DeviationRequestService;
 import com.enlear.erp.store.controller.dto.CreateDeviationRequestRequest;
 import com.enlear.erp.store.controller.dto.RequestResponses.DeviationRequestResponse;
@@ -39,13 +40,13 @@ public class DeviationRequestController {
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','QUALITY_ASSURANCE')")
     public DeviationRequestResponse approve(@PathVariable UUID id, @RequestParam UUID approverId) {
         return DeviationRequestResponse.from(requests.approve(id, approverId));
     }
 
     @PostMapping("/{id}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','QUALITY_ASSURANCE')")
     public DeviationRequestResponse reject(@PathVariable UUID id, @RequestParam UUID approverId) {
         return DeviationRequestResponse.from(requests.reject(id, approverId));
     }
@@ -58,14 +59,20 @@ public class DeviationRequestController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER','QUALITY_ASSURANCE')")
     public DeviationRequestResponse get(@PathVariable UUID id) {
         return DeviationRequestResponse.from(requests.get(id));
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER','QUALITY_ASSURANCE')")
     public List<DeviationRequestResponse> listByStage(@RequestParam DeviationStage stage) {
         return requests.listByStage(stage).stream().map(DeviationRequestResponse::from).toList();
+    }
+
+    @GetMapping("/by-status")
+    @PreAuthorize("hasAnyRole('ADMIN','QUALITY_ASSURANCE')")
+    public List<DeviationRequestResponse> listByStatus(@RequestParam DeviationStatus status) {
+        return requests.listByStatus(status).stream().map(DeviationRequestResponse::from).toList();
     }
 }

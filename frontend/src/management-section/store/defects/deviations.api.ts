@@ -1,5 +1,5 @@
 import { api } from "@core/http/client";
-import type { DeviationRequest, DeviationStage } from "@core/types";
+import type { DeviationItemRow, DeviationRequest, DeviationStage } from "@core/types";
 
 export interface DeviationItemInput {
   itemId: string;
@@ -15,6 +15,14 @@ export interface CreateDeviationInput {
 export async function listDeviations(stage: DeviationStage): Promise<DeviationRequest[]> {
   const { data } = await api.get<DeviationRequest[]>("/store/deviation-requests", {
     params: { stage },
+  });
+  return data;
+}
+
+/** Flattened defective item lines across all deviation requests (admin analytic). */
+export async function getDefectItems(stage?: DeviationStage): Promise<DeviationItemRow[]> {
+  const { data } = await api.get<DeviationItemRow[]>("/store/dashboard/defect-items", {
+    params: { stage: stage || undefined },
   });
   return data;
 }

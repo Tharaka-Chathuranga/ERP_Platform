@@ -13,6 +13,8 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { DataTable, type Column } from "@ui/data";
 import { useAuth } from "@auth/AuthContext";
+import { useCan } from "@auth/useCan";
+import { DEFECT_APPROVE } from "@auth/permissions";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import {
   advanceDeviationStage,
@@ -45,6 +47,8 @@ export function DeviationDetailPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { userId, isAdmin } = useAuth();
+  const can = useCan();
+  const canApprove = can(DEFECT_APPROVE);
   const itemLabel = useItemLabels();
   const userLabel = useUserLabels();
 
@@ -97,40 +101,36 @@ export function DeviationDetailPage() {
             >
               Back
             </Button>
-            {isAdmin && (
+            {canApprove && dev.status === "PENDING" && (
               <>
-                {dev.status === "PENDING" && (
-                  <>
-                    <Button
-                      color="green"
-                      leftSection={<IconCheck size={16} />}
-                      loading={approve.isPending}
-                      onClick={() => approve.mutate()}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      color="red"
-                      variant="light"
-                      leftSection={<IconX size={16} />}
-                      loading={reject.isPending}
-                      onClick={() => reject.mutate()}
-                    >
-                      Reject
-                    </Button>
-                  </>
-                )}
-                {next && (
-                  <Button
-                    variant="light"
-                    rightSection={<IconArrowRight size={16} />}
-                    loading={advance.isPending}
-                    onClick={() => advance.mutate(next)}
-                  >
-                    Move to {next.replace(/_/g, " ")}
-                  </Button>
-                )}
+                <Button
+                  color="green"
+                  leftSection={<IconCheck size={16} />}
+                  loading={approve.isPending}
+                  onClick={() => approve.mutate()}
+                >
+                  Approve
+                </Button>
+                <Button
+                  color="red"
+                  variant="light"
+                  leftSection={<IconX size={16} />}
+                  loading={reject.isPending}
+                  onClick={() => reject.mutate()}
+                >
+                  Reject
+                </Button>
               </>
+            )}
+            {isAdmin && next && (
+              <Button
+                variant="light"
+                rightSection={<IconArrowRight size={16} />}
+                loading={advance.isPending}
+                onClick={() => advance.mutate(next)}
+              >
+                Move to {next.replace(/_/g, " ")}
+              </Button>
             )}
           </Group>
         }

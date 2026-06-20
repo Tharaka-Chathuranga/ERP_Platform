@@ -11,4 +11,6 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, UU
     List<BorrowRequest> findByRequestedByUserIdOrderByRequestedAtDesc(UUID requestedByUserId);
 
     List<BorrowRequest> findByStatusOrderByRequestedAtDesc(BorrowRequestStatus status);
+
+    long countByStatus(BorrowRequestStatus status);
 }

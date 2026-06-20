@@ -63,4 +63,16 @@ public class SupplierController {
         return suppliers.listItemsForSupplier(id).stream()
                 .map(SupplierItemResponse::from).toList();
     }
+
+    @PostMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public SupplierResponse activate(@PathVariable UUID id) {
+        return SupplierResponse.from(suppliers.activate(id));
+    }
+
+    @PostMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public SupplierResponse deactivate(@PathVariable UUID id) {
+        return SupplierResponse.from(suppliers.deactivate(id));
+    }
 }

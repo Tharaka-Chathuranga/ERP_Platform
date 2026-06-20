@@ -23,8 +23,4 @@ public enum MovementType {
     public int direction() {
         return direction;
     }
-
-    public boolean isInbound() {
-        return direction > 0;
-    }
 }

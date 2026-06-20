@@ -22,7 +22,7 @@ public class UserController {
 
     /** All users, or — when {@code department} is given — only that department's. */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER','QUALITY_ASSURANCE')")
     public List<CurrentUser> list(@RequestParam(required = false) String department) {
         return StringUtils.hasText(department)
                 ? users.listByDepartment(department)

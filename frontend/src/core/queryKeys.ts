@@ -28,6 +28,10 @@ export const qk = {
   onHand: (itemId: string) => ["item", itemId, "on-hand"] as const,
   movements: (itemId: string) => ["item", itemId, "movements"] as const,
 
+  // ── Stock movements (cross-item reporting) ──
+  allMovements: () => ["movements"] as const,
+  movementSummary: () => ["movements", "summary"] as const,
+
   // ── Suppliers ──
   suppliers: () => ["suppliers"] as const,
   supplier: (id: string) => ["supplier", id] as const,
@@ -52,5 +56,23 @@ export const qk = {
 
   // ── Deviation (defect) requests ──
   deviations: (stage?: string) => filtered("deviations", stage),
+  deviationsByStatus: (status: string) => ["deviations", "status", status] as const,
   deviation: (id: string) => ["deviation", id] as const,
+
+  // ── QA: defect review ──
+  qaDefectSummary: () => ["qa", "defect-summary"] as const,
+
+  // ── Admin: dashboard ──
+  adminSummary: () => ["admin", "summary"] as const,
+  lowStock: () => ["admin", "low-stock"] as const,
+  movementTrend: (days: number) => ["admin", "movement-trend", days] as const,
+  defectItems: (stage?: string) => filtered("admin-defect-items", stage),
+
+  // ── Admin: count-adjustment requests ──
+  countRequests: (status?: string) => filtered("count-requests", status),
+  countRequest: (id: string) => ["count-request", id] as const,
+
+  // ── Admin: user management ──
+  adminUsers: () => ["admin", "users"] as const,
+  adminUser: (id: string) => ["admin", "user", id] as const,
 } as const;

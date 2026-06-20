@@ -1,17 +1,10 @@
 import { useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Grid,
-  Group,
-  LoadingOverlay,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Card, Grid, Group, LoadingOverlay, Stack, Text } from "@mantine/core";
 import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
+import { AppButton } from "@ui/buttons";
 import { DepartmentSelect } from "@ui/primitives/DepartmentSelect";
 import { UserSelect } from "@ui/primitives/UserSelect";
 import { LineItemsEditor, newLine, type EditableLine } from "@ui/primitives/LineItemsEditor";
@@ -133,16 +126,13 @@ export function NewIssuePage() {
             </div>
 
             <Group justify="flex-end">
-              <Button variant="default" onClick={() => navigate("/issuing")}>
-                Cancel
-              </Button>
-              <Button
+              <AppButton label="Cancel" variant="default" onClick={() => navigate("/issuing")} />
+              <AppButton
+                label="Next"
                 onClick={() => mutation.mutate()}
                 loading={mutation.isPending}
                 disabled={!canSubmit}
-              >
-                Next
-              </Button>
+              />
             </Group>
           </Stack>
         </Card>
@@ -183,19 +173,17 @@ export function NewIssuePage() {
           </Card>
 
           <Group justify="flex-end">
-            <Button
+            <AppButton
+              label="Back to list"
               variant="default"
-              leftSection={<IconArrowLeft size={16} />}
+              icon={<IconArrowLeft size={16} />}
               onClick={() => navigate("/issuing")}
-            >
-              Back to list
-            </Button>
-            <Button
-              leftSection={<IconExternalLink size={16} />}
+            />
+            <AppButton
+              label="Issue the items"
+              icon={<IconExternalLink size={16} />}
               onClick={() => navigate(`/issuing/${created.id}`)}
-            >
-              Issue the items
-            </Button>
+            />
           </Group>
         </Stack>
       )}

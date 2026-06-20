@@ -94,6 +94,18 @@ public class Item extends BaseEntity {
         this.locations = newLocations != null ? new ArrayList<>(newLocations) : new ArrayList<>();
     }
 
+    /** Update the editable master-data fields (identity, code and on-hand are not touched). */
+    public void updateDetails(String name, String description, String category,
+                              BigDecimal reorderLevel, boolean criticalItem,
+                              boolean approvalRequiredForIssue) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.reorderLevel = reorderLevel != null ? reorderLevel : BigDecimal.ZERO;
+        this.criticalItem = criticalItem;
+        this.approvalRequiredForIssue = approvalRequiredForIssue;
+    }
+
     public void adjustOnHand(BigDecimal signedDelta) {
         BigDecimal next = quantityOnHand.add(signedDelta);
         if (next.signum() < 0) {

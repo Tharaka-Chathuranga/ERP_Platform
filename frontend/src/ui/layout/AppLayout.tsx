@@ -6,6 +6,13 @@ import { Sidebar } from "./Sidebar";
 import { PageTitleProvider, usePageTitle } from "./PageTitle";
 import { useAuth } from "@auth/AuthContext";
 
+/** Human-readable label per role string, shown in the header user menu. */
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Administrator",
+  STORE_KEEPER: "Store Keeper",
+  QUALITY_ASSURANCE: "Quality Assurance",
+};
+
 /** The current page's title, shown in the shared header (set via PageHeader). */
 function HeaderTitle() {
   const { title } = usePageTitle();
@@ -61,7 +68,7 @@ export function AppLayout() {
                     {username}
                   </Text>
                   <Text size="xs" c="dimmed" visibleFrom="xs">
-                    {role === "ADMIN" ? "Administrator" : "Store Keeper"}
+                    {ROLE_LABELS[role ?? ""] ?? "Store Keeper"}
                   </Text>
                 </div>
                 <Avatar color="brand" radius="xl" size={36}>
