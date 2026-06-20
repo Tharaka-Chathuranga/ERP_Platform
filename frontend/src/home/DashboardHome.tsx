@@ -11,6 +11,7 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { StatCard } from "@ui/feedback/StatCard";
 import { useAuth } from "@auth/AuthContext";
 import { useCan } from "@auth/useCan";
+import { Can } from "@auth/Can";
 import { listIssues } from "@store/goods-issuing/issuing.api";
 import { listDeviations } from "@store/defects/deviations.api";
 import { listReceivals } from "@store/goods-receiving/receiving.api";
@@ -71,27 +72,33 @@ export function DashboardHome() {
           Quick actions
         </Text>
         <Group>
-          <Button
-            leftSection={<IconPackageImport size={16} />}
-            onClick={() => navigate("/receiving/new")}
-          >
-            New item receival
-          </Button>
-          <Button
-            leftSection={<IconPackageExport size={16} />}
-            variant="light"
-            onClick={() => navigate("/issuing/new")}
-          >
-            New goods issue
-          </Button>
-          <Button
-            leftSection={<IconAlertTriangle size={16} />}
-            variant="light"
-            color="red"
-            onClick={() => navigate("/defects/new")}
-          >
-            Report defect
-          </Button>
+          <Can perform="stock:view">
+            <Button
+              leftSection={<IconPackageImport size={16} />}
+              onClick={() => navigate("/receiving/new")}
+            >
+              New item receival
+            </Button>
+          </Can>
+          <Can perform="stock:view">
+            <Button
+              leftSection={<IconPackageExport size={16} />}
+              variant="light"
+              onClick={() => navigate("/issuing/new")}
+            >
+              New goods issue
+            </Button>
+          </Can>
+          <Can perform="defect:view">
+            <Button
+              leftSection={<IconAlertTriangle size={16} />}
+              variant="light"
+              color="red"
+              onClick={() => navigate("/defects/new")}
+            >
+              Report defect
+            </Button>
+          </Can>
         </Group>
       </Card>
 

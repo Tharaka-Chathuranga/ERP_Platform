@@ -10,35 +10,41 @@ import { CountRequestsPage } from "./count-adjustments";
 
 export const storeRoutes = (
   <>
-    <Route path="receiving" element={<ReceivingListPage />} />
-    <Route path="receiving/new" element={<NewReceivalPage />} />
-    <Route path="receiving/:id" element={<ReceivalDetailPage />} />
+    {/* Core store operations — guarded on `stock:view`, matching the sidebar so a
+        hidden entry is also unreachable by URL. */}
+    <Route element={<RequirePermission perform="stock:view" />}>
+      <Route path="receiving" element={<ReceivingListPage />} />
+      <Route path="receiving/new" element={<NewReceivalPage />} />
+      <Route path="receiving/:id" element={<ReceivalDetailPage />} />
 
-    <Route path="issuing" element={<IssueListPage />} />
-    <Route path="issuing/new" element={<NewIssuePage />} />
-    <Route path="issuing/:id" element={<IssueDetailPage />} />
+      <Route path="issuing" element={<IssueListPage />} />
+      <Route path="issuing/new" element={<NewIssuePage />} />
+      <Route path="issuing/:id" element={<IssueDetailPage />} />
 
-    <Route path="store" element={<ItemsPage />} />
-    <Route path="store/suppliers" element={<SuppliersPage />} />
+      <Route path="store" element={<ItemsPage />} />
+      <Route path="store/suppliers" element={<SuppliersPage />} />
 
-    <Route path="defects" element={<DeviationBoardPage />} />
-    <Route path="defects/new" element={<NewDeviationPage />} />
+      <Route path="movements" element={<StockMovementsPage />} />
+      <Route path="movements/detail" element={<StockMovementDetailPage />} />
+
+      <Route path="warnings" element={<WarningsPage />} />
+
+      <Route path="requests" element={<RequestListPage />} />
+      <Route path="requests/:id" element={<RequestDetailPage />} />
+    </Route>
+
+    {/* Defects — reported by store keepers, reviewed by QA; both need the board. */}
+    <Route element={<RequirePermission perform="defect:view" />}>
+      <Route path="defects" element={<DeviationBoardPage />} />
+      <Route path="defects/new" element={<NewDeviationPage />} />
+      <Route path="defects/:id" element={<DeviationDetailPage />} />
+    </Route>
     <Route element={<RequirePermission perform="dashboard:admin" />}>
       <Route path="defects/items" element={<DefectItemsPage />} />
     </Route>
-    <Route path="defects/:id" element={<DeviationDetailPage />} />
 
-    <Route path="movements" element={<StockMovementsPage />} />
-    <Route path="movements/detail" element={<StockMovementDetailPage />} />
-
-    <Route element={<RequirePermission perform="stock:view" />}>
-      <Route path="warnings" element={<WarningsPage />} />
-    </Route>
     <Route element={<RequirePermission perform="count:request" />}>
       <Route path="count-requests" element={<CountRequestsPage />} />
     </Route>
-
-    <Route path="requests" element={<RequestListPage />} />
-    <Route path="requests/:id" element={<RequestDetailPage />} />
   </>
 );

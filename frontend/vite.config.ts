@@ -12,6 +12,7 @@ export default defineConfig({
       "@store": r("./src/management-section/store"),
       "@users": r("./src/management-section/users"),
       "@dashboard": r("./src/management-section/dashboard"),
+      "@qa": r("./src/management-section/qa"),
       "@home": r("./src/home"),
       "@ui": r("./src/ui"),
       "@core": r("./src/core"),

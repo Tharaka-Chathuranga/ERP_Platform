@@ -7,7 +7,7 @@
  * single new permission. The backend `@PreAuthorize` rules are the real
  * enforcement — this only drives the UX so users don't see what they can't do.
  */
-export type Role = "ADMIN" | "STORE_KEEPER";
+export type Role = "ADMIN" | "STORE_KEEPER" | "QUALITY_ASSURANCE";
 
 export type Permission =
   | "stock:view" // view stock levels, movements, low-stock warnings
@@ -16,10 +16,14 @@ export type Permission =
   | "count:approve" // approve / reject count-adjustment requests
   | "supplier:manage" // create / activate / deactivate suppliers
   | "user:manage" // manage users, roles & access
-  | "dashboard:admin"; // admin overview & cross-cutting analytics
+  | "dashboard:admin" // admin overview & cross-cutting analytics
+  | "defect:view" // see the defect (deviation) board, reports & detail
+  | "defect:approve" // review & approve / reject defect (deviation) reports
+  | "dashboard:qa"; // quality-assurance overview
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  STORE_KEEPER: ["stock:view", "count:request"],
+  STORE_KEEPER: ["stock:view", "count:request", "defect:view"],
+  QUALITY_ASSURANCE: ["defect:view", "defect:approve", "dashboard:qa"],
   ADMIN: [
     "stock:view",
     "item:edit",
@@ -28,6 +32,9 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "supplier:manage",
     "user:manage",
     "dashboard:admin",
+    "defect:view",
+    "defect:approve",
+    "dashboard:qa",
   ],
 };
 

@@ -10,6 +10,7 @@ import { createUser, updateUser } from "./users.api";
 const ROLES = [
   { value: "ADMIN", label: "Admin" },
   { value: "STORE_KEEPER", label: "Store keeper" },
+  { value: "QUALITY_ASSURANCE", label: "Quality assurance" },
 ];
 
 interface UserFormModalProps {

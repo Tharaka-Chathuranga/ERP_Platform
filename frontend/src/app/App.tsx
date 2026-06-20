@@ -7,6 +7,7 @@ import { DashboardHome } from "@home/DashboardHome";
 import { storeRoutes } from "@store/store.routes";
 import { usersRoutes } from "@users/users.routes";
 import { dashboardRoutes } from "@dashboard/dashboard.routes";
+import { qaRoutes } from "@qa/qa.routes";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -33,6 +34,7 @@ export default function App() {
         {storeRoutes}
         {usersRoutes}
         {dashboardRoutes}
+        {qaRoutes}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

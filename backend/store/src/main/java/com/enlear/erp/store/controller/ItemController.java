@@ -46,7 +46,7 @@ public class ItemController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
+    @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER','QUALITY_ASSURANCE')")
     public PageResponse<ItemResponse> list(
             @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "itemCode") Pageable pageable) {

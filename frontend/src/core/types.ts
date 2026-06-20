@@ -202,6 +202,17 @@ export interface DeviationRequest {
   approvedAt?: string;
 }
 
+/** Quality-assurance dashboard headline counts (mirrors QaDefectSummaryResponse). */
+export interface QaDefectSummary {
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  incomingCount: number;
+  inProgressCount: number;
+  finalCount: number;
+  totalCount: number;
+}
+
 // ── Borrow requests ──
 export type BorrowRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "ISSUED";
 

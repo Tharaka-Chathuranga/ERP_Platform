@@ -56,7 +56,11 @@ export const qk = {
 
   // ── Deviation (defect) requests ──
   deviations: (stage?: string) => filtered("deviations", stage),
+  deviationsByStatus: (status: string) => ["deviations", "status", status] as const,
   deviation: (id: string) => ["deviation", id] as const,
+
+  // ── QA: defect review ──
+  qaDefectSummary: () => ["qa", "defect-summary"] as const,
 
   // ── Admin: dashboard ──
   adminSummary: () => ["admin", "summary"] as const,

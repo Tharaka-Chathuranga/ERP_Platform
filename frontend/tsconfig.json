@@ -14,6 +14,7 @@
       "@store/*": ["src/management-section/store/*"],
       "@users/*": ["src/management-section/users/*"],
       "@dashboard/*": ["src/management-section/dashboard/*"],
+      "@qa/*": ["src/management-section/qa/*"],
       "@home/*": ["src/home/*"],
       "@ui/*": ["src/ui/*"],
       "@core/*": ["src/core/*"],
