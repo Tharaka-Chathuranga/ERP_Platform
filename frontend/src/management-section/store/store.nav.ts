@@ -4,7 +4,7 @@ import {
   IconArrowsExchange,
   IconBuildingWarehouse,
   IconClipboardCheck,
-  IconHome,
+  IconLayoutDashboard,
   IconListDetails,
   IconPackageExport,
   IconPackageImport,
@@ -29,7 +29,7 @@ export interface NavItem {
 }
 
 export const NAV: NavItem[] = [
-  { to: "/dashboard", label: "Home", icon: IconHome, color: "brand", description: "Your dashboard" },
+  { to: "/overview", label: "Overview", icon: IconLayoutDashboard, color: "indigo", description: "Your role overview & KPIs" },
 
   // ── Operations: day-to-day goods movement ──
   { to: "/receiving", label: "Receiving", icon: IconPackageImport, color: "teal", description: "Record goods receipts", group: "Operations", requiredPermission: STOCK_VIEW },

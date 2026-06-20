@@ -1,14 +1,14 @@
-import { IconShieldCheck } from "@tabler/icons-react";
+import { IconClipboardList } from "@tabler/icons-react";
 import type { NavItem } from "@store/store.nav";
-import { DASHBOARD_QA } from "@auth/permissions";
+import { DEFECT_APPROVE } from "@auth/permissions";
 
 export const NAV: NavItem[] = [
   {
-    to: "/qa",
-    label: "Quality Assurance",
-    icon: IconShieldCheck,
+    to: "/qa/defects",
+    label: "Defect Review",
+    icon: IconClipboardList,
     color: "grape",
-    description: "Review & approve defect reports",
-    requiredPermission: DASHBOARD_QA,
+    description: "Review & approve pending defect reports",
+    requiredPermission: DEFECT_APPROVE,
   },
 ];
