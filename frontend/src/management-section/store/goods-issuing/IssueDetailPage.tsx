@@ -1,33 +1,58 @@
 import { useState } from "react";
 import {
+  Badge,
+  Box,
   Button,
   Card,
+  Divider,
   Group,
   Modal,
   NumberInput,
   Stack,
   Text,
+  ThemeIcon,
+  Title,
 } from "@mantine/core";
-import { IconArrowLeft, IconCheck, IconPackageExport, IconX } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconCheck,
+  IconChevronLeft,
+  IconClipboardList,
+  IconHourglass,
+  IconPackageExport,
+  IconX,
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
+import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
-import { StatusBadge } from "@ui/feedback/StatusBadge";
-import { DefinitionList } from "@ui/data/DefinitionList";
 import { useAuth } from "@auth/AuthContext";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
+import type { IssueStatus } from "@core/types";
+
+const STATUS_META: Record<
+  IssueStatus,
+  { label: string; bg: string; border: string; badge: string; icon: React.ReactNode; iconColor: string }
+> = {
+  DRAFT:            { label: "Draft",            bg: "var(--mantine-color-gray-light)",   border: "var(--mantine-color-gray-5)",   badge: "gray",   icon: <IconClipboardList size={28} />, iconColor: "gray"   },
+  PENDING_APPROVAL: { label: "Pending approval", bg: "var(--mantine-color-yellow-light)", border: "var(--mantine-color-yellow-5)", badge: "yellow", icon: <IconHourglass size={28} />,     iconColor: "yellow" },
+  APPROVED:         { label: "Approved",         bg: "var(--mantine-color-green-light)",  border: "var(--mantine-color-green-5)",  badge: "green",  icon: <IconCheck size={28} />,         iconColor: "green"  },
+  ISSUED:           { label: "Issued",           bg: "var(--mantine-color-blue-light)",   border: "var(--mantine-color-blue-5)",   badge: "blue",   icon: <IconPackageExport size={28} />, iconColor: "blue"   },
+  REJECTED:         { label: "Rejected",         bg: "var(--mantine-color-red-light)",    border: "var(--mantine-color-red-5)",    badge: "red",    icon: <IconX size={28} />,             iconColor: "red"    },
+  RETURNED:         { label: "Returned",         bg: "var(--mantine-color-teal-light)",   border: "var(--mantine-color-teal-5)",   badge: "teal",   icon: <IconArrowBackUp size={28} />,   iconColor: "teal"   },
+};
 import {
-  approveIssue,
   decideIssueLines,
   getIssue,
   issueDocument,
-  rejectIssue,
   returnIssueItems,
+  type LineDecisionInput,
   type ReturnLineInput,
 } from "@store/goods-issuing/issuing.api";
 import { notifyError, notifySuccess } from "@core/notify";
+import { IssueApprovalList } from "./IssueApprovalList";
 import { IssueItemCards } from "./IssueItemCards";
 import { IssueProgress } from "./IssueProgress";
 
@@ -50,19 +75,9 @@ export function IssueDetailPage() {
     qc.invalidateQueries({ queryKey: qk.issues() });
   };
 
-  const approve = useMutation({
-    mutationFn: () => approveIssue(id, userId!),
-    onSuccess: () => { notifySuccess("All pending lines approved"); invalidate(); },
-    onError: notifyError,
-  });
-  const reject = useMutation({
-    mutationFn: () => rejectIssue(id, userId!),
-    onSuccess: () => { notifySuccess("All pending lines rejected"); invalidate(); },
-    onError: notifyError,
-  });
-  const decide = useMutation({
-    mutationFn: (d: { lineId: string; approve: boolean }) => decideIssueLines(id, userId!, [d]),
-    onSuccess: () => { notifySuccess("Line updated"); invalidate(); },
+  const decideLines = useMutation({
+    mutationFn: (decisions: LineDecisionInput[]) => decideIssueLines(id, userId!, decisions),
+    onSuccess: () => { notifySuccess("Approval decisions saved"); invalidate(); },
     onError: notifyError,
   });
   const doIssue = useMutation({
@@ -73,57 +88,17 @@ export function IssueDetailPage() {
 
   return (
     <div>
-      <PageHeader
-        title={issue?.issueNumber ?? "Goods issue"}
-        actions={
-          <Group>
-            <Button
-              variant="default"
-              leftSection={<IconArrowLeft size={16} />}
-              onClick={() => navigate("/issuing")}
-            >
-              Back
-            </Button>
-            {issue && isAdmin && issue.status === "PENDING_APPROVAL" && (
-              <>
-                <Button
-                  color="green"
-                  leftSection={<IconCheck size={16} />}
-                  loading={approve.isPending}
-                  onClick={() => approve.mutate()}
-                >
-                  Approve all
-                </Button>
-                <Button
-                  color="red"
-                  variant="light"
-                  leftSection={<IconX size={16} />}
-                  loading={reject.isPending}
-                  onClick={() => reject.mutate()}
-                >
-                  Reject all
-                </Button>
-              </>
-            )}
-            {issue && issue.status === "APPROVED" && (
-              <Button
-                leftSection={<IconPackageExport size={16} />}
-                loading={doIssue.isPending}
-                onClick={() => doIssue.mutate()}
-              >
-                Issue stock
-              </Button>
-            )}
-            {issue &&
-              (issue.status === "ISSUED" || issue.status === "RETURNED") &&
-              issue.lines.some((l) => l.returnable) && (
-                <Button variant="light" onClick={() => setReturnsOpen(true)}>
-                  Record return
-                </Button>
-              )}
-          </Group>
-        }
-      />
+      <PageHeader title={issue?.issueNumber ?? "Goods issue"} />
+
+      <Group mb="md">
+        <Button
+          variant="default"
+          leftSection={<IconChevronLeft size={16} />}
+          onClick={() => navigate("/issuing")}
+        >
+          Back
+        </Button>
+      </Group>
 
       <QueryBoundary
         loading={isLoading}
@@ -131,54 +106,114 @@ export function IssueDetailPage() {
         isEmpty={!issue}
         empty={<Text>Not found.</Text>}
       >
-        {issue && (
-          <>
-            <Card withBorder radius="md" padding="lg" mb="lg">
-              <DefinitionList
-                cols={{ base: 2, sm: 3 }}
-                items={[
-                  { label: "Status", value: <StatusBadge status={issue.status} /> },
-                  { label: "Borrowing user", value: userLabel(issue.borrowingUserId) },
-                  { label: "Store keeper", value: userLabel(issue.storeKeeperId) },
-                ]}
-              />
-              <IssueProgress status={issue.status} mt="lg" />
-            </Card>
+        {issue && (() => {
+          const meta = STATUS_META[issue.status];
+          const total = issue.lines.length;
+          const approved = issue.lines.filter((l) => l.approvalStatus === "APPROVED").length;
+          const rejected = issue.lines.filter((l) => l.approvalStatus === "REJECTED").length;
+          const pending = issue.lines.filter((l) => l.approvalStatus === "PENDING").length;
+          const canReturn =
+            (issue.status === "ISSUED" || issue.status === "RETURNED") &&
+            issue.lines.some((l) => l.returnable);
 
-            <Card withBorder radius="md" padding="lg">
-              <Text fw={600} mb="sm">
-                Items
-              </Text>
-              <IssueItemCards
-                lines={issue.lines}
-                itemLabel={itemLabel}
-                renderActions={(line) =>
-                  isAdmin && line.approvalStatus === "PENDING" ? (
-                    <Group gap="xs">
+          return (
+          <>
+            <IssueProgress status={issue.status} mb="lg" />
+
+            <Card
+              withBorder
+              radius="md"
+              padding={0}
+              style={{ borderColor: meta.border, borderWidth: 1.5, position: "relative", overflow: "visible" }}
+            >
+              {/* Floating status icon */}
+              <Box style={{ position: "absolute", top: -20, right: -20, zIndex: 1 }}>
+                <ThemeIcon
+                  size={40}
+                  radius="xl"
+                  color={meta.iconColor}
+                  variant="filled"
+                  style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.18)" }}
+                >
+                  {meta.icon}
+                </ThemeIcon>
+              </Box>
+
+              {/* Coloured header */}
+              <Box
+                p="lg"
+                bg={meta.bg}
+                style={{ borderRadius: "calc(var(--mantine-radius-md) - 1px) calc(var(--mantine-radius-md) - 1px) 0 0" }}
+              >
+                <Group justify="space-between" align="flex-start" wrap="nowrap">
+                  <Stack gap={6}>
+                    <Badge color={meta.badge} variant="filled" size="md">
+                      {meta.label}
+                    </Badge>
+                    <Title order={4}>Goods Issue</Title>
+                  </Stack>
+                  <Stack gap={2} align="flex-end">
+                    <Text size="sm" fw={500}>{userLabel(issue.borrowingUserId)}</Text>
+                    <Text size="xs" c="dimmed">Store keeper · {userLabel(issue.storeKeeperId)}</Text>
+                    {issue.approvedByUserId && (
+                      <Text size="xs" c="dimmed">
+                        Approved by {userLabel(issue.approvedByUserId)}
+                        {issue.approvedAt ? ` · ${dayjs(issue.approvedAt).format("MMM D, YYYY")}` : ""}
+                      </Text>
+                    )}
+                  </Stack>
+                </Group>
+              </Box>
+
+              {/* Item summary */}
+              <Group gap="xl" px="lg" py="lg">
+                <Stat label="Total items" value={total} />
+                <Stat label="Approved" value={approved} color="green" />
+                <Stat label="Rejected" value={rejected} color="red" />
+                <Stat label="Pending" value={pending} color="yellow.7" />
+              </Group>
+
+              <Divider />
+
+              {/* Items — approval checklist while pending, otherwise the decided list */}
+              <Box p="lg">
+                <Title order={5} mb="sm">
+                  {isAdmin && issue.status === "PENDING_APPROVAL" ? "Items needing approval" : "Items"}
+                </Title>
+                {isAdmin && issue.status === "PENDING_APPROVAL" ? (
+                  <IssueApprovalList
+                    lines={issue.lines}
+                    itemLabel={itemLabel}
+                    submitting={decideLines.isPending}
+                    onSubmit={(decisions) => decideLines.mutate(decisions)}
+                  />
+                ) : (
+                  <IssueItemCards lines={issue.lines} itemLabel={itemLabel} />
+                )}
+              </Box>
+
+              {/* Document actions */}
+              {(issue.status === "APPROVED" || canReturn) && (
+                <>
+                  <Divider />
+                  <Group justify="flex-end" p="lg">
+                    {issue.status === "APPROVED" && (
                       <Button
-                        size="xs"
-                        color="green"
-                        variant="light"
-                        leftSection={<IconCheck size={14} />}
-                        loading={decide.isPending}
-                        onClick={() => decide.mutate({ lineId: line.id, approve: true })}
+                        leftSection={<IconPackageExport size={16} />}
+                        loading={doIssue.isPending}
+                        onClick={() => doIssue.mutate()}
                       >
-                        Approve
+                        Issue stock
                       </Button>
-                      <Button
-                        size="xs"
-                        color="red"
-                        variant="light"
-                        leftSection={<IconX size={14} />}
-                        loading={decide.isPending}
-                        onClick={() => decide.mutate({ lineId: line.id, approve: false })}
-                      >
-                        Reject
+                    )}
+                    {canReturn && (
+                      <Button variant="light" onClick={() => setReturnsOpen(true)}>
+                        Record return
                       </Button>
-                    </Group>
-                  ) : null
-                }
-              />
+                    )}
+                  </Group>
+                </>
+              )}
             </Card>
 
             <ReturnsModal
@@ -195,9 +230,23 @@ export function IssueDetailPage() {
               onDone={invalidate}
             />
           </>
-        )}
+          );
+        })()}
       </QueryBoundary>
     </div>
+  );
+}
+
+function Stat({ label, value, color }: { label: string; value: number; color?: string }) {
+  return (
+    <Stack gap={2}>
+      <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+        {label}
+      </Text>
+      <Text fw={700} size="lg" c={color}>
+        {value}
+      </Text>
+    </Stack>
   );
 }
 

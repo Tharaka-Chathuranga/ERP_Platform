@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,14 +82,13 @@ public class Issue extends BaseEntity {
         }
     }
 
-    /** Approves or rejects a single line, then re-derives the document status. */
-    public void decideLine(UUID lineId, boolean approve, UUID approverId) {
+    public void decideLine(UUID lineId, boolean approve, BigDecimal approvedQuantity, UUID approverId) {
         IssueLine line = lines.stream()
                 .filter(l -> l.getId().equals(lineId))
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("IssueLine", lineId));
         if (approve) {
-            line.approve(approverId);
+            line.approve(approverId, approvedQuantity);
         } else {
             line.reject(approverId);
         }

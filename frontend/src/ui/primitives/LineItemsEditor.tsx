@@ -1,4 +1,4 @@
-import { ActionIcon, Button, NumberInput, Paper, Stack, Switch, Table, Text } from "@mantine/core";
+import { ActionIcon, Button, Group, NumberInput, Paper, Stack, Switch, Table, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { ItemSelect } from "./ItemSelect";

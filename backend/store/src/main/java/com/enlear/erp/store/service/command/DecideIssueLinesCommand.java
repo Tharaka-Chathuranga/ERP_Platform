@@ -1,5 +1,6 @@
 package com.enlear.erp.store.service.command;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,7 +10,6 @@ public record DecideIssueLinesCommand(
         UUID approverId,
         List<Decision> decisions) {
 
-    /** {@code approve == true} approves the line; otherwise it is rejected. */
-    public record Decision(UUID lineId, boolean approve) {
+    public record Decision(UUID lineId, boolean approve, BigDecimal approvedQuantity) {
     }
 }
