@@ -1,9 +1,35 @@
-import { ActionIcon, Box, Divider, Group, NavLink, Stack, Text, Tooltip } from "@mantine/core";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import { useMemo } from "react";
+import { ActionIcon, Box, Divider, Group, NavLink, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconChevronLeft, IconChevronRight, type Icon } from "@tabler/icons-react";
+import { type ComponentType, useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { useCan } from "@auth/useCan";
 import { GROUP_META, NAV, type NavItem } from "@nav/nav.registry";
+
+function NavIcon({
+  icon: Icon,
+  color,
+  active,
+  size = 30,
+  iconSize = 15,
+}: {
+  icon: ComponentType<{ size?: number }> | Icon;
+  color: string;
+  active: boolean;
+  size?: number;
+  iconSize?: number;
+}) {
+  return (
+    <ThemeIcon
+      size={size}
+      radius="md"
+      color={color}
+      variant={active ? "filled" : "light"}
+      style={{ transition: "background 0.15s, color 0.15s", flexShrink: 0 }}
+    >
+      <Icon size={iconSize} />
+    </ThemeIcon>
+  );
+}
 
 type NavBlock =
   | { kind: "leaf"; item: NavItem }
@@ -108,7 +134,7 @@ export function Sidebar({
         </Box>
         {!collapsed && (
           <div>
-            <Text fw={700} fz="sm" lh={1.2} c="dark.8">
+            <Text fw={700} fz="sm" lh={1.2}>
               ERP Platform
             </Text>
             <Text fz={10} c="dimmed" lh={1.3} style={{ letterSpacing: "0.02em" }}>
@@ -122,15 +148,15 @@ export function Sidebar({
 
       {collapsed ? (
         <Stack gap={4}>
-          {items.map(({ to, label, icon: Icon }) => (
+          {items.map(({ to, label, icon: Icon, color }) => (
             <Tooltip key={to} label={label} position="right" withArrow>
               <NavLink
                 component={RouterNavLink}
                 to={to}
                 active={isActive(to)}
-                leftSection={<Icon size={20} />}
+                leftSection={<NavIcon icon={Icon} color={color} active={isActive(to)} />}
                 onClick={onNavigate}
-                variant="light"
+                variant="subtle"
                 aria-label={label}
                 styles={{ section: { marginInlineEnd: 0 }, body: { display: "none" } }}
                 style={{ justifyContent: "center" }}
@@ -142,7 +168,7 @@ export function Sidebar({
         <Stack gap={4}>
           {blocks.map((block) => {
             if (block.kind === "leaf") {
-              const { to, label, icon: Icon } = block.item;
+              const { to, label, icon: Icon, color } = block.item;
               return (
                 <NavLink
                   key={to}
@@ -150,9 +176,9 @@ export function Sidebar({
                   to={to}
                   label={label}
                   active={isActive(to)}
-                  leftSection={<Icon size={20} />}
+                  leftSection={<NavIcon icon={Icon} color={color} active={isActive(to)} />}
                   onClick={onNavigate}
-                  variant="light"
+                  variant="subtle"
                 />
               );
             }
@@ -164,21 +190,25 @@ export function Sidebar({
               <NavLink
                 key={block.name}
                 label={block.name}
-                leftSection={GroupIcon ? <GroupIcon size={20} /> : undefined}
-                childrenOffset={28}
+                leftSection={
+                  GroupIcon ? (
+                    <NavIcon icon={GroupIcon} color={meta.color} active={groupActive} />
+                  ) : undefined
+                }
+                childrenOffset={36}
                 defaultOpened={groupActive}
-                variant="light"
+                variant="subtle"
               >
-                {block.items.map(({ to, label, icon: Icon }) => (
+                {block.items.map(({ to, label, icon: Icon, color }) => (
                   <NavLink
                     key={to}
                     component={RouterNavLink}
                     to={to}
                     label={label}
                     active={isActive(to)}
-                    leftSection={<Icon size={18} />}
+                    leftSection={<NavIcon icon={Icon} color={color} active={isActive(to)} size={24} iconSize={13} />}
                     onClick={onNavigate}
-                    variant="light"
+                    variant="subtle"
                   />
                 ))}
               </NavLink>
