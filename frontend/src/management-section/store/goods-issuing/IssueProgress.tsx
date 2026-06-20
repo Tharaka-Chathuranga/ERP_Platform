@@ -33,8 +33,11 @@ export function IssueProgress({ status, ...rest }: { status: IssueStatus } & Rec
     { label: status === "RETURNED" ? "Returned" : "Issued", icon: <IconPackageExport size={16} /> },
   ];
 
+  // The furthest-reached step keeps its label on mobile so the stage is always readable.
+  const current = Math.min(active, steps.length - 1);
+
   return (
-    <Group gap={0} wrap="nowrap" {...rest}>
+    <Group gap={0} wrap="nowrap" style={{ overflowX: "auto" }} {...rest}>
       {steps.map((step, i) => {
         const reached = i <= active;
         const completed = !step.danger && i < active;
@@ -62,7 +65,12 @@ export function IssueProgress({ status, ...rest }: { status: IssueStatus } & Rec
               }}
             >
               {step.icon}
-              <Text size="sm" fw={600} style={{ color: "inherit" }}>
+              <Text
+                size="sm"
+                fw={600}
+                style={{ color: "inherit" }}
+                visibleFrom={i === current ? undefined : "sm"}
+              >
                 {step.label}
               </Text>
 
