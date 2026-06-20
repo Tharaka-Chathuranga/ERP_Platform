@@ -44,7 +44,7 @@ function StageColumn({ stage, title }: { stage: DeviationStage; title: string })
   });
 
   return (
-    <Card withBorder radius="md" padding="md" bg="var(--mantine-color-gray-0)">
+    <Card withBorder radius="md" padding="md">
       <Text fw={600} mb="sm">
         {title}{" "}
         <Badge variant="light" ml={4}>

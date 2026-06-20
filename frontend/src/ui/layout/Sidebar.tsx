@@ -1,19 +1,40 @@
-import { ActionIcon, Box, Group, NavLink, Stack, Title, Tooltip } from "@mantine/core";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import { useMemo } from "react";
+import { ActionIcon, Box, Divider, Group, NavLink, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconChevronLeft, IconChevronRight, type Icon } from "@tabler/icons-react";
+import { type ComponentType, useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { useCan } from "@auth/useCan";
 import { GROUP_META, NAV, type NavItem } from "@nav/nav.registry";
+
+function NavIcon({
+  icon: Icon,
+  color,
+  active,
+  size = 30,
+  iconSize = 15,
+}: {
+  icon: ComponentType<{ size?: number }> | Icon;
+  color: string;
+  active: boolean;
+  size?: number;
+  iconSize?: number;
+}) {
+  return (
+    <ThemeIcon
+      size={size}
+      radius="md"
+      color={color}
+      variant={active ? "filled" : "light"}
+      style={{ transition: "background 0.15s, color 0.15s", flexShrink: 0 }}
+    >
+      <Icon size={iconSize} />
+    </ThemeIcon>
+  );
+}
 
 type NavBlock =
   | { kind: "leaf"; item: NavItem }
   | { kind: "group"; name: string; items: NavItem[] };
 
-/**
- * Main navigation. Entries sharing a `group` are nested under one collapsible
- * parent so a feature area (e.g. Store) shows as a single item with sub-options
- * instead of many flat rows. When `collapsed`, the rail flattens to leaf icons.
- */
 export function Sidebar({
   collapsed = false,
   onToggle,
@@ -26,14 +47,11 @@ export function Sidebar({
   const location = useLocation();
   const can = useCan();
 
-  // Only entries the user is allowed to see.
   const items = useMemo(
     () => NAV.filter((n) => !n.requiredPermission || can(n.requiredPermission)),
     [can],
   );
 
-  // Arrange into ordered blocks: ungrouped leaves stay inline; grouped entries
-  // collapse into a single parent emitted at the position of their first member.
   const blocks = useMemo<NavBlock[]>(() => {
     const out: NavBlock[] = [];
     const seen = new Set<string>();
@@ -52,8 +70,6 @@ export function Sidebar({
     return out;
   }, [items]);
 
-  // The active entry is the most specific (longest) matching path, so e.g.
-  // /store/suppliers highlights "Suppliers" rather than also "Items" (/store).
   const activeTo = useMemo(() => {
     let best: string | null = null;
     for (const { to } of items) {
@@ -89,24 +105,58 @@ export function Sidebar({
         </Tooltip>
       )}
 
-      <Group h={40} mb="md" px={collapsed ? 0 : "xs"} justify={collapsed ? "center" : "flex-start"}>
-        <Title order={4} c="brand">
-          {collapsed ? "ERP" : "ERP Platform"}
-        </Title>
+      {/* Brand mark */}
+      <Group
+        h={52}
+        mb="xs"
+        px={collapsed ? 0 : "xs"}
+        justify={collapsed ? "center" : "flex-start"}
+        align="center"
+        gap="sm"
+        wrap="nowrap"
+      >
+        <Box
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            background: "linear-gradient(135deg, var(--mantine-color-brand-5) 0%, var(--mantine-color-brand-8) 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            boxShadow: "0 2px 8px rgba(44, 75, 128, 0.3)",
+          }}
+        >
+          <Text fw={800} fz={16} c="white" lh={1} style={{ userSelect: "none" }}>
+            E
+          </Text>
+        </Box>
+        {!collapsed && (
+          <div>
+            <Text fw={700} fz="sm" lh={1.2}>
+              ERP Platform
+            </Text>
+            <Text fz={10} c="dimmed" lh={1.3} style={{ letterSpacing: "0.02em" }}>
+              Enterprise Resource
+            </Text>
+          </div>
+        )}
       </Group>
 
-      {/* Collapsed rail: flatten everything to leaf icons with tooltips. */}
+      <Divider mb="sm" />
+
       {collapsed ? (
         <Stack gap={4}>
-          {items.map(({ to, label, icon: Icon }) => (
+          {items.map(({ to, label, icon: Icon, color }) => (
             <Tooltip key={to} label={label} position="right" withArrow>
               <NavLink
                 component={RouterNavLink}
                 to={to}
                 active={isActive(to)}
-                leftSection={<Icon size={20} />}
+                leftSection={<NavIcon icon={Icon} color={color} active={isActive(to)} />}
                 onClick={onNavigate}
-                variant="light"
+                variant="subtle"
                 aria-label={label}
                 styles={{ section: { marginInlineEnd: 0 }, body: { display: "none" } }}
                 style={{ justifyContent: "center" }}
@@ -118,7 +168,7 @@ export function Sidebar({
         <Stack gap={4}>
           {blocks.map((block) => {
             if (block.kind === "leaf") {
-              const { to, label, icon: Icon } = block.item;
+              const { to, label, icon: Icon, color } = block.item;
               return (
                 <NavLink
                   key={to}
@@ -126,9 +176,9 @@ export function Sidebar({
                   to={to}
                   label={label}
                   active={isActive(to)}
-                  leftSection={<Icon size={20} />}
+                  leftSection={<NavIcon icon={Icon} color={color} active={isActive(to)} />}
                   onClick={onNavigate}
-                  variant="light"
+                  variant="subtle"
                 />
               );
             }
@@ -140,21 +190,25 @@ export function Sidebar({
               <NavLink
                 key={block.name}
                 label={block.name}
-                leftSection={GroupIcon ? <GroupIcon size={20} /> : undefined}
-                childrenOffset={28}
+                leftSection={
+                  GroupIcon ? (
+                    <NavIcon icon={GroupIcon} color={meta.color} active={groupActive} />
+                  ) : undefined
+                }
+                childrenOffset={36}
                 defaultOpened={groupActive}
-                variant="light"
+                variant="subtle"
               >
-                {block.items.map(({ to, label, icon: Icon }) => (
+                {block.items.map(({ to, label, icon: Icon, color }) => (
                   <NavLink
                     key={to}
                     component={RouterNavLink}
                     to={to}
                     label={label}
                     active={isActive(to)}
-                    leftSection={<Icon size={18} />}
+                    leftSection={<NavIcon icon={Icon} color={color} active={isActive(to)} size={24} iconSize={13} />}
                     onClick={onNavigate}
-                    variant="light"
+                    variant="subtle"
                   />
                 ))}
               </NavLink>
