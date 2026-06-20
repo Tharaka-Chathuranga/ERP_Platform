@@ -144,7 +144,6 @@ export function Sidebar({
         )}
       </Group>
 
-      <Divider mb="sm" />
 
       {collapsed ? (
         <Stack gap={4}>
