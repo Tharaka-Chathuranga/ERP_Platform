@@ -1,6 +1,6 @@
-import { AppShell, Avatar, Burger, Divider, Group, Menu, Text, Title } from "@mantine/core";
+import { ActionIcon, AppShell, Avatar, Burger, Divider, Group, Menu, Text, Title, useMantineColorScheme } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { IconLogout } from "@tabler/icons-react";
+import { IconLogout, IconMoon, IconSun } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { PageTitleProvider, usePageTitle } from "./PageTitle";
@@ -27,6 +27,7 @@ export function AppLayout() {
   const isMobile = useMediaQuery("(max-width: 48em)");
   const { username, role, logout } = useAuth();
   const navigate = useNavigate();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   const expanded = isMobile || desktopOpened;
   const initials = (username ?? "?").trim().slice(0, 2).toUpperCase();
@@ -49,16 +50,9 @@ export function AppLayout() {
         padding="lg"
         styles={{
           header: {
-            background: "white",
-            borderBottom: "1px solid var(--mantine-color-gray-2)",
-            boxShadow: "0 1px 4px rgba(0, 0, 0, 0.06)",
           },
           navbar: {
-            background: "var(--mantine-color-gray-0)",
-            borderRight: "1px solid var(--mantine-color-gray-2)",
-          },
-          main: {
-            background: "var(--mantine-color-gray-0)",
+            borderRight: "1px solid var(--mantine-color-default-border)",
           },
         }}
       >
@@ -69,6 +63,14 @@ export function AppLayout() {
             <HeaderTitle />
 
             <Group gap="sm" ml="auto" wrap="nowrap" align="center">
+              <ActionIcon
+                variant="subtle"
+                size="lg"
+                aria-label="Toggle color scheme"
+                onClick={toggleColorScheme}
+              >
+                {colorScheme === "dark" ? <IconSun size={18} /> : <IconMoon size={18} />}
+              </ActionIcon>
               <Divider orientation="vertical" style={{ height: 28 }} />
               <Menu position="bottom-end" withArrow shadow="md" width={200}>
                 <Menu.Target>
