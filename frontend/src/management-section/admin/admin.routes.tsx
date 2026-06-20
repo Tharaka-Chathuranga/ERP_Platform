@@ -1,11 +1,7 @@
 import { Route } from "react-router-dom";
-import { RequirePermission } from "@auth/RequirePermission";
-import { DASHBOARD_ADMIN } from "@auth/permissions";
-import { AdminAnalyticsPage } from "./AdminAnalyticsPage";
+import { OverviewPage } from "./OverviewPage";
 
-/** Admin analytics route, guarded by the `dashboard:admin` permission. */
+/** Overview route — accessible to all authenticated users; renders role-specific content. */
 export const adminRoutes = (
-  <Route element={<RequirePermission perform={DASHBOARD_ADMIN} />}>
-    <Route path="overview" element={<AdminAnalyticsPage />} />
-  </Route>
+  <Route path="overview" element={<OverviewPage />} />
 );
