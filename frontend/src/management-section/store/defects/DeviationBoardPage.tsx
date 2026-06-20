@@ -1,12 +1,14 @@
 import { Badge, Box, Button, Card, Group, Loader, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconCircleCheck, IconPackageImport, IconPlus, IconProgress } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
+import { TableToolbar } from "@ui/data/TableToolbar";
 import { listDeviations } from "@store/defects/deviations.api";
-import type { DeviationRequest, DeviationStage } from "@core/types";
+import type { DeviationRequest, DeviationStage, DeviationStatus } from "@core/types";
 
 const STAGE_META: Record<DeviationStage, { title: string; color: string; icon: React.ReactNode }> = {
   INCOMING:    { title: "Incoming",    color: "indigo", icon: <IconPackageImport size={16} /> },
@@ -16,30 +18,74 @@ const STAGE_META: Record<DeviationStage, { title: string; color: string; icon: R
 
 const STAGES: DeviationStage[] = ["INCOMING", "IN_PROGRESS", "FINAL"];
 
+const STATUS_OPTIONS: { value: string; label: string }[] = [
+  { value: "", label: "All statuses" },
+  { value: "PENDING", label: "Pending" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "REJECTED", label: "Rejected" },
+];
+
+type DateRange = [Date | null, Date | null];
+
+interface DeviationFilters {
+  status: string;
+  dateRange: DateRange;
+}
+
+const EMPTY_FILTERS: DeviationFilters = { status: "", dateRange: [null, null] };
+
+/** Apply the board-level status/date filters to a stage's deviations. */
+function applyFilters(items: DeviationRequest[], filters: DeviationFilters): DeviationRequest[] {
+  const [from, to] = filters.dateRange;
+
+  return items.filter((d) => {
+    if (filters.status && d.status !== (filters.status as DeviationStatus)) return false;
+    if (from && dayjs(d.requestedAt).isBefore(dayjs(from), "day")) return false;
+    if (to && dayjs(d.requestedAt).isAfter(dayjs(to), "day")) return false;
+    return true;
+  });
+}
+
 export function DeviationBoardPage() {
   const navigate = useNavigate();
+  const [filters, setFilters] = useState<DeviationFilters>(EMPTY_FILTERS);
 
   return (
     <div>
-      <PageHeader
-        title="Defects"
+      <PageHeader title="Defects" />
+
+      <TableToolbar
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/defects/new")}>
             Report defect
           </Button>
         }
+        filters={[
+          {
+            label: "Status",
+            value: filters.status,
+            onChange: (value) => setFilters((f) => ({ ...f, status: value })),
+            options: STATUS_OPTIONS,
+          },
+          {
+            type: "daterange",
+            label: "Requested between",
+            value: filters.dateRange,
+            onChange: (value) => setFilters((f) => ({ ...f, dateRange: value })),
+          },
+        ]}
       />
 
       <SimpleGrid cols={{ base: 1, md: 3 }}>
         {STAGES.map((stage) => (
-          <StageColumn key={stage} stage={stage} />
+          <StageColumn key={stage} stage={stage} filters={filters} />
         ))}
       </SimpleGrid>
     </div>
   );
 }
 
-function StageColumn({ stage }: { stage: DeviationStage }) {
+function StageColumn({ stage, filters }: { stage: DeviationStage; filters: DeviationFilters }) {
   const navigate = useNavigate();
   const meta = STAGE_META[stage];
 
@@ -47,6 +93,8 @@ function StageColumn({ stage }: { stage: DeviationStage }) {
     queryKey: ["deviations", stage],
     queryFn: () => listDeviations(stage),
   });
+
+  const filtered = useMemo(() => applyFilters(data ?? [], filters), [data, filters]);
 
   return (
     <Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
@@ -62,7 +110,7 @@ function StageColumn({ stage }: { stage: DeviationStage }) {
           <Text fw={600} size="sm">{meta.title}</Text>
         </Group>
         <Badge variant="light" color={meta.color} size="sm">
-          {data?.length ?? 0}
+          {filtered.length}
         </Badge>
       </Group>
 
@@ -73,12 +121,12 @@ function StageColumn({ stage }: { stage: DeviationStage }) {
             <Loader size="sm" color={meta.color} />
           </Group>
         )}
-        {!isLoading && data?.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <Text c="dimmed" size="sm" ta="center" py="md">
             No defects here
           </Text>
         )}
-        {data?.map((d) => (
+        {filtered.map((d) => (
           <DeviationCard key={d.id} d={d} stageColor={meta.color} onClick={() => navigate(`/defects/${d.id}`)} />
         ))}
       </Stack>
