@@ -106,7 +106,7 @@ export function NewIssuePage() {
             </Grid>
 
             {selectedUser && (
-              <Card withBorder radius="md" padding="sm" bg="var(--mantine-color-brand-0)">
+              <Card withBorder radius="md" padding="sm" bg="var(--mantine-color-brand-light)">
                 <DefinitionList
                   items={[
                     { label: "User", value: selectedUser.displayName || selectedUser.username },

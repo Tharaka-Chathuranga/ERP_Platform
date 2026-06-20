@@ -105,7 +105,7 @@ export function DataTable<T>({
               return (
                 <Table.Tr
                   key={key}
-                  bg={activeRowKey === key ? "var(--mantine-color-brand-0)" : undefined}
+                  bg={activeRowKey === key ? "var(--mantine-color-brand-light)" : undefined}
                   style={onRowClick ? { cursor: "pointer" } : undefined}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                 >

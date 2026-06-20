@@ -34,8 +34,8 @@ import { TopMoversChart } from "./TopMoversChart";
 const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
 
 const WELCOME_BANNER_STYLE = {
-  background: "linear-gradient(135deg, var(--mantine-color-brand-0) 0%, white 70%)",
-  borderColor: "var(--mantine-color-brand-2)",
+  background: "linear-gradient(135deg, light-dark(var(--mantine-color-brand-0), var(--mantine-color-dark-6)) 0%, light-dark(white, var(--mantine-color-dark-8)) 70%)",
+  borderColor: "var(--mantine-color-default-border)",
 } as const;
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
