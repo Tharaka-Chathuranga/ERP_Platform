@@ -3,10 +3,10 @@ import type { ReactNode } from "react";
 import { useAuth } from "@auth/AuthContext";
 import { AppLayout } from "@ui/layout/AppLayout";
 import { LoginPage } from "@screens/LoginPage";
-import { DashboardHome } from "@home/DashboardHome";
+import { DashboardPage } from "@dashboard/DashboardPage";
 import { storeRoutes } from "@store/store.routes";
 import { usersRoutes } from "@users/users.routes";
-import { dashboardRoutes } from "@dashboard/dashboard.routes";
+import { adminRoutes } from "@admin/admin.routes";
 import { qaRoutes } from "@qa/qa.routes";
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -27,13 +27,13 @@ export default function App() {
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardHome />} />
+        <Route path="dashboard" element={<DashboardPage />} />
 
         {/* Each management feature contributes its own route subtree;
             permission-gated routes guard themselves via RequirePermission. */}
         {storeRoutes}
         {usersRoutes}
-        {dashboardRoutes}
+        {adminRoutes}
         {qaRoutes}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

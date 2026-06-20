@@ -1,12 +1,13 @@
 import { Route } from "react-router-dom";
 import { RequirePermission } from "@auth/RequirePermission";
-import { QaDashboardPage } from "./QaDashboardPage";
-import { QaDefectReviewPage } from "./QaDefectReviewPage";
+import { DASHBOARD_QA } from "@auth/permissions";
+import { QualityAssuranceDashboardPage } from "./QualityAssuranceDashboardPage";
+import { QualityAssuranceDefectReviewPage } from "./QualityAssuranceDefectReviewPage";
 
 /** Quality-assurance routes, guarded by the `dashboard:qa` permission. */
 export const qaRoutes = (
-  <Route element={<RequirePermission perform="dashboard:qa" />}>
-    <Route path="qa" element={<QaDashboardPage />} />
-    <Route path="qa/defects" element={<QaDefectReviewPage />} />
+  <Route element={<RequirePermission perform={DASHBOARD_QA} />}>
+    <Route path="qa" element={<QualityAssuranceDashboardPage />} />
+    <Route path="qa/defects" element={<QualityAssuranceDefectReviewPage />} />
   </Route>
 );

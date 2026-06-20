@@ -13,7 +13,7 @@ import { StatCard } from "@ui/feedback/StatCard";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { getQaDefectSummary } from "./qa.api";
 
-export function QaDashboardPage() {
+export function QualityAssuranceDashboardPage() {
   const summary = useQuery({ queryKey: qk.qaDefectSummary(), queryFn: getQaDefectSummary });
   const s = summary.data;
 

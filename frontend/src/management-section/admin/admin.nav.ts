@@ -1,5 +1,6 @@
 import { IconLayoutDashboard } from "@tabler/icons-react";
 import type { NavItem } from "@store/store.nav";
+import { DASHBOARD_ADMIN } from "@auth/permissions";
 
 export const NAV: NavItem[] = [
   {
@@ -8,6 +9,6 @@ export const NAV: NavItem[] = [
     icon: IconLayoutDashboard,
     color: "indigo",
     description: "Admin analytics & KPIs",
-    requiredPermission: "dashboard:admin",
+    requiredPermission: DASHBOARD_ADMIN,
   },
 ];

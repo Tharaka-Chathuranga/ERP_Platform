@@ -14,6 +14,7 @@ import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { DataTable, type Column } from "@ui/data";
 import { useAuth } from "@auth/AuthContext";
 import { useCan } from "@auth/useCan";
+import { DEFECT_APPROVE } from "@auth/permissions";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import {
   advanceDeviationStage,
@@ -47,7 +48,7 @@ export function DeviationDetailPage() {
   const qc = useQueryClient();
   const { userId, isAdmin } = useAuth();
   const can = useCan();
-  const canApprove = can("defect:approve");
+  const canApprove = can(DEFECT_APPROVE);
   const itemLabel = useItemLabels();
   const userLabel = useUserLabels();
 

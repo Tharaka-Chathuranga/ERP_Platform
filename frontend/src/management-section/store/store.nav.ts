@@ -12,6 +12,7 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import type { Permission } from "@auth/permissions";
+import { STOCK_VIEW, COUNT_REQUEST, DEFECT_VIEW, DASHBOARD_ADMIN } from "@auth/permissions";
 
 /** Single source of truth for the main navigation — shared by the sidebar and
  *  the dashboard tiles so they can never drift apart. */
@@ -28,17 +29,20 @@ export interface NavItem {
 }
 
 export const NAV: NavItem[] = [
-  { to: "/dashboard", label: "Home", icon: IconHome, color: "brand", description: "Your store at a glance" },
+  { to: "/dashboard", label: "Home", icon: IconHome, color: "brand", description: "Your dashboard" },
 
-  // ── Store group: the whole store domain lives under one collapsible parent ──
-  // Core store operations are gated on `stock:view` so non-store roles (e.g. QA) don't see them.
-  { to: "/receiving", label: "Receiving", icon: IconPackageImport, color: "teal", description: "Record goods receipts", group: "Store", requiredPermission: "stock:view" },
-  { to: "/issuing", label: "Goods Issue", icon: IconPackageExport, color: "yellow", description: "Issue stock to users & record returns", group: "Store", requiredPermission: "stock:view" },
-  { to: "/store", label: "Items", icon: IconBuildingWarehouse, color: "brand", description: "Items & stock levels", group: "Store", requiredPermission: "stock:view" },
-  { to: "/store/suppliers", label: "Suppliers", icon: IconTruck, color: "brand", description: "Supplier master data", group: "Store", requiredPermission: "stock:view" },
-  { to: "/movements", label: "Stock Movements", icon: IconArrowsExchange, color: "grape", description: "Top movements & full ledger", group: "Store", requiredPermission: "stock:view" },
-  { to: "/warnings", label: "Warnings", icon: IconAlertHexagon, color: "red", description: "Items below reorder level", group: "Store", requiredPermission: "stock:view" },
-  { to: "/count-requests", label: "Count Requests", icon: IconClipboardCheck, color: "indigo", description: "Stock count adjustments", group: "Store", requiredPermission: "count:request" },
-  { to: "/defects", label: "Defects", icon: IconAlertTriangle, color: "red", description: "Report & triage deviations", group: "Store", requiredPermission: "defect:view" },
-  { to: "/defects/items", label: "Defect Items", icon: IconListDetails, color: "red", description: "Every defective item line", group: "Store", requiredPermission: "dashboard:admin" },
+  // ── Operations: day-to-day goods movement ──
+  { to: "/receiving", label: "Receiving", icon: IconPackageImport, color: "teal", description: "Record goods receipts", group: "Operations", requiredPermission: STOCK_VIEW },
+  { to: "/issuing", label: "Goods Issue", icon: IconPackageExport, color: "yellow", description: "Issue stock to users & record returns", group: "Operations", requiredPermission: STOCK_VIEW },
+  { to: "/movements", label: "Stock Movements", icon: IconArrowsExchange, color: "grape", description: "Full movement ledger", group: "Operations", requiredPermission: STOCK_VIEW },
+
+  // ── Inventory: master data & stock levels ──
+  { to: "/store", label: "Items", icon: IconBuildingWarehouse, color: "brand", description: "Item catalog & stock levels", group: "Inventory", requiredPermission: STOCK_VIEW },
+  { to: "/store/suppliers", label: "Suppliers", icon: IconTruck, color: "brand", description: "Supplier master data", group: "Inventory", requiredPermission: STOCK_VIEW },
+  { to: "/warnings", label: "Low Stock", icon: IconAlertHexagon, color: "red", description: "Items below reorder level", group: "Inventory", requiredPermission: STOCK_VIEW },
+
+  // ── Compliance: adjustments & defects ──
+  { to: "/count-requests", label: "Count Requests", icon: IconClipboardCheck, color: "indigo", description: "Stock count adjustments", group: "Compliance", requiredPermission: COUNT_REQUEST },
+  { to: "/defects", label: "Defects", icon: IconAlertTriangle, color: "orange", description: "Report & triage deviations", group: "Compliance", requiredPermission: DEFECT_VIEW },
+  { to: "/defects/items", label: "Defect Line Items", icon: IconListDetails, color: "orange", description: "Every defective item line", group: "Compliance", requiredPermission: DASHBOARD_ADMIN },
 ];

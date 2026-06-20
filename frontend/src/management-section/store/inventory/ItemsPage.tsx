@@ -7,6 +7,7 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, type Column } from "@ui/data";
 import { useCan } from "@auth/useCan";
+import { ITEM_EDIT } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { deactivateItem, listItems } from "@store/inventory/items.api";
@@ -17,7 +18,7 @@ import { ItemEditModal } from "./ItemEditModal";
 
 export function ItemsPage() {
   const can = useCan();
-  const canEdit = can("item:edit");
+  const canEdit = can(ITEM_EDIT);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");

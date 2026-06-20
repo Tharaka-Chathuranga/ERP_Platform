@@ -9,7 +9,7 @@ import { qk } from "@core/queryKeys";
 import type { DeviationRequest } from "@core/types";
 import { listDeviationsByStatus } from "./qa.api";
 
-export function QaDefectReviewPage() {
+export function QualityAssuranceDefectReviewPage() {
   const navigate = useNavigate();
   const userLabel = useUserLabels();
 

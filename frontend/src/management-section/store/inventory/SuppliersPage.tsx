@@ -9,6 +9,7 @@ import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, type Column } from "@ui/data";
 import { useCan } from "@auth/useCan";
 import { useItemLabels } from "@core/hooks/useLookups";
+import { SUPPLIER_MANAGE } from "@auth/permissions";
 import { notifyError, notifySuccess } from "@core/notify";
 import {
   activateSupplier,
@@ -22,7 +23,7 @@ import { SupplierFormModal } from "./SupplierFormModal";
 export function SuppliersPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const canManage = useCan()("supplier:manage");
+  const canManage = useCan()(SUPPLIER_MANAGE);
   const itemLabel = useItemLabels();
   const [selected, setSelected] = useState<Supplier | null>(null);
   const [creating, setCreating] = useState(false);

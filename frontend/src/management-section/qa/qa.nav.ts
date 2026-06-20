@@ -1,5 +1,6 @@
 import { IconShieldCheck } from "@tabler/icons-react";
 import type { NavItem } from "@store/store.nav";
+import { DASHBOARD_QA } from "@auth/permissions";
 
 export const NAV: NavItem[] = [
   {
@@ -8,6 +9,6 @@ export const NAV: NavItem[] = [
     icon: IconShieldCheck,
     color: "grape",
     description: "Review & approve defect reports",
-    requiredPermission: "dashboard:qa",
+    requiredPermission: DASHBOARD_QA,
   },
 ];

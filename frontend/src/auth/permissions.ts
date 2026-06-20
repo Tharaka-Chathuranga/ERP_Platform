@@ -42,3 +42,15 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 export function permissionsFor(role: string | null | undefined): Set<Permission> {
   return new Set(ROLE_PERMISSIONS[(role as Role) ?? ""] ?? []);
 }
+
+// Named exports for permission keys to avoid string literals across the UI.
+export const STOCK_VIEW: Permission = "stock:view";
+export const ITEM_EDIT: Permission = "item:edit";
+export const COUNT_REQUEST: Permission = "count:request";
+export const COUNT_APPROVE: Permission = "count:approve";
+export const SUPPLIER_MANAGE: Permission = "supplier:manage";
+export const USER_MANAGE: Permission = "user:manage";
+export const DASHBOARD_ADMIN: Permission = "dashboard:admin";
+export const DEFECT_VIEW: Permission = "defect:view";
+export const DEFECT_APPROVE: Permission = "defect:approve";
+export const DASHBOARD_QA: Permission = "dashboard:qa";

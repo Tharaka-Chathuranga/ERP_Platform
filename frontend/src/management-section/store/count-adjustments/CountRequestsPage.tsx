@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useAuth } from "@auth/AuthContext";
 import { Can } from "@auth/Can";
+import { COUNT_APPROVE } from "@auth/permissions";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
@@ -97,7 +98,7 @@ export function CountRequestsPage() {
             align: "right",
             render: (r) =>
               r.status === "PENDING" ? (
-                <Can perform="count:approve">
+                <Can perform={COUNT_APPROVE}>
                   <Group gap="xs" justify="flex-end" wrap="nowrap">
                     <Anchor component="button" type="button" onClick={() => !busy && approve.mutate(r.id)}>
                       Approve

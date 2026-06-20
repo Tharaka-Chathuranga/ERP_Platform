@@ -1,69 +1,75 @@
 import { Button, Card, Group, SimpleGrid, Text, ThemeIcon } from "@mantine/core";
 import {
+  IconAlertHexagon,
   IconAlertTriangle,
+  IconClipboardCheck,
   IconPackageExport,
   IconPackageImport,
-  IconBuildingWarehouse,
 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { PageHeader } from "@ui/layout/PageHeader";
-import { StatCard } from "@ui/feedback/StatCard";
 import { useAuth } from "@auth/AuthContext";
 import { useCan } from "@auth/useCan";
 import { Can } from "@auth/Can";
-import { listIssues } from "@store/goods-issuing/issuing.api";
+import { STOCK_VIEW, DEFECT_VIEW } from "@auth/permissions";
+import { qk } from "@core/queryKeys";
 import { listDeviations } from "@store/defects/deviations.api";
 import { listReceivals } from "@store/goods-receiving/receiving.api";
-import { listItems } from "@store/inventory/items.api";
+import { getLowStockItems } from "@store/inventory/items.api";
+import { listCountRequests } from "@store/count-adjustments/count-requests.api";
+import { PageHeader } from "@ui/layout/PageHeader";
+import { StatCard } from "@ui/feedback/StatCard";
 import { NAV } from "@nav/nav.registry";
 
-export function DashboardHome() {
+export function StorekeeperDashboard() {
   const { username } = useAuth();
   const can = useCan();
   const navigate = useNavigate();
 
-  const pendingIssues = useQuery({
-    queryKey: ["issues", "PENDING_APPROVAL"],
-    queryFn: () => listIssues("PENDING_APPROVAL"),
-  });
-  const openDeviations = useQuery({
-    queryKey: ["deviations", "INCOMING"],
+  const lowStock = useQuery({ queryKey: qk.lowStock(), queryFn: getLowStockItems });
+  const openDefects = useQuery({
+    queryKey: qk.deviations("INCOMING"),
     queryFn: () => listDeviations("INCOMING"),
   });
-  const recentReceivals = useQuery({ queryKey: ["receivals"], queryFn: () => listReceivals() });
-  const items = useQuery({ queryKey: ["items", ""], queryFn: () => listItems() });
+  const recentReceivals = useQuery({ queryKey: qk.receivals(), queryFn: () => listReceivals() });
+  const pendingCountRequests = useQuery({
+    queryKey: qk.countRequests("PENDING"),
+    queryFn: () => listCountRequests("PENDING"),
+  });
 
   return (
     <div>
-      <PageHeader
-        title={`Welcome back, ${username ?? ""} 👋`}
-      />
+      <PageHeader title={`Welcome back, ${username ?? ""}`} />
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} mb="lg">
         <StatCard
-          label="Pending approvals"
-          value={pendingIssues.data?.totalElements ?? 0}
-          icon={<IconPackageExport size={22} />}
-          color="yellow"
-        />
-        <StatCard
-          label="Incoming defects"
-          value={openDeviations.data?.length ?? 0}
-          icon={<IconAlertTriangle size={22} />}
+          label="Low stock items"
+          value={lowStock.data?.length ?? 0}
+          icon={<IconAlertHexagon size={22} />}
           color="red"
+          to="/warnings"
+          hint="Below reorder level"
         />
         <StatCard
-          label="Receivals"
+          label="Pending count requests"
+          value={pendingCountRequests.data?.length ?? 0}
+          icon={<IconClipboardCheck size={22} />}
+          color="indigo"
+          to="/count-requests"
+        />
+        <StatCard
+          label="Open defects"
+          value={openDefects.data?.length ?? 0}
+          icon={<IconAlertTriangle size={22} />}
+          color="orange"
+          to="/defects"
+        />
+        <StatCard
+          label="Total receivals"
           value={recentReceivals.data?.totalElements ?? 0}
           icon={<IconPackageImport size={22} />}
           color="teal"
-        />
-        <StatCard
-          label="Catalog items"
-          value={items.data?.totalElements ?? 0}
-          icon={<IconBuildingWarehouse size={22} />}
-          color="brand"
+          to="/receiving"
         />
       </SimpleGrid>
 
@@ -71,25 +77,25 @@ export function DashboardHome() {
         <Text fw={600} mb="md">
           Quick actions
         </Text>
-        <Group>
-          <Can perform="stock:view">
+        <Group wrap="wrap">
+          <Can perform={STOCK_VIEW}>
             <Button
               leftSection={<IconPackageImport size={16} />}
               onClick={() => navigate("/receiving/new")}
             >
-              New item receival
+              New receival
             </Button>
           </Can>
-          <Can perform="stock:view">
+          <Can perform={STOCK_VIEW}>
             <Button
               leftSection={<IconPackageExport size={16} />}
               variant="light"
               onClick={() => navigate("/issuing/new")}
             >
-              New goods issue
+              Issue goods
             </Button>
           </Can>
-          <Can perform="defect:view">
+          <Can perform={DEFECT_VIEW}>
             <Button
               leftSection={<IconAlertTriangle size={16} />}
               variant="light"
@@ -102,19 +108,20 @@ export function DashboardHome() {
         </Group>
       </Card>
 
-      {/* One box per sidebar section, kept in sync via the shared NAV list. */}
       <Text fw={600} mb="sm">
         Sections
       </Text>
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-        {NAV.filter((n) => n.to !== "/dashboard" && (!n.requiredPermission || can(n.requiredPermission))).map(({ to, label, icon: Icon, color, description }) => (
+        {NAV.filter(
+          (n) => n.to !== "/dashboard" && (!n.requiredPermission || can(n.requiredPermission)),
+        ).map(({ to, label, icon: Icon, color, description }) => (
           <Card
             key={to}
             withBorder
             radius="md"
             padding="lg"
             onClick={() => navigate(to)}
-            style={{ cursor: "pointer", height: "100%" }}
+            style={{ cursor: "pointer" }}
           >
             <ThemeIcon color={color} variant="light" size={44} radius="md" mb="sm">
               <Icon size={24} />

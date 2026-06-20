@@ -17,13 +17,13 @@ import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { StatCard } from "@ui/feedback/StatCard";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { LowStockItem } from "@core/types";
-import { getDashboardSummary, getMovementTrend } from "./dashboard.api";
+import { getDashboardSummary, getMovementTrend } from "./admin.api";
 import { MovementTrendChart } from "./MovementTrendChart";
 import { TopMoversChart } from "./TopMoversChart";
 
 const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
 
-export function OverviewPage() {
+export function AdminAnalyticsPage() {
   const itemLabel = useItemLabels();
 
   const summary = useQuery({ queryKey: qk.adminSummary(), queryFn: getDashboardSummary });
