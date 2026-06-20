@@ -44,5 +44,5 @@ export const NAV: NavItem[] = [
   // ── Compliance: adjustments & defects ──
   { to: "/count-requests", label: "Count Requests", icon: IconClipboardCheck, color: "indigo", description: "Stock count adjustments", group: "Compliance", requiredPermission: COUNT_REQUEST },
   { to: "/defects", label: "Defects", icon: IconAlertTriangle, color: "orange", description: "Report & triage deviations", group: "Compliance", requiredPermission: DEFECT_VIEW },
-  { to: "/defects/items", label: "Defect Line Items", icon: IconListDetails, color: "orange", description: "Every defective item line", group: "Compliance", requiredPermission: DASHBOARD_ADMIN },
+  { to: "/defects/items", label: "Defect Items", icon: IconListDetails, color: "orange", description: "Every defective item line", group: "Compliance", requiredPermission: DASHBOARD_ADMIN },
 ];

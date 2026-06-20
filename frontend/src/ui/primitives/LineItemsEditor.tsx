@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Group, NumberInput, Paper, Stack, Switch, Table, Text } from "@mantine/core";
+import { ActionIcon, Button, NumberInput, Paper, Stack, Switch, Table, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { ItemSelect } from "./ItemSelect";
@@ -37,11 +37,9 @@ export function LineItemsEditor({
   const add = () => onChange([...lines, emptyLine(showUnitCost, showReturnable)]);
 
   const addButton = (
-    <Group mt="xs">
-      <Button variant="light" size="xs" leftSection={<IconPlus size={14} />} onClick={add}>
-        Add line
-      </Button>
-    </Group>
+    <Button variant="default" size="xs" leftSection={<IconPlus size={14} />} onClick={add}>
+      Add item
+    </Button>
   );
 
   if (isMobile) {
@@ -164,6 +162,11 @@ export function LineItemsEditor({
               </Table.Td>
             </Table.Tr>
           ))}
+          <Table.Tr>
+            <Table.Td pt="xs">
+              {addButton}
+            </Table.Td>
+          </Table.Tr>
         </Table.Tbody>
       </Table>
       {lines.length === 0 && (
@@ -171,7 +174,6 @@ export function LineItemsEditor({
           No lines yet.
         </Text>
       )}
-      {addButton}
     </div>
   );
 }
