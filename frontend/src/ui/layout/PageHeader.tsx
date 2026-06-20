@@ -1,25 +1,18 @@
-import { Group } from "@mantine/core";
-import { useEffect, type ReactNode } from "react";
-import { usePageTitle } from "./PageTitle";
+import { Group, Title } from "@mantine/core";
+import { type ReactNode } from "react";
 
 interface PageHeaderProps {
   title: string;
   actions?: ReactNode;
 }
 
-/** Publishes the page title to the shared top header. Renders any page-level
- *  action buttons (right-aligned) above the content; nothing else. */
 export function PageHeader({ title, actions }: PageHeaderProps) {
-  const { setTitle } = usePageTitle();
-
-  useEffect(() => {
-    setTitle(title);
-  }, [title, setTitle]);
-
-  if (!actions) return null;
   return (
-    <Group justify="flex-end" mb="lg" wrap="wrap">
-      {actions}
+    <Group justify="space-between" align="center" mb="lg" wrap="wrap">
+      <Title order={2} fw={700}>
+        {title}
+      </Title>
+      {actions && <Group gap="sm">{actions}</Group>}
     </Group>
   );
 }

@@ -1,9 +1,8 @@
-import { ActionIcon, AppShell, Avatar, Burger, Divider, Group, Menu, Text, Title, useMantineColorScheme } from "@mantine/core";
+import { ActionIcon, AppShell, Avatar, Burger, Divider, Group, Menu, Text, useMantineColorScheme } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconLogout, IconMoon, IconSun } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { PageTitleProvider, usePageTitle } from "./PageTitle";
 import { NotificationsPopover } from "./NotificationsPopover";
 import { useAuth } from "@auth/AuthContext";
 
@@ -12,15 +11,6 @@ const ROLE_LABELS: Record<string, string> = {
   STORE_KEEPER: "Store Keeper",
   QUALITY_ASSURANCE: "Quality Assurance",
 };
-
-function HeaderTitle() {
-  const { title } = usePageTitle();
-  return (
-    <Title order={3} fw={700} fz="xl" lineClamp={1} pl="md">
-      {title}
-    </Title>
-  );
-}
 
 export function AppLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -39,8 +29,7 @@ export function AppLayout() {
   }
 
   return (
-    <PageTitleProvider>
-      <AppShell
+    <AppShell
         layout="alt"
         header={{ height: 64 }}
         navbar={{
@@ -53,13 +42,14 @@ export function AppLayout() {
           navbar: {
             borderRight: "1px solid var(--mantine-color-default-border)",
           },
+          main: {
+            paddingTop: "var(--app-shell-header-height, 0rem)",
+          },
         }}
       >
         <AppShell.Header withBorder={false}>
           <Group h="100%" px="lg" gap="sm" wrap="nowrap">
             <Burger opened={mobileOpened} onClick={toggleMobile} hiddenFrom="sm" size="sm" />
-
-            <HeaderTitle />
 
             <Group gap="sm" ml="auto" wrap="nowrap" align="center">
               <NotificationsPopover />
@@ -115,6 +105,5 @@ export function AppLayout() {
           <Outlet />
         </AppShell.Main>
       </AppShell>
-    </PageTitleProvider>
   );
 }

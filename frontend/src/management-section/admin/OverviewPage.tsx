@@ -26,7 +26,6 @@ import { getQaDefectSummary } from "@qa/qa.api";
 import { DataTable } from "@ui/data/DataTable";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { StatCard } from "@ui/feedback/StatCard";
-import { PageHeader } from "@ui/layout/PageHeader";
 import type { LowStockItem } from "@core/types";
 import { getDashboardSummary, getMovementTrend } from "./admin.api";
 import { MovementTrendChart } from "./MovementTrendChart";
@@ -52,7 +51,6 @@ function AdminOverview() {
 
   return (
     <Stack gap="xl">
-      <PageHeader title="Admin overview" />
 
       <Paper p="xl" radius="md" withBorder style={WELCOME_BANNER_STYLE}>
         <Title order={2} fw={700} mb={4}>
@@ -122,7 +120,6 @@ function StorekeeperOverview() {
 
   return (
     <Stack gap="xl">
-      <PageHeader title="Overview" />
 
       <Paper p="xl" radius="md" withBorder style={WELCOME_BANNER_STYLE}>
         <Title order={2} fw={700} mb={4}>
@@ -196,7 +193,6 @@ function QualityAssuranceOverview() {
 
   return (
     <Stack gap="xl">
-      <PageHeader title="Quality assurance" />
 
       <Paper p="xl" radius="md" withBorder style={WELCOME_BANNER_STYLE}>
         <Group justify="space-between" align="flex-end" wrap="wrap" gap="md">
