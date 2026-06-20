@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { Card, Grid, Group, LoadingOverlay, Stack, Text } from "@mantine/core";
-import { IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
+import { ActionIcon, Box, Button, Card, Divider, Grid, Group, LoadingOverlay, Stack, Text, ThemeIcon } from "@mantine/core";
+import { IconArrowLeft, IconChevronLeft, IconChevronRight, IconExternalLink, IconUser, IconX } from "@tabler/icons-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
+import { StepHeading } from "@ui/layout/StepHeading";
 import { AppButton } from "@ui/buttons";
 import { DepartmentSelect } from "@ui/primitives/DepartmentSelect";
 import { UserSelect } from "@ui/primitives/UserSelect";
@@ -75,16 +76,25 @@ export function NewIssuePage() {
     <div>
       <PageHeader title="New goods issue" />
 
+      <Group mb="md">
+        <Button variant="default" leftSection={<IconChevronLeft size={16} />} onClick={() => navigate("/issuing")}>
+          Back
+        </Button>
+      </Group>
+
       <IssueProgress status={created?.status ?? "DRAFT"} mb="lg" />
 
       {active === 0 && (
-        <Card withBorder radius="md" padding="lg" pos="relative">
+        <Card withBorder radius="md" padding={0} pos="relative">
           <LoadingOverlay
             visible={mutation.isPending}
             overlayProps={{ blur: 1 }}
             loaderProps={{ children: "Creating issue…" }}
           />
-          <Stack>
+
+          {/* Step 1 — Who is borrowing */}
+          <Box p="xl">
+            <StepHeading number={1} title="Who is borrowing the items?" />
             <Grid>
               <Grid.Col span={{ base: 12, sm: 6 }}>
                 <DepartmentSelect
@@ -106,35 +116,60 @@ export function NewIssuePage() {
             </Grid>
 
             {selectedUser && (
-              <Card withBorder radius="md" padding="sm" bg="var(--mantine-color-brand-light)">
-                <DefinitionList
-                  items={[
-                    { label: "User", value: selectedUser.displayName || selectedUser.username },
-                    { label: "Username", value: selectedUser.username },
-                    { label: "Role", value: roleLabel(selectedUser.role) },
-                    { label: "Department", value: selectedUser.department },
-                  ]}
-                />
+              <Card withBorder radius="md" padding="sm" mt="md" bg="var(--mantine-color-brand-light)">
+                <Group justify="space-between" align="flex-start" wrap="nowrap">
+                  <Group gap="sm" align="flex-start" wrap="nowrap" style={{ flex: 1 }}>
+                    <ThemeIcon size={40} radius="xl" variant="light" color="brand">
+                      <IconUser size={22} />
+                    </ThemeIcon>
+                    <Box style={{ flex: 1 }}>
+                      <DefinitionList
+                        items={[
+                          { label: "User", value: selectedUser.displayName || selectedUser.username },
+                          { label: "Username", value: selectedUser.username },
+                          { label: "Role", value: roleLabel(selectedUser.role) },
+                          { label: "Department", value: selectedUser.department },
+                        ]}
+                      />
+                    </Box>
+                  </Group>
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    aria-label="Remove selected user"
+                    onClick={() => setBorrowingUserId(null)}
+                  >
+                    <IconX size={16} />
+                  </ActionIcon>
+                </Group>
               </Card>
             )}
+          </Box>
 
-            <div>
-              <Text fw={600} mb="xs">
-                Items
-              </Text>
-              <LineItemsEditor lines={lines} onChange={setLines} showReturnable />
-            </div>
+          {/* Step 2 — Items */}
+          <Divider />
+          <Box p="xl">
+            <StepHeading number={2} title="Which items are being issued?" />
+            <LineItemsEditor lines={lines} onChange={setLines} showReturnable />
+          </Box>
 
-            <Group justify="flex-end">
-              <AppButton label="Cancel" variant="default" onClick={() => navigate("/issuing")} />
-              <AppButton
-                label="Next"
+          {/* Submit */}
+          <Box p="xl" pt={0}>
+            <Group justify="space-between">
+              <Button variant="default" onClick={() => navigate("/issuing")}>
+                Cancel
+              </Button>
+              <Button
+                radius="md"
+                rightSection={<IconChevronRight size={16} />}
                 onClick={() => mutation.mutate()}
                 loading={mutation.isPending}
                 disabled={!canSubmit}
-              />
+              >
+                Next
+              </Button>
             </Group>
-          </Stack>
+          </Box>
         </Card>
       )}
 

@@ -5,6 +5,7 @@ import { IconCheck, IconChevronLeft, IconChevronRight, IconCircleCheck, IconPack
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
+import { StepHeading } from "@ui/layout/StepHeading";
 import { LineItemsEditor, newLine, type EditableLine } from "@ui/primitives/LineItemsEditor";
 import { UserSelect } from "@ui/primitives/UserSelect";
 import { useAuth } from "@auth/AuthContext";
@@ -17,24 +18,6 @@ const STAGE_OPTIONS: { label: string; value: DeviationStage; icon: React.ReactNo
   { label: "In progress", value: "IN_PROGRESS", icon: <IconProgress size={28} /> },
   { label: "Final", value: "FINAL", icon: <IconCircleCheck size={28} /> },
 ];
-
-function StepHeading({ number, title }: { number: number; title: string }) {
-  return (
-    <Group gap="sm" mb="md">
-      <Box
-        style={{
-          width: 32, height: 32, borderRadius: "50%",
-          border: "2px solid var(--mantine-color-brand-5)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Text size="sm" fw={700} c="brand">{number}</Text>
-      </Box>
-      <Text size="md" fw={600}>{title}</Text>
-    </Group>
-  );
-}
 
 export function NewDeviationPage() {
   const navigate = useNavigate();
@@ -165,11 +148,10 @@ export function NewDeviationPage() {
         </Box>
 
         {/* Submit */}
-        <Divider />
-        <Box p="xl">
+        <Box p="xl" pt={0}>
           <Group justify="flex-end">
             <Button
-              radius="xl"
+              radius="md"
               rightSection={<IconChevronRight size={16} />}
               onClick={() => mutation.mutate()}
               loading={mutation.isPending}
