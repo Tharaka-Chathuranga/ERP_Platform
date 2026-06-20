@@ -4,6 +4,7 @@ import { IconLogout, IconMoon, IconSun } from "@tabler/icons-react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { PageTitleProvider, usePageTitle } from "./PageTitle";
+import { NotificationsPopover } from "./NotificationsPopover";
 import { useAuth } from "@auth/AuthContext";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -49,8 +50,6 @@ export function AppLayout() {
         }}
         padding="lg"
         styles={{
-          header: {
-          },
           navbar: {
             borderRight: "1px solid var(--mantine-color-default-border)",
           },
@@ -63,6 +62,7 @@ export function AppLayout() {
             <HeaderTitle />
 
             <Group gap="sm" ml="auto" wrap="nowrap" align="center">
+              <NotificationsPopover />
               <ActionIcon
                 variant="subtle"
                 size="lg"
