@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { Anchor, Group } from "@mantine/core";
+import { Button, Group, Text } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useAuth } from "@auth/AuthContext";
-import { Can } from "@auth/Can";
+import { useCan } from "@auth/useCan";
 import { COUNT_APPROVE } from "@auth/permissions";
 import { useItemLabels, useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { AppButton } from "@ui/buttons/AppButton";
-import { DataTable, TableToolbar } from "@ui/data";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { CountAdjustmentRequest, CountAdjustmentStatus } from "@core/types";
@@ -27,6 +28,7 @@ const FILTERS = ["ALL", "PENDING", "APPROVED", "REJECTED"] as const;
 export function CountRequestsPage() {
   const qc = useQueryClient();
   const { userId } = useAuth();
+  const canApprove = useCan()(COUNT_APPROVE);
   const itemLabel = useItemLabels();
   const userLabel = useUserLabels();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("PENDING");
@@ -75,6 +77,36 @@ export function CountRequestsPage() {
       (r.reason ?? "").toLowerCase().includes(term),
   );
 
+  const columns: Column<CountAdjustmentRequest>[] = [
+    { header: "Item", render: (r) => itemLabel(r.itemId), emphasis: true },
+    { header: "Current", render: (r) => r.currentQuantity, align: "right" },
+    { header: "Requested", render: (r) => r.requestedQuantity, align: "right" },
+    { header: "Reason", render: (r) => r.reason ?? "—" },
+    { header: "By", render: (r) => userLabel(r.requestedByUserId) },
+    { header: "Raised", render: (r) => dayjs(r.requestedAt).format("MMM D, HH:mm") },
+    { header: "Status", render: (r) => <StatusBadge status={r.status} /> },
+  ];
+
+  if (canApprove) {
+    columns.push({
+      header: "Actions",
+      align: "right",
+      render: (r) =>
+        r.status === "PENDING" ? (
+          <Group gap="xs" justify="flex-end" wrap="nowrap">
+            <Button size="xs" variant="light" color="green" leftSection={<IconCheck size={14} />} styles={{ root: { paddingInline: 8, paddingBlock: 1 }, section: { marginInlineEnd: 2 } }} onClick={() => !busy && approve.mutate(r.id)}>
+              Approve
+            </Button>
+            <Button size="xs" variant="light" color="red" leftSection={<IconX size={14} />} styles={{ root: { paddingInline: 8, paddingBlock: 1 }, section: { marginInlineEnd: 2 } }} onClick={() => !busy && reject.mutate(r.id)}>
+              Reject
+            </Button>
+          </Group>
+        ) : (
+          <Text size="xs" c="dimmed">Already taken</Text>
+        ),
+    });
+  }
+
   return (
     <div>
       <PageHeader title="Count requests" />
@@ -95,37 +127,7 @@ export function CountRequestsPage() {
         loading={isLoading}
         error={error}
         rowKey={(r) => r.id}
-        columns={[
-          { header: "Item", render: (r) => itemLabel(r.itemId), emphasis: true },
-          { header: "Current", render: (r) => r.currentQuantity, align: "right" },
-          { header: "Requested", render: (r) => r.requestedQuantity, align: "right" },
-          { header: "Reason", render: (r) => r.reason ?? "—" },
-          { header: "By", render: (r) => userLabel(r.requestedByUserId) },
-          { header: "Raised", render: (r) => dayjs(r.requestedAt).format("MMM D, HH:mm") },
-          { header: "Status", render: (r) => <StatusBadge status={r.status} /> },
-          {
-            header: "",
-            align: "right",
-            render: (r) =>
-              r.status === "PENDING" ? (
-                <Can perform={COUNT_APPROVE}>
-                  <Group gap="xs" justify="flex-end" wrap="nowrap">
-                    <Anchor component="button" type="button" onClick={() => !busy && approve.mutate(r.id)}>
-                      Approve
-                    </Anchor>
-                    <Anchor
-                      component="button"
-                      type="button"
-                      c="red"
-                      onClick={() => !busy && reject.mutate(r.id)}
-                    >
-                      Reject
-                    </Anchor>
-                  </Group>
-                </Can>
-              ) : null,
-          },
-        ]}
+        columns={columns}
       />
 
       <CountRequestModal opened={creating} onClose={() => setCreating(false)} />
