@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Badge, Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, type Column } from "@ui/data/DataTable";
+import { TableToolbar } from "@ui/data";
 import { qk } from "@core/queryKeys";
 import type { Receival } from "@core/types";
 import { listReceivals } from "@store/goods-receiving/receiving.api";
@@ -14,6 +15,7 @@ import { listSuppliers } from "@store/inventory/suppliers.api";
 
 export function ReceivingListPage() {
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
   const { data, isLoading, error } = useQuery({
     queryKey: qk.receivals(),
     queryFn: () => listReceivals(),
@@ -24,6 +26,13 @@ export function ReceivingListPage() {
     const map = new Map(suppliers.data?.map((s) => [s.id, `${s.code} — ${s.name}`]));
     return (id?: string, name?: string) => (id ? map.get(id) ?? id.slice(0, 8) : name ?? "—");
   }, [suppliers.data]);
+
+  const term = search.trim().toLowerCase();
+  const rows = (data?.content ?? []).filter(
+    (r) =>
+      r.receivalNumber.toLowerCase().includes(term) ||
+      supplierName(r.supplierId, r.supplierName).toLowerCase().includes(term),
+  );
 
   const columns: Column<Receival>[] = [
     { header: "Receival №", emphasis: true, render: (r) => r.receivalNumber },
@@ -61,8 +70,10 @@ export function ReceivingListPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Receiving"
+      <PageHeader title="Receiving" />
+
+      <TableToolbar
+        search={{ value: search, onChange: setSearch, placeholder: "Search receival № or supplier…" }}
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/receiving/new")}>
             New item receival
@@ -72,7 +83,7 @@ export function ReceivingListPage() {
 
       <DataTable
         columns={columns}
-        data={data?.content}
+        data={rows}
         rowKey={(r) => r.id}
         onRowClick={(r) => navigate(`/receiving/${r.id}`)}
         loading={isLoading}

@@ -55,7 +55,7 @@ public class IssueService {
     public Issue decideLines(DecideIssueLinesCommand cmd) {
         Issue issue = getIssue(cmd.issueId());
         for (DecideIssueLinesCommand.Decision d : cmd.decisions()) {
-            issue.decideLine(d.lineId(), d.approve(), cmd.approverId());
+            issue.decideLine(d.lineId(), d.approve(), d.approvedQuantity(), cmd.approverId());
         }
         return issues.save(issue);
     }

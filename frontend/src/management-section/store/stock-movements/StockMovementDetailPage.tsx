@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
-import { Anchor, Badge, Group, MultiSelect, Select } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
+import { Badge, Button } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
-import { DataTable, type Column } from "@ui/data";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { useItemCodes } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
@@ -35,26 +34,34 @@ export function StockMovementDetailPage() {
   const itemCode = useItemCodes();
   const all = useQuery({ queryKey: qk.allMovements(), queryFn: listMovements });
 
-  const [types, setTypes] = useState<string[]>([]);
-  const [itemId, setItemId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
+  const [itemFilter, setItemFilter] = useState("ALL");
   const [range, setRange] = useState<[Date | null, Date | null]>([null, null]);
 
   const rows = all.data?.content ?? [];
 
-  // Item options, deduped from whatever actually moved.
+  const typeOptions = [
+    { value: "ALL", label: "All types" },
+    ...TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") })),
+  ];
+
   const itemOptions = useMemo(() => {
     const ids = [...new Set(rows.map((m) => m.itemId))];
-    return ids
-      .map((id) => ({ value: id, label: itemCode(id) }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+    return [
+      { value: "ALL", label: "All items" },
+      ...ids.map((id) => ({ value: id, label: itemCode(id) })).sort((a, b) => a.label.localeCompare(b.label)),
+    ];
   }, [rows, itemCode]);
 
   const [from, to] = range;
+  const term = search.trim().toLowerCase();
   const visible = rows.filter((m) => {
-    if (types.length && !types.includes(m.type)) return false;
-    if (itemId && m.itemId !== itemId) return false;
+    if (typeFilter !== "ALL" && m.type !== typeFilter) return false;
+    if (itemFilter !== "ALL" && m.itemId !== itemFilter) return false;
     if (from && dayjs(m.occurredAt).isBefore(dayjs(from).startOf("day"))) return false;
     if (to && dayjs(m.occurredAt).isAfter(dayjs(to).endOf("day"))) return false;
+    if (term && !itemCode(m.itemId).toLowerCase().includes(term) && !(m.reference ?? "").toLowerCase().includes(term)) return false;
     return true;
   });
 
@@ -71,43 +78,20 @@ export function StockMovementDetailPage() {
     <div>
       <PageHeader title="Movement detail" />
 
-      <Anchor component={Link} to="/movements" size="sm" mb="md" display="inline-block">
-        <Group gap={4}>
-          <IconArrowLeft size={16} />
-          Back to overview
-        </Group>
-      </Anchor>
-
-      <Group mb="md" align="flex-end" wrap="wrap">
-        <MultiSelect
-          label="Type"
-          placeholder="All types"
-          data={TYPES.map((t) => ({ value: t, label: t.replace(/_/g, " ") }))}
-          value={types}
-          onChange={setTypes}
-          clearable
-          w={260}
-        />
-        <Select
-          label="Item"
-          placeholder="All items"
-          data={itemOptions}
-          value={itemId}
-          onChange={setItemId}
-          clearable
-          searchable
-          w={220}
-        />
-        <DatePickerInput
-          type="range"
-          label="Date range"
-          placeholder="Any date"
-          value={range}
-          onChange={setRange}
-          clearable
-          w={260}
-        />
-      </Group>
+      <TableToolbar
+        leftSection={
+          <Button component={Link} to="/movements" variant="default" leftSection={<IconArrowLeft size={16} />}>
+            Back to overview
+          </Button>
+        }
+        filters={[
+          { label: "Type", value: typeFilter, onChange: setTypeFilter, options: typeOptions },
+          { label: "Item", value: itemFilter, onChange: setItemFilter, options: itemOptions },
+          { type: "daterange", label: "Date", value: range, onChange: setRange },
+        ]}
+        search={{ value: search, onChange: setSearch, placeholder: "Search item code or reference…" }}
+        searchPosition="right"
+      />
 
       <DataTable
         columns={columns}

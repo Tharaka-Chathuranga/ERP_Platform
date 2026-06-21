@@ -3,7 +3,7 @@ import { RequirePermission } from "@auth/RequirePermission";
 import { STOCK_VIEW, DEFECT_VIEW, DASHBOARD_ADMIN, COUNT_REQUEST } from "@auth/permissions";
 import { ReceivingListPage, NewReceivalPage, ReceivalDetailPage } from "./goods-receiving";
 import { IssueListPage, NewIssuePage, IssueDetailPage } from "./goods-issuing";
-import { ItemsPage, SuppliersPage, WarningsPage } from "./inventory";
+import { ItemsPage, ItemDetailPage, SuppliersPage, WarningsPage } from "./inventory";
 import { DeviationBoardPage, NewDeviationPage, DeviationDetailPage, DefectItemsPage } from "./defects";
 import { RequestListPage, RequestDetailPage } from "./borrow-requests";
 import { StockMovementsPage, StockMovementDetailPage } from "./stock-movements";
@@ -23,6 +23,7 @@ export const storeRoutes = (
       <Route path="issuing/:id" element={<IssueDetailPage />} />
 
       <Route path="store" element={<ItemsPage />} />
+      <Route path="store/:id" element={<ItemDetailPage />} />
       <Route path="store/suppliers" element={<SuppliersPage />} />
 
       <Route path="movements" element={<StockMovementsPage />} />

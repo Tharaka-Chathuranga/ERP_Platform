@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, SegmentedControl } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { DataTable, PersonCell, type Column } from "@ui/data";
+import { DataTable, TableToolbar, PersonCell, type Column } from "@ui/data";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { listBorrowRequests } from "@store/borrow-requests/borrowRequests.api";
 import type { BorrowRequest, BorrowRequestStatus } from "@core/types";
@@ -43,16 +43,16 @@ export function RequestListPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Borrow Requests"
+      <PageHeader title="Borrow Requests" />
+
+      <TableToolbar
+        filters={[{ label: "Status", value: filter, onChange: setFilter, options: FILTERS }]}
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => setNewOpen(true)}>
             New borrow request
           </Button>
         }
       />
-
-      <SegmentedControl data={FILTERS} value={filter} onChange={setFilter} mb="md" />
 
       <DataTable
         columns={columns}

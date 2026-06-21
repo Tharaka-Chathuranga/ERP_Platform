@@ -64,6 +64,7 @@ export async function returnIssueItems(id: string, lines: ReturnLineInput[]): Pr
 export interface LineDecisionInput {
   lineId: string;
   approve: boolean;
+  approvedQuantity?: number;
 }
 
 /** Approves/rejects individual lines; the document status is re-derived server-side. */

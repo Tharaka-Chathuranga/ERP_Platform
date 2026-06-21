@@ -51,6 +51,17 @@ public class IssueLine extends BaseEntity {
     }
 
     public void approve(UUID approverId) {
+        approve(approverId, null);
+    }
+
+    public void approve(UUID approverId, BigDecimal approvedQuantity) {
+        if (approvedQuantity != null) {
+            if (approvedQuantity.signum() <= 0) {
+                throw new BusinessRuleException("STORE_LINE_QTY_INVALID",
+                        "Approved quantity must be greater than zero");
+            }
+            this.quantity = approvedQuantity;
+        }
         decide(IssueLineStatus.APPROVED, approverId);
     }
 

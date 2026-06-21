@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { DataTable, type Column } from "@ui/data";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { getMovements, getOnHand, postMovement } from "@store/inventory/items.api";
 import { notifyError, notifySuccess } from "@core/notify";
@@ -25,7 +25,7 @@ const MOVEMENT_TYPES: { value: MovementType; label: string }[] = [
   { value: "ADJUSTMENT_OUT", label: "Adjustment −" },
 ];
 
-export function StockPanel({ item }: { item: Item }) {
+export function StockPanel({ item, showHeader = true }: { item: Item; showHeader?: boolean }) {
   const qc = useQueryClient();
   const onHand = useQuery({ queryKey: ["onHand", item.id], queryFn: () => getOnHand(item.id) });
   const movements = useQuery({
@@ -39,9 +39,23 @@ export function StockPanel({ item }: { item: Item }) {
     { header: "Qty", render: (m) => m.quantity },
   ];
 
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("ALL");
   const [type, setType] = useState<MovementType>("RECEIPT");
   const [quantity, setQuantity] = useState<number | "">("");
   const [reference, setReference] = useState("");
+
+  const TYPE_FILTER_OPTIONS = [
+    { value: "ALL", label: "All types" },
+    ...MOVEMENT_TYPES.map((t) => ({ value: t.value, label: t.label })),
+  ];
+
+  const term = search.trim().toLowerCase();
+  const filteredMovements = (movements.data?.content ?? []).filter((m) => {
+    if (typeFilter !== "ALL" && m.type !== typeFilter) return false;
+    if (term && !m.type.replace(/_/g, " ").toLowerCase().includes(term) && !(m.reference ?? "").toLowerCase().includes(term)) return false;
+    return true;
+  });
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -63,12 +77,14 @@ export function StockPanel({ item }: { item: Item }) {
 
   return (
     <Stack gap="sm">
-      <div>
-        <Title order={4}>{item.itemCode}</Title>
-        <Text c="dimmed" size="sm">
-          {item.name}
-        </Text>
-      </div>
+      {showHeader && (
+        <div>
+          <Title order={4}>{item.itemCode}</Title>
+          <Text c="dimmed" size="sm">
+            {item.name}
+          </Text>
+        </div>
+      )}
 
       <Group>
         <Badge size="lg" variant="light">
@@ -119,10 +135,14 @@ export function StockPanel({ item }: { item: Item }) {
       </Group>
 
       <Divider label="Recent movements" labelPosition="left" />
+      <TableToolbar
+        filters={[{ label: "Type", value: typeFilter, onChange: setTypeFilter, options: TYPE_FILTER_OPTIONS }]}
+        search={{ value: search, onChange: setSearch, placeholder: "Search reference…" }}
+      />
       <DataTable
         withCard={false}
         columns={movementColumns}
-        data={movements.data?.content}
+        data={filteredMovements}
         rowKey={(m) => m.id}
         loading={movements.isLoading}
         empty={<EmptyState title="No movements yet" />}

@@ -1,144 +1,150 @@
-import { useState } from "react";
-import { Anchor, Badge, Button, Card, Grid, Group, Text, TextInput } from "@mantine/core";
-import { IconBuildingStore, IconPlus, IconSearch } from "@tabler/icons-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { Badge, Button, Group, Text } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { DataTable, type Column } from "@ui/data";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { useCan } from "@auth/useCan";
 import { ITEM_EDIT } from "@auth/permissions";
-import { qk } from "@core/queryKeys";
-import { notifyError, notifySuccess } from "@core/notify";
-import { deactivateItem, listItems } from "@store/inventory/items.api";
+import { getOnHand, listItems } from "@store/inventory/items.api";
 import type { Item } from "@core/types";
-import { StockPanel } from "./StockPanel";
 import { CreateItemModal } from "./CreateItemModal";
-import { ItemEditModal } from "./ItemEditModal";
 
 export function ItemsPage() {
   const can = useCan();
   const canEdit = can(ITEM_EDIT);
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Item | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [createOpen, setCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<Item | null>(null);
 
   const items = useQuery({
     queryKey: ["items", search],
     queryFn: () => listItems(search || undefined),
   });
 
-  const deactivate = useMutation({
-    mutationFn: (id: string) => deactivateItem(id),
-    onSuccess: () => {
-      notifySuccess("Item deactivated");
-      qc.invalidateQueries({ queryKey: ["items"] });
-      qc.invalidateQueries({ queryKey: qk.adminSummary() });
-    },
-    onError: notifyError,
+  const itemList = items.data?.content ?? [];
+
+  const categoryOptions = useMemo(() => {
+    const cats = Array.from(
+      new Set(itemList.map((i) => i.category).filter(Boolean) as string[]),
+    ).sort();
+    return [
+      { label: "All categories", value: "ALL" },
+      ...cats.map((c) => ({ label: c, value: c })),
+    ];
+  }, [itemList]);
+
+  const [flagFilter, setFlagFilter] = useState("ALL");
+
+  const STATUS_OPTIONS = [
+    { label: "All statuses", value: "ALL" },
+    { label: "Active", value: "ACTIVE" },
+    { label: "Inactive", value: "INACTIVE" },
+  ];
+
+  const FLAG_OPTIONS = [
+    { label: "All flags", value: "ALL" },
+    { label: "Critical", value: "CRITICAL" },
+    { label: "Approval required", value: "APPROVAL" },
+  ];
+
+  const filteredItems = itemList.filter((i) => {
+    if (categoryFilter !== "ALL" && i.category !== categoryFilter) return false;
+    if (statusFilter !== "ALL" && i.status !== statusFilter) return false;
+    if (flagFilter === "CRITICAL" && !i.criticalItem) return false;
+    if (flagFilter === "APPROVAL" && !i.approvalRequiredForIssue) return false;
+    return true;
+  });
+
+  const onHandQueries = useQueries({
+    queries: itemList.map((item) => ({
+      queryKey: ["onHand", item.id],
+      queryFn: () => getOnHand(item.id),
+      staleTime: 30_000,
+    })),
+  });
+
+  const onHandMap: Record<string, number> = {};
+  onHandQueries.forEach((q, i) => {
+    const id = itemList[i]?.id;
+    if (id && q.data != null) onHandMap[id] = q.data.quantityOnHand;
   });
 
   const columns: Column<Item>[] = [
     { header: "Code", emphasis: true, render: (i) => i.itemCode },
     { header: "Name", render: (i) => i.name },
+    { header: "Category", render: (i) => i.category ?? "—" },
+    { header: "Description", render: (i) => i.description ? (
+      <Text size="sm" lineClamp={1}>{i.description}</Text>
+    ) : "—" },
     { header: "UoM", render: (i) => i.unitOfMeasure },
+    {
+      header: "Qty on hand",
+      align: "right",
+      render: (i) => onHandMap[i.id] != null ? onHandMap[i.id] : "—",
+    },
+    {
+      header: "Reorder level",
+      align: "right",
+      render: (i) => i.reorderLevel > 0 ? i.reorderLevel : "—",
+    },
     {
       header: "Flags",
       render: (i) => (
         <Group gap={4}>
           {i.criticalItem && (
-            <Badge size="xs" color="red" variant="light">
-              Critical
-            </Badge>
+            <Badge size="xs" color="red" variant="light">Critical</Badge>
           )}
           {i.approvalRequiredForIssue && (
-            <Badge size="xs" color="yellow" variant="light">
-              Approval
-            </Badge>
+            <Badge size="xs" color="yellow" variant="light">Approval</Badge>
           )}
         </Group>
       ),
     },
   ];
 
-  if (canEdit) {
-    columns.push({
-      header: "",
-      align: "right",
-      render: (i) => (
-        <Group gap="xs" justify="flex-end" wrap="nowrap" onClick={(e) => e.stopPropagation()}>
-          <Anchor component="button" type="button" onClick={() => setEditing(i)}>
-            Edit
-          </Anchor>
-          {i.status === "ACTIVE" && (
-            <Anchor component="button" type="button" c="red" onClick={() => deactivate.mutate(i.id)}>
-              Deactivate
-            </Anchor>
-          )}
-        </Group>
-      ),
-    });
-  }
-
   return (
     <div>
-      <PageHeader
-        title="Store"
+      <PageHeader title="Store" />
+
+      <TableToolbar
+        filters={[
+          { label: "Category", value: categoryFilter, onChange: setCategoryFilter, options: categoryOptions },
+          { label: "Status", value: statusFilter, onChange: setStatusFilter, options: STATUS_OPTIONS },
+          { label: "Flag", value: flagFilter, onChange: setFlagFilter, options: FLAG_OPTIONS },
+        ]}
+        search={{ value: search, onChange: setSearch, placeholder: "Search item code or name…" }}
         actions={
-          <Group>
-            <Button
-              variant="default"
-              leftSection={<IconBuildingStore size={16} />}
-              onClick={() => navigate("/store/suppliers")}
-            >
-              Suppliers
+          canEdit ? (
+            <Button leftSection={<IconPlus size={16} />} onClick={() => setCreateOpen(true)}>
+              New item
             </Button>
-            {canEdit && (
-              <Button leftSection={<IconPlus size={16} />} onClick={() => setCreateOpen(true)}>
-                New item
-              </Button>
-            )}
-          </Group>
+          ) : undefined
         }
       />
 
-      <Grid align="flex-start">
-        <Grid.Col span={{ base: 12, md: 7 }}>
-          <TextInput
-            leftSection={<IconSearch size={16} />}
-            placeholder="Search item code or name…"
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
-            mb="md"
-          />
-          <DataTable
-            columns={columns}
-            data={items.data?.content}
-            rowKey={(i) => i.id}
-            onRowClick={setSelected}
-            activeRowKey={selected?.id}
-            loading={items.isLoading}
-            error={items.error}
-            empty={<EmptyState title="No items" description="Create an item to start tracking stock." />}
-          />
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 5 }}>
-          <Card withBorder radius="md" padding="lg">
-            {selected ? (
-              <StockPanel item={selected} />
-            ) : (
-              <Text c="dimmed">Select an item to view stock and post movements.</Text>
-            )}
-          </Card>
-        </Grid.Col>
-      </Grid>
+      <DataTable
+        columns={columns}
+        data={filteredItems}
+        rowKey={(i) => i.id}
+        onRowClick={(i) => navigate(`/store/${i.id}`)}
+        loading={items.isLoading}
+        error={items.error}
+        rowBg={(i) => {
+          const qty = onHandMap[i.id];
+          if (qty != null && i.reorderLevel > 0 && qty <= i.reorderLevel) {
+            return "var(--mantine-color-red-light)";
+          }
+          return undefined;
+        }}
+        empty={<EmptyState title="No items" description="Create an item to start tracking stock." />}
+      />
 
       <CreateItemModal opened={createOpen} onClose={() => setCreateOpen(false)} />
-      <ItemEditModal item={editing} onClose={() => setEditing(null)} />
     </div>
   );
 }

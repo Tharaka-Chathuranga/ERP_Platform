@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
-import { Button, Group, SegmentedControl, TextInput } from "@mantine/core";
-import { IconPlus, IconSearch } from "@tabler/icons-react";
+import { Button } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { DataTable, PersonCell, StackedCell, type Column } from "@ui/data";
+import { DataTable, TableToolbar, PersonCell, StackedCell, type Column } from "@ui/data";
 import { useUsers } from "@core/hooks/useUsers";
 import { listIssues } from "@store/goods-issuing/issuing.api";
 import type { Issue, IssueStatus, UserSummary } from "@core/types";
@@ -88,25 +88,17 @@ export function IssueListPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Goods Issue"
+      <PageHeader title="Goods Issue" />
+
+      <TableToolbar
+        filters={[{ label: "Status", value: filter, onChange: setFilter, options: FILTERS }]}
+        search={{ value: search, onChange: setSearch, placeholder: "Search issue № or user…" }}
         actions={
           <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/issuing/new")}>
             New goods issue
           </Button>
         }
       />
-
-      <Group gap="sm" mb="md">
-        <SegmentedControl data={FILTERS} value={filter} onChange={setFilter} />
-        <TextInput
-          leftSection={<IconSearch size={16} />}
-          placeholder="Search issue № or user…"
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          w={260}
-        />
-      </Group>
 
       <DataTable
         columns={columns}

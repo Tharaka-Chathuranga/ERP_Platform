@@ -1,19 +1,24 @@
 import { useState } from "react";
 import {
+  Box,
   Button,
   Card,
   Checkbox,
+  Divider,
   Grid,
   Group,
-  SegmentedControl,
+  LoadingOverlay,
+  Radio,
   Select,
   Stack,
   TextInput,
 } from "@mantine/core";
 import { DateInput } from "@mantine/dates";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
+import { StepHeading } from "@ui/layout/StepHeading";
 import { LineItemsEditor, newLine, type EditableLine } from "@ui/primitives/LineItemsEditor";
 import { useAuth } from "@auth/AuthContext";
 import { listSuppliers } from "@store/inventory/suppliers.api";
@@ -75,22 +80,36 @@ export function NewReceivalPage() {
 
   return (
     <div>
-      <PageHeader
-        title="New item receival"
-      />
-      <Card withBorder radius="md" padding="lg">
-        <Stack>
+      <PageHeader title="New item receival" />
+
+      <Group mb="md">
+        <Button variant="default" leftSection={<IconChevronLeft size={16} />} onClick={() => navigate("/receiving")}>
+          Back
+        </Button>
+      </Group>
+
+      <Card withBorder radius="md" padding={0} pos="relative">
+        <LoadingOverlay
+          visible={mutation.isPending}
+          overlayProps={{ blur: 1 }}
+          loaderProps={{ children: "Recording receival…" }}
+        />
+
+        {/* Step 1 — Supplier & document details */}
+        <Box p="xl">
+          <StepHeading number={1} title="Who supplied the items?" />
           <Grid>
             <Grid.Col span={{ base: 12, sm: 6 }}>
-              <Stack gap={4}>
-                <SegmentedControl
+              <Stack gap="xs">
+                <Radio.Group
                   value={source}
                   onChange={(v) => setSource(v as SupplierSource)}
-                  data={[
-                    { label: "Registered supplier", value: "registered" },
-                    { label: "Unregistered", value: "unregistered" },
-                  ]}
-                />
+                >
+                  <Group gap="lg">
+                    <Radio value="registered" label="Registered supplier" />
+                    <Radio value="unregistered" label="Unregistered" />
+                  </Group>
+                </Radio.Group>
                 {source === "registered" ? (
                   <Select
                     label="Supplier"
@@ -142,16 +161,24 @@ export function NewReceivalPage() {
               </Grid.Col>
             )}
           </Grid>
+        </Box>
 
-          <div>
-            <LineItemsEditor lines={lines} onChange={setLines} showUnitCost />
-          </div>
+        {/* Step 2 — Items */}
+        <Divider />
+        <Box p="xl">
+          <StepHeading number={2} title="Which items were received?" />
+          <LineItemsEditor lines={lines} onChange={setLines} showUnitCost />
+        </Box>
 
-          <Group justify="flex-end">
+        {/* Submit */}
+        <Box p="xl" pt={0}>
+          <Group justify="space-between">
             <Button variant="default" onClick={() => navigate("/receiving")}>
               Cancel
             </Button>
             <Button
+              radius="md"
+              rightSection={<IconChevronRight size={16} />}
               onClick={() => mutation.mutate()}
               loading={mutation.isPending}
               disabled={!canSubmit}
@@ -159,7 +186,7 @@ export function NewReceivalPage() {
               Receive items
             </Button>
           </Group>
-        </Stack>
+        </Box>
       </Card>
     </div>
   );

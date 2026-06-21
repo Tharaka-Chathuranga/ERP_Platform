@@ -8,11 +8,15 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, actions }: PageHeaderProps) {
   return (
-    <Group justify="space-between" align="center" mb="lg" wrap="wrap">
-      <Title order={2} fw={700}>
+    <div style={{ marginBottom: "var(--mantine-spacing-lg)" }}>
+      <Title order={2} fw={700} py="sm">
         {title}
       </Title>
-      {actions && <Group gap="sm">{actions}</Group>}
-    </Group>
+      {actions && (
+        <Group justify="flex-end" gap="sm" pt="md">
+          {actions}
+        </Group>
+      )}
+    </div>
   );
 }

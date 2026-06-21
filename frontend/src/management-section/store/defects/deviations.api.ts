@@ -9,6 +9,7 @@ export interface DeviationItemInput {
 export interface CreateDeviationInput {
   reason?: string;
   requestedByUserId: string;
+  stage: DeviationStage;
   items: DeviationItemInput[];
 }
 
