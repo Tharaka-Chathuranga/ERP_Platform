@@ -67,6 +67,9 @@ export const qk = {
   lowStock: () => ["admin", "low-stock"] as const,
   movementTrend: (days: number) => ["admin", "movement-trend", days] as const,
   defectItems: (stage?: string) => filtered("admin-defect-items", stage),
+  todayReceivals: () => ["admin", "today-receivals"] as const,
+  todayIssues: () => ["admin", "today-issues"] as const,
+  stockHealth: () => ["admin", "stock-health"] as const,
 
   // ── Admin: count-adjustment requests ──
   countRequests: (status?: string) => filtered("count-requests", status),

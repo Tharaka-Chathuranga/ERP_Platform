@@ -4,6 +4,7 @@ import com.enlear.erp.store.model.DeviationStage;
 import com.enlear.erp.store.model.DeviationStatus;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /** Read-only aggregations powering the admin dashboard. */
@@ -34,5 +35,47 @@ public final class AdminDashboardResponses {
     public record DeviationItemRowResponse(
             UUID requestId, UUID itemId, BigDecimal quantity, DeviationStatus status,
             DeviationStage stage, String reason, Instant requestedAt) {
+    }
+
+    /**
+     * A receival document recorded today. {@code totalValue} is the sum of each
+     * line's quantity times its receipt unit cost.
+     */
+    public record TodayReceivalRowResponse(
+            UUID receivalId, String receivalNumber, String supplierName,
+            int lineCount, BigDecimal totalQuantity, BigDecimal totalValue, Instant receivedAt) {
+    }
+
+    /**
+     * An issue document physically issued today. {@code totalValue} is the sum of
+     * each line's quantity times the item's current unit price (issue lines carry
+     * no cost of their own).
+     */
+    public record TodayIssueRowResponse(
+            UUID issueId, String issueNumber, UUID borrowingUserId,
+            int lineCount, BigDecimal totalQuantity, BigDecimal totalValue, Instant issuedAt) {
+    }
+
+    /** A single item row used across the stock-health lists. */
+    public record ItemStockRowResponse(
+            UUID itemId, String itemCode, String name, String unitOfMeasure,
+            BigDecimal quantityOnHand, BigDecimal reorderLevel, BigDecimal unitPrice,
+            boolean criticalItem) {
+    }
+
+    /**
+     * Stock-health snapshot for the admin overview: items grouped into critical,
+     * normal (healthy), warning (below reorder) and critical-warning (flagged
+     * critical and below reorder) buckets, each with its full count.
+     */
+    public record StockHealthResponse(
+            List<ItemStockRowResponse> criticalItems,
+            List<ItemStockRowResponse> normalItems,
+            List<ItemStockRowResponse> warningItems,
+            List<ItemStockRowResponse> criticalWarningItems,
+            long criticalCount,
+            long normalCount,
+            long warningCount,
+            long criticalWarningCount) {
     }
 }

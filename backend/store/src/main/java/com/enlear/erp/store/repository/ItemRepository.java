@@ -47,4 +47,42 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
             + "and i.quantityOnHand < i.reorderLevel "
             + "order by (i.quantityOnHand - i.reorderLevel) asc")
     List<Item> findLowStock();
+
+    /** Active items flagged critical, lowest stock first. */
+    @Query("select i from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.criticalItem = true "
+            + "order by i.quantityOnHand asc")
+    List<Item> findCriticalItems();
+
+    /** Active items with healthy stock (at or above reorder level), least headroom first. */
+    @Query("select i from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.quantityOnHand >= i.reorderLevel "
+            + "order by (i.quantityOnHand - i.reorderLevel) asc")
+    List<Item> findNormalStock(Pageable pageable);
+
+    /** Active items that are flagged critical AND below reorder level — highest priority. */
+    @Query("select i from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.criticalItem = true "
+            + "and i.quantityOnHand < i.reorderLevel "
+            + "order by (i.quantityOnHand - i.reorderLevel) asc")
+    List<Item> findCriticalLowStock();
+
+    @Query("select count(i) from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.criticalItem = true")
+    long countCritical();
+
+    @Query("select count(i) from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.quantityOnHand >= i.reorderLevel")
+    long countNormalStock();
+
+    @Query("select count(i) from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.criticalItem = true "
+            + "and i.quantityOnHand < i.reorderLevel")
+    long countCriticalLowStock();
 }

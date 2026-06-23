@@ -30,6 +30,7 @@ import type { LowStockItem } from "@core/types";
 import { getDashboardSummary, getMovementTrend } from "./admin.api";
 import { MovementTrendChart } from "./MovementTrendChart";
 import { TopMoversChart } from "./TopMoversChart";
+import { StockHealthSection, TodayIssuesCard, TodayReceivalsCard } from "./overview";
 
 const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
 
@@ -44,7 +45,6 @@ function AdminOverview() {
   const { username } = useAuth();
   const itemLabel = useItemLabels();
   const summary = useQuery({ queryKey: qk.adminSummary(), queryFn: getDashboardSummary });
-  const lowStock = useQuery({ queryKey: qk.lowStock(), queryFn: getLowStockItems });
   const trend = useQuery({ queryKey: qk.movementTrend(30), queryFn: () => getMovementTrend(30) });
   const topMovers = useQuery({ queryKey: qk.movementSummary(), queryFn: () => getMovementSummary(8) });
   const s = summary.data;
@@ -83,26 +83,35 @@ function AdminOverview() {
         <Divider
           label={
             <Text fw={600} fz="xs" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
-              Low-stock items
+              Today's movements
             </Text>
           }
           labelPosition="left"
           mb="md"
         />
-        <DataTable<LowStockItem>
-          data={lowStock.data}
-          loading={lowStock.isLoading}
-          error={lowStock.error}
-          rowKey={(r) => r.itemId}
-          empty={<Text c="dimmed" p="md">Nothing below reorder level — all good.</Text>}
-          columns={[
-            { header: "Code", render: (r) => r.itemCode, emphasis: true },
-            { header: "Name", render: (r) => r.name },
-            { header: "On hand", render: (r) => `${r.quantityOnHand} ${r.unitOfMeasure}`, align: "right" },
-            { header: "Reorder", render: (r) => r.reorderLevel, align: "right" },
-            { header: "Flag", render: (r) => (r.criticalItem ? <StatusBadge status="CRITICAL" /> : null) },
-          ]}
+        <Grid>
+          <Grid.Col span={{ base: 12, lg: 6 }}>
+            <TodayReceivalsCard />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, lg: 6 }}>
+            <TodayIssuesCard />
+          </Grid.Col>
+        </Grid>
+      </div>
+
+      <div>
+        <Divider
+          label={
+            <Text fw={600} fz="xs" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
+              Stock health
+            </Text>
+          }
+          labelPosition="left"
+          mb="md"
         />
+        <Stack gap="lg">
+          <StockHealthSection />
+        </Stack>
       </div>
     </Stack>
   );
