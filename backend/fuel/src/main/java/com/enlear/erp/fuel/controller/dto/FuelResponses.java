@@ -61,11 +61,12 @@ public final class FuelResponses {
     }
 
     public record VehicleResponse(
-            UUID id, String vehicleNumber, BigDecimal fullTankCapacityLitres,
-            String description, UUID driverUserId, VehicleStatus status) {
+            UUID id, String vehicleNumber, String name, String category,
+            BigDecimal fullTankCapacityLitres, String description, UUID driverUserId,
+            VehicleStatus status) {
 
         public static VehicleResponse from(Vehicle v) {
-            return new VehicleResponse(v.getId(), v.getVehicleNumber(),
+            return new VehicleResponse(v.getId(), v.getVehicleNumber(), v.getName(), v.getCategory(),
                     v.getFullTankCapacityLitres(), v.getDescription(),
                     v.getDriverUserId(), v.getStatus());
         }

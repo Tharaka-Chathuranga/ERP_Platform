@@ -29,8 +29,8 @@ public class VehicleService {
             throw new BusinessRuleException("FUEL_DUPLICATE_VEHICLE_NUMBER",
                     "A vehicle with number '%s' already exists".formatted(cmd.vehicleNumber()));
         }
-        Vehicle vehicle = new Vehicle(cmd.vehicleNumber(), cmd.fullTankCapacityLitres(),
-                cmd.description(), cmd.driverUserId());
+        Vehicle vehicle = new Vehicle(cmd.vehicleNumber(), cmd.name(), cmd.category(),
+                cmd.fullTankCapacityLitres(), cmd.description(), cmd.driverUserId());
         return vehicles.save(vehicle);
     }
 
@@ -55,8 +55,8 @@ public class VehicleService {
             throw new BusinessRuleException("FUEL_DUPLICATE_VEHICLE_NUMBER",
                     "A vehicle with number '%s' already exists".formatted(cmd.vehicleNumber()));
         }
-        vehicle.updateDetails(cmd.vehicleNumber(), cmd.fullTankCapacityLitres(),
-                cmd.description(), cmd.driverUserId());
+        vehicle.updateDetails(cmd.vehicleNumber(), cmd.name(), cmd.category(),
+                cmd.fullTankCapacityLitres(), cmd.description(), cmd.driverUserId());
         return vehicles.save(vehicle);
     }
 

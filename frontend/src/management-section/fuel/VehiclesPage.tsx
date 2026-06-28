@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ActionIcon, Badge, Button } from "@mantine/core";
+import { ActionIcon, Button } from "@mantine/core";
 import { IconPencil, IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -42,17 +42,11 @@ export function VehiclesPage() {
 
   const columns: Column<Vehicle>[] = [
     { header: "Vehicle no.", emphasis: true, render: (v) => v.vehicleNumber },
+    { header: "Name", render: (v) => v.name ?? "—" },
+    { header: "Category", render: (v) => v.category ?? "—" },
     { header: "Capacity", align: "right", render: (v) => `${v.fullTankCapacityLitres} L` },
     { header: "Driver", render: (v) => userName(v.driverUserId) },
     { header: "Description", render: (v) => v.description ?? "—" },
-    {
-      header: "Status",
-      render: (v) => (
-        <Badge color={v.status === "ACTIVE" ? "teal" : "gray"} variant="light" radius="sm">
-          {v.status}
-        </Badge>
-      ),
-    },
     ...(canManage
       ? [
           {

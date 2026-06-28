@@ -70,6 +70,8 @@ export async function listReadings(tankId: string): Promise<FuelTankReading[]> {
 
 export interface VehicleInput {
   vehicleNumber: string;
+  name?: string;
+  category?: string;
   fullTankCapacityLitres: number;
   description?: string;
   driverUserId?: string;

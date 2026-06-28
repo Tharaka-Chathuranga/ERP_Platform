@@ -20,6 +20,8 @@ export function VehicleFormModal({ opened, onClose, vehicle }: VehicleFormModalP
   const editing = !!vehicle;
 
   const [vehicleNumber, setVehicleNumber] = useState("");
+  const [name, setName] = useState("");
+  const [category, setCategory] = useState("");
   const [capacity, setCapacity] = useState<number | "">("");
   const [description, setDescription] = useState("");
   const [driverUserId, setDriverUserId] = useState<string | null>(null);
@@ -27,6 +29,8 @@ export function VehicleFormModal({ opened, onClose, vehicle }: VehicleFormModalP
   useEffect(() => {
     if (opened) {
       setVehicleNumber(vehicle?.vehicleNumber ?? "");
+      setName(vehicle?.name ?? "");
+      setCategory(vehicle?.category ?? "");
       setCapacity(vehicle?.fullTankCapacityLitres ?? "");
       setDescription(vehicle?.description ?? "");
       setDriverUserId(vehicle?.driverUserId ?? null);
@@ -37,6 +41,8 @@ export function VehicleFormModal({ opened, onClose, vehicle }: VehicleFormModalP
     mutationFn: () => {
       const input: VehicleInput = {
         vehicleNumber,
+        name: name || undefined,
+        category: category || undefined,
         fullTankCapacityLitres: Number(capacity || 0),
         description: description || undefined,
         driverUserId: driverUserId || undefined,
@@ -65,6 +71,16 @@ export function VehicleFormModal({ opened, onClose, vehicle }: VehicleFormModalP
           value={vehicleNumber}
           onChange={(e) => setVehicleNumber(e.currentTarget.value)}
           required
+        />
+        <TextInput
+          label="Vehicle name"
+          value={name}
+          onChange={(e) => setName(e.currentTarget.value)}
+        />
+        <TextInput
+          label="Vehicle category"
+          value={category}
+          onChange={(e) => setCategory(e.currentTarget.value)}
         />
         <NumberInput
           label="Full tank capacity (L)"

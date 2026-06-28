@@ -10,11 +10,14 @@ import java.util.UUID;
 
 public record CreateVehicleRequest(
         @NotBlank @Size(max = 64) String vehicleNumber,
+        @Size(max = 200) String name,
+        @Size(max = 100) String category,
         @NotNull @DecimalMin(value = "0.0", inclusive = false) BigDecimal fullTankCapacityLitres,
         @Size(max = 1000) String description,
         UUID driverUserId) {
 
     public CreateVehicleCommand toCommand() {
-        return new CreateVehicleCommand(vehicleNumber, fullTankCapacityLitres, description, driverUserId);
+        return new CreateVehicleCommand(vehicleNumber, name, category, fullTankCapacityLitres,
+                description, driverUserId);
     }
 }

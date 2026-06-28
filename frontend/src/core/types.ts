@@ -394,6 +394,8 @@ export interface FuelTankReading {
 export interface Vehicle {
   id: string;
   vehicleNumber: string;
+  name?: string;
+  category?: string;
   fullTankCapacityLitres: number;
   description?: string;
   driverUserId?: string;
