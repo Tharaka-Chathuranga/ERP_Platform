@@ -55,12 +55,12 @@ public class DeviationRequest extends BaseEntity {
     @JoinColumn(name = "deviation_request_id", nullable = false)
     private List<DeviationRequestItem> items = new ArrayList<>();
 
-    public DeviationRequest(String reason, UUID requestedByUserId) {
+    public DeviationRequest(String reason, UUID requestedByUserId, DeviationStage stage) {
         this.reason = reason;
         this.requestedByUserId = requestedByUserId;
         this.requestedAt = Instant.now();
         this.status = DeviationStatus.PENDING;
-        this.stage = DeviationStage.INCOMING;
+        this.stage = stage != null ? stage : DeviationStage.INCOMING;
     }
 
     public void addItem(UUID itemId, BigDecimal quantity) {
