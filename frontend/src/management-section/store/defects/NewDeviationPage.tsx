@@ -36,13 +36,15 @@ export function NewDeviationPage() {
   const canSubmit = !!requestedByUserId && validLines.length > 0;
 
   const mutation = useMutation({
-    mutationFn: () =>
-      createDeviation({
+    mutationFn: () => {
+      const payload = {
         stage,
         reason: reason || undefined,
         requestedByUserId: requestedByUserId!,
         items: validLines.map((l) => ({ itemId: l.itemId!, quantity: Number(l.quantity) })),
-      }),
+      };
+      return createDeviation(payload);
+    },
     onSuccess: (d) => {
       notifySuccess("Defect report created");
       qc.invalidateQueries({ queryKey: ["deviations"] });

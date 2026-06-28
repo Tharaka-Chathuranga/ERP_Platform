@@ -1,5 +1,6 @@
 package com.enlear.erp.store.controller.dto;
 
+import com.enlear.erp.store.model.DeviationStage;
 import com.enlear.erp.store.service.command.CreateDeviationRequestCommand;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
@@ -12,6 +13,7 @@ import java.util.UUID;
 public record CreateDeviationRequestRequest(
         @Size(max = 1000) String reason,
         @NotNull UUID requestedByUserId,
+        DeviationStage stage,
         @NotNull @Size(min = 1) @Valid List<Line> items) {
 
     public record Line(
@@ -20,7 +22,7 @@ public record CreateDeviationRequestRequest(
     }
 
     public CreateDeviationRequestCommand toCommand() {
-        return new CreateDeviationRequestCommand(reason, requestedByUserId,
+        return new CreateDeviationRequestCommand(reason, requestedByUserId, stage,
                 items.stream()
                         .map(l -> new CreateDeviationRequestCommand.Line(l.itemId(), l.quantity()))
                         .toList());

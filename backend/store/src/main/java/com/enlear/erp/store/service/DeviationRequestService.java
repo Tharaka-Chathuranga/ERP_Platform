@@ -26,7 +26,7 @@ public class DeviationRequestService {
     }
 
     public DeviationRequest create(CreateDeviationRequestCommand cmd) {
-        DeviationRequest req = new DeviationRequest(cmd.reason(), cmd.requestedByUserId());
+        DeviationRequest req = new DeviationRequest(cmd.reason(), cmd.requestedByUserId(), cmd.stage());
         for (CreateDeviationRequestCommand.Line line : cmd.items()) {
             if (!items.existsById(line.itemId())) {
                 throw new ResourceNotFoundException("Item", line.itemId());
