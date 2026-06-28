@@ -430,7 +430,7 @@ export interface FuelPrice {
   id: string;
   unitPrice: number;
   effectiveFrom: string;
-  effectiveTo: string;
+  effectiveTo: string | null;
   recordedByUserId: string;
   note?: string;
 }
@@ -446,7 +446,7 @@ export interface FuelOverview {
   tanks: FuelOverviewTank[];
   todayIssueCount: number;
   todayLitres: number;
-  currentPrice?: { unitPrice: number; effectiveFrom: string; effectiveTo: string };
+  currentPrice?: { unitPrice: number; effectiveFrom: string; effectiveTo: string | null };
   lastInternalReading?: {
     litresMeasured: number;
     readingAt: string;

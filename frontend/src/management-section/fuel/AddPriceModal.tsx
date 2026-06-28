@@ -18,14 +18,14 @@ export function AddPriceModal({ opened, onClose }: AddPriceModalProps) {
   const qc = useQueryClient();
   const { userId } = useAuth();
   const [unitPrice, setUnitPrice] = useState<number | "">("");
-  const [from, setFrom] = useState<Date | null>(null);
+  const [from, setFrom] = useState<Date | null>(new Date());
   const [to, setTo] = useState<Date | null>(null);
   const [note, setNote] = useState("");
 
   useEffect(() => {
     if (opened) {
       setUnitPrice("");
-      setFrom(null);
+      setFrom(new Date());
       setTo(null);
       setNote("");
     }
@@ -36,7 +36,7 @@ export function AddPriceModal({ opened, onClose }: AddPriceModalProps) {
       addFuelPrice({
         unitPrice: Number(unitPrice),
         effectiveFrom: dayjs(from).format("YYYY-MM-DD"),
-        effectiveTo: dayjs(to).format("YYYY-MM-DD"),
+        effectiveTo: to ? dayjs(to).format("YYYY-MM-DD") : undefined,
         recordedByUserId: userId!,
         note: note || undefined,
       }),
@@ -50,10 +50,16 @@ export function AddPriceModal({ opened, onClose }: AddPriceModalProps) {
     onError: notifyError,
   });
 
-  const valid = unitPrice !== "" && Number(unitPrice) >= 0 && from && to && !dayjs(to).isBefore(dayjs(from));
+  const valid = unitPrice !== "" && Number(unitPrice) >= 0 && from && (!to || !dayjs(to).isBefore(dayjs(from)));
 
   return (
-    <Modal opened={opened} onClose={onClose} title="Add fuel price" centered>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="Add fuel price"
+      centered
+      styles={{ title: { fontSize: "var(--mantine-font-size-xl)", fontWeight: 700 } }}
+    >
       <Stack>
         <NumberInput
           label="Unit price (per L)"
@@ -64,11 +70,25 @@ export function AddPriceModal({ opened, onClose }: AddPriceModalProps) {
           required
         />
         <Group grow>
-          <DatePickerInput label="Effective from" value={from} onChange={setFrom} valueFormat="MMM D, YYYY" required />
-          <DatePickerInput label="Effective to" value={to} onChange={setTo} valueFormat="MMM D, YYYY" required />
+          <DatePickerInput
+            label="Effective from"
+            value={from}
+            onChange={setFrom}
+            valueFormat="MMM D, YYYY"
+            defaultDate={new Date()}
+            required
+          />
+          <DatePickerInput
+            label="Effective to (optional)"
+            value={to}
+            onChange={setTo}
+            valueFormat="MMM D, YYYY"
+            defaultDate={new Date()}
+            clearable
+          />
         </Group>
         <Textarea label="Note" value={note} onChange={(e) => setNote(e.currentTarget.value)} autosize minRows={2} />
-        <Group justify="flex-end">
+        <Group justify="space-between">
           <Button variant="default" onClick={onClose}>
             Cancel
           </Button>

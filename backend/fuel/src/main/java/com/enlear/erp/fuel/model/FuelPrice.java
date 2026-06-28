@@ -12,10 +12,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * One entry in the append-only fuel-price history. Each row carries an explicit
- * {@code [effectiveFrom, effectiveTo]} date range during which the unit price
- * applies. Rows are never updated or deleted and their ranges must not overlap,
- * so the history is preserved for later costing.
+ * One entry in the fuel-price history. Each row applies from {@code effectiveFrom}
+ * onward; {@code effectiveTo} is {@code null} while the row is the current price
+ * and is set automatically when a later price supersedes it. Ranges do not
+ * overlap, so the history is preserved for later costing.
  */
 @Entity
 @Table(name = "fuel_prices", schema = "fuel",
@@ -30,7 +30,7 @@ public class FuelPrice extends BaseEntity {
     @Column(name = "effective_from", nullable = false)
     private LocalDate effectiveFrom;
 
-    @Column(name = "effective_to", nullable = false)
+    @Column(name = "effective_to")
     private LocalDate effectiveTo;
 
     @Column(name = "recorded_by_user_id", nullable = false)
@@ -46,5 +46,10 @@ public class FuelPrice extends BaseEntity {
         this.effectiveTo = effectiveTo;
         this.recordedByUserId = recordedByUserId;
         this.note = note;
+    }
+
+    /** Close this price so it stops applying on {@code endDate}, when a later price takes over. */
+    public void closeOn(LocalDate endDate) {
+        this.effectiveTo = endDate;
     }
 }

@@ -136,7 +136,7 @@ export async function createVehicleIssue(input: CreateVehicleFuelIssueInput): Pr
 export interface CreateFuelPriceInput {
   unitPrice: number;
   effectiveFrom: string;
-  effectiveTo: string;
+  effectiveTo?: string;
   recordedByUserId: string;
   note?: string;
 }

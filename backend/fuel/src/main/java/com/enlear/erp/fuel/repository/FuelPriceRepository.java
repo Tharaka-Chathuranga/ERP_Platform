@@ -13,14 +13,12 @@ public interface FuelPriceRepository extends JpaRepository<FuelPrice, UUID> {
 
     List<FuelPrice> findAllByOrderByEffectiveFromDesc();
 
-    /** Any existing price whose range overlaps [from, to] — used to reject overlaps. */
-    @Query("select count(p) from FuelPrice p "
-            + "where p.effectiveFrom <= :to and :from <= p.effectiveTo")
-    long countOverlapping(@Param("from") LocalDate from, @Param("to") LocalDate to);
+    /** The most recent price by start date — the one a newly added price supersedes. */
+    Optional<FuelPrice> findTopByOrderByEffectiveFromDesc();
 
-    /** The price effective on a given date, if any. */
+    /** The price effective on a given date, if any (an open price has no effective_to). */
     @Query("select p from FuelPrice p "
-            + "where p.effectiveFrom <= :date and :date <= p.effectiveTo "
+            + "where p.effectiveFrom <= :date and (p.effectiveTo is null or :date <= p.effectiveTo) "
             + "order by p.effectiveFrom desc")
     Optional<FuelPrice> findEffectiveOn(@Param("date") LocalDate date);
 }
