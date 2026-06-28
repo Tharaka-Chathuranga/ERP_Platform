@@ -30,7 +30,7 @@ import type { LowStockItem } from "@core/types";
 import { getDashboardSummary, getMovementTrend } from "./admin.api";
 import { MovementTrendChart } from "./MovementTrendChart";
 import { TopMoversChart } from "./TopMoversChart";
-import { FuelOverviewSection, StockHealthSection, TodayIssuesCard, TodayReceivalsCard } from "./overview";
+import { FuelEfficiencySection, FuelOverviewSection, FuelTankCapacitySection, StockHealthSection, TodayIssuesCard, TodayReceivalsCard } from "./overview";
 
 const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
 
@@ -109,7 +109,11 @@ function AdminOverview() {
           labelPosition="left"
           mb="md"
         />
-        <FuelOverviewSection />
+        <Stack gap="lg">
+          <FuelOverviewSection />
+          <FuelTankCapacitySection />
+          <FuelEfficiencySection />
+        </Stack>
       </div>
 
       <div>

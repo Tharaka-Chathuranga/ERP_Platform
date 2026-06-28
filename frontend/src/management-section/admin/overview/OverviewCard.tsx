@@ -22,6 +22,8 @@ interface OverviewCardProps {
   accent: string;
   /** Total count shown in the header badge (the list itself may be capped). */
   count?: number;
+  /** Rendered between the header and the scroll area (e.g. search / filter bar). */
+  toolbar?: ReactNode;
   children: ReactNode;
 }
 
@@ -35,7 +37,7 @@ const BODY_MAX_HEIGHT = 320;
  * modal that re-renders the same content uncapped. Keeps every overview section
  * visually consistent and the panel components focused on their table content.
  */
-export function OverviewCard({ title, description, icon, accent, count, children }: OverviewCardProps) {
+export function OverviewCard({ title, description, icon, accent, count, toolbar, children }: OverviewCardProps) {
   const [expanded, { open, close }] = useDisclosure(false);
 
   const heading = (
@@ -73,6 +75,7 @@ export function OverviewCard({ title, description, icon, accent, count, children
               </Tooltip>
             </Group>
           </Group>
+          {toolbar}
           <ScrollArea.Autosize mah={BODY_MAX_HEIGHT} type="auto">
             {children}
           </ScrollArea.Autosize>
@@ -87,6 +90,7 @@ export function OverviewCard({ title, description, icon, accent, count, children
         title={heading}
         scrollAreaComponent={ScrollArea.Autosize}
       >
+        {toolbar && <div style={{ padding: "0 0 12px" }}>{toolbar}</div>}
         {children}
       </Modal>
     </>
