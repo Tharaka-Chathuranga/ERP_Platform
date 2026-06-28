@@ -19,10 +19,12 @@ export type Permission =
   | "dashboard:admin" // admin overview & cross-cutting analytics
   | "defect:view" // see the defect (deviation) board, reports & detail
   | "defect:approve" // review & approve / reject defect (deviation) reports
-  | "dashboard:qa"; // quality-assurance overview
+  | "dashboard:qa" // quality-assurance overview
+  | "fuel:view" // view fuel tanks, vehicle issues, refills, readings & prices
+  | "fuel:manage"; // manage vehicle master data & add fuel prices
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  STORE_KEEPER: ["stock:view", "count:request", "defect:view"],
+  STORE_KEEPER: ["stock:view", "count:request", "defect:view", "fuel:view"],
   QUALITY_ASSURANCE: ["defect:view", "defect:approve", "dashboard:qa"],
   ADMIN: [
     "stock:view",
@@ -35,6 +37,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "defect:view",
     "defect:approve",
     "dashboard:qa",
+    "fuel:view",
+    "fuel:manage",
   ],
 };
 
@@ -54,3 +58,5 @@ export const DASHBOARD_ADMIN: Permission = "dashboard:admin";
 export const DEFECT_VIEW: Permission = "defect:view";
 export const DEFECT_APPROVE: Permission = "defect:approve";
 export const DASHBOARD_QA: Permission = "dashboard:qa";
+export const FUEL_VIEW: Permission = "fuel:view";
+export const FUEL_MANAGE: Permission = "fuel:manage";

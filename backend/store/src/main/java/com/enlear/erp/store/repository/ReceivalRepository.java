@@ -1,6 +1,7 @@
 package com.enlear.erp.store.repository;
 
 import com.enlear.erp.store.model.Receival;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,4 +27,9 @@ public interface ReceivalRepository extends JpaRepository<Receival, UUID> {
 
     @EntityGraph(attributePaths = "lines")
     Page<Receival> findBySupplierIdOrderByReceivedAtDesc(UUID supplierId, Pageable pageable);
+
+    /** Receivals recorded within the half-open instant range [start, end), newest first. */
+    @EntityGraph(attributePaths = "lines")
+    List<Receival> findByReceivedAtGreaterThanEqualAndReceivedAtLessThanOrderByReceivedAtDesc(
+            Instant start, Instant end);
 }

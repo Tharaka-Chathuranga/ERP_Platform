@@ -294,6 +294,59 @@ export interface DeviationItemRow {
   requestedAt: string;
 }
 
+/** A receival document recorded today (mirrors TodayReceivalRowResponse). */
+export interface TodayReceivalRow {
+  receivalId: string;
+  receivalNumber: string;
+  supplierName?: string;
+  lineCount: number;
+  totalQuantity: number;
+  /** Sum of each line's quantity × receipt unit cost. */
+  totalValue: number;
+  receivedAt: string;
+}
+
+/** An issue document physically issued today (mirrors TodayIssueRowResponse). */
+export interface TodayIssueRow {
+  issueId: string;
+  issueNumber: string;
+  borrowingUserId: string;
+  lineCount: number;
+  totalQuantity: number;
+  /** Sum of each line's quantity × the item's current unit price. */
+  totalValue: number;
+  issuedAt: string;
+}
+
+/** A single item row shared across the stock-health lists. */
+export interface ItemStockRow {
+  itemId: string;
+  itemCode: string;
+  name: string;
+  unitOfMeasure: string;
+  quantityOnHand: number;
+  reorderLevel: number;
+  /** Current unit price of the item. */
+  unitPrice: number;
+  criticalItem: boolean;
+}
+
+/**
+ * Stock-health snapshot for the admin overview: items grouped into critical,
+ * normal, warning (below reorder) and critical-warning buckets. Each list may
+ * be capped server-side; the matching `*Count` field is the true total.
+ */
+export interface StockHealth {
+  criticalItems: ItemStockRow[];
+  normalItems: ItemStockRow[];
+  warningItems: ItemStockRow[];
+  criticalWarningItems: ItemStockRow[];
+  criticalCount: number;
+  normalCount: number;
+  warningCount: number;
+  criticalWarningCount: number;
+}
+
 // ── Admin: user management (full view, includes `enabled`) ──
 export interface AdminUser {
   id: string;
@@ -302,4 +355,101 @@ export interface AdminUser {
   role: string;
   department?: string;
   enabled: boolean;
+}
+
+// ── Fuel ──
+export type FuelTankPurpose = "INTERNAL" | "VEHICLE";
+export type TankStatus = "ACTIVE" | "INACTIVE";
+export type VehicleStatus = "ACTIVE" | "INACTIVE";
+
+export interface FuelTank {
+  id: string;
+  name: string;
+  purpose: FuelTankPurpose;
+  capacityLitres: number;
+  currentLitres: number;
+  status: TankStatus;
+}
+
+export interface FuelTankRefill {
+  id: string;
+  tankId: string;
+  litres: number;
+  refilledAt: string;
+  recordedByUserId: string;
+  note?: string;
+}
+
+export interface FuelTankReading {
+  id: string;
+  tankId: string;
+  litresMeasured: number;
+  readingAt: string;
+  recordedByUserId: string;
+  note?: string;
+  /** Fuel used since the previous reading; absent for the first reading. */
+  consumptionSincePrevious?: number;
+}
+
+export interface Vehicle {
+  id: string;
+  vehicleNumber: string;
+  fullTankCapacityLitres: number;
+  description?: string;
+  driverUserId?: string;
+  status: VehicleStatus;
+}
+
+export interface VehicleFuelIssue {
+  id: string;
+  vehicleId: string;
+  vehicleReadingBeforeIssueLitres: number;
+  litresIssued: number;
+  issuingUserId: string;
+  receivingUserId: string;
+  issuedAt: string;
+  /** Odometer reading (km) captured at the time of fuelling. Absent if not recorded. */
+  odometerReadingKm?: number;
+}
+
+export interface VehicleEfficiencyPoint {
+  date: string;
+  kmPerLitre: number;
+  kmDriven: number;
+  litresConsumed: number;
+}
+
+export interface VehicleEfficiencyReport {
+  vehicleId: string;
+  vehicleNumber: string;
+  driverUserId: string;
+  points: VehicleEfficiencyPoint[];
+}
+
+export interface FuelPrice {
+  id: string;
+  unitPrice: number;
+  effectiveFrom: string;
+  effectiveTo: string;
+  recordedByUserId: string;
+  note?: string;
+}
+
+export interface FuelOverviewTank {
+  purpose: FuelTankPurpose;
+  name: string;
+  currentLitres: number;
+  capacityLitres: number;
+}
+
+export interface FuelOverview {
+  tanks: FuelOverviewTank[];
+  todayIssueCount: number;
+  todayLitres: number;
+  currentPrice?: { unitPrice: number; effectiveFrom: string; effectiveTo: string };
+  lastInternalReading?: {
+    litresMeasured: number;
+    readingAt: string;
+    consumptionSincePrevious?: number;
+  };
 }

@@ -12,6 +12,7 @@
       "@app/*": ["src/app/*"],
       "@auth/*": ["src/auth/*"],
       "@store/*": ["src/management-section/store/*"],
+      "@fuel/*": ["src/management-section/fuel/*"],
       "@users/*": ["src/management-section/users/*"],
       "@admin/*": ["src/management-section/admin/*"],
       "@qa/*": ["src/management-section/qa/*"],

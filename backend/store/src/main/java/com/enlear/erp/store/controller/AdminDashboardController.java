@@ -3,6 +3,9 @@ package com.enlear.erp.store.controller;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DashboardSummaryResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DeviationItemRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.MovementTrendPointResponse;
+import com.enlear.erp.store.controller.dto.AdminDashboardResponses.StockHealthResponse;
+import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayIssueRowResponse;
+import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayReceivalRowResponse;
 import com.enlear.erp.store.model.DeviationStage;
 import com.enlear.erp.store.service.AdminDashboardQueryService;
 import java.util.List;
@@ -41,5 +44,20 @@ public class AdminDashboardController {
     public List<DeviationItemRowResponse> defectItems(
             @RequestParam(required = false) DeviationStage stage) {
         return dashboard.deviationItems(stage);
+    }
+
+    @GetMapping("/today-receivals")
+    public List<TodayReceivalRowResponse> todayReceivals() {
+        return dashboard.todayReceivals();
+    }
+
+    @GetMapping("/today-issues")
+    public List<TodayIssueRowResponse> todayIssues() {
+        return dashboard.todayIssues();
+    }
+
+    @GetMapping("/stock-health")
+    public StockHealthResponse stockHealth() {
+        return dashboard.stockHealth();
     }
 }

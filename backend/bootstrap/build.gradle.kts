@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":shared"))
     implementation(project(":user"))
     implementation(project(":store"))
+    implementation(project(":fuel"))
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocVersion")}")

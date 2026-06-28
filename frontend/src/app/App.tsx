@@ -5,6 +5,7 @@ import { AppLayout } from "@ui/layout/AppLayout";
 import { LoginPage } from "@screens/LoginPage";
 import { DashboardPage } from "@dashboard/DashboardPage";
 import { storeRoutes } from "@store/store.routes";
+import { fuelRoutes } from "@fuel/fuel.routes";
 import { usersRoutes } from "@users/users.routes";
 import { adminRoutes } from "@admin/admin.routes";
 import { qaRoutes } from "@qa/qa.routes";
@@ -32,6 +33,7 @@ export default function App() {
         {/* Each management feature contributes its own route subtree;
             permission-gated routes guard themselves via RequirePermission. */}
         {storeRoutes}
+        {fuelRoutes}
         {usersRoutes}
         {adminRoutes}
         {qaRoutes}

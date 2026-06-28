@@ -67,6 +67,9 @@ export const qk = {
   lowStock: () => ["admin", "low-stock"] as const,
   movementTrend: (days: number) => ["admin", "movement-trend", days] as const,
   defectItems: (stage?: string) => filtered("admin-defect-items", stage),
+  todayReceivals: () => ["admin", "today-receivals"] as const,
+  todayIssues: () => ["admin", "today-issues"] as const,
+  stockHealth: () => ["admin", "stock-health"] as const,
 
   // ── Admin: count-adjustment requests ──
   countRequests: (status?: string) => filtered("count-requests", status),
@@ -75,4 +78,17 @@ export const qk = {
   // ── Admin: user management ──
   adminUsers: () => ["admin", "users"] as const,
   adminUser: (id: string) => ["admin", "user", id] as const,
+
+  // ── Fuel ──
+  fuelTanks: () => ["fuel-tanks"] as const,
+  fuelTank: (id: string) => ["fuel-tank", id] as const,
+  tankRefills: (tankId: string) => ["fuel-tank", tankId, "refills"] as const,
+  tankReadings: (tankId: string) => ["fuel-tank", tankId, "readings"] as const,
+  vehicles: (search?: string) => filtered("fuel-vehicles", search),
+  vehicle: (id: string) => ["fuel-vehicle", id] as const,
+  vehicleIssues: (filter?: string) => filtered("fuel-vehicle-issues", filter),
+  fuelPrices: () => ["fuel-prices"] as const,
+  currentFuelPrice: () => ["fuel-price", "current"] as const,
+  fuelOverview: () => ["fuel-overview"] as const,
+  fuelEfficiency: (from: string, to: string, vehicleId?: string) => ["fuel-efficiency", from, to, vehicleId ?? "ALL"] as const,
 } as const;
