@@ -20,7 +20,8 @@
       "@ui/*": ["src/ui/*"],
       "@core/*": ["src/core/*"],
       "@nav/*": ["src/nav/*"],
-      "@screens/*": ["src/screens/*"]
+      "@screens/*": ["src/screens/*"],
+      "@voice/*": ["src/voice/*"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

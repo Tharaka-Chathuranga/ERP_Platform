@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { MantineProvider, localStorageColorSchemeManager } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { AuthProvider } from "@auth/AuthContext";
+import { VoiceProvider } from "@voice/index";
 import { theme } from "./theme";
 import App from "@app/App";
 
@@ -27,7 +28,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
-            <App />
+            <VoiceProvider>
+              <App />
+            </VoiceProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>
