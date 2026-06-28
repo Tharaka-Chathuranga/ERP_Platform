@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import type { ReactNode } from "react";
 import { useAuth } from "@auth/AuthContext";
 import { AppLayout } from "@ui/layout/AppLayout";
+import { AppVoiceCommands } from "./AppVoiceCommands";
 import { LoginPage } from "@screens/LoginPage";
 import { DashboardPage } from "@dashboard/DashboardPage";
 import { storeRoutes } from "@store/store.routes";
@@ -23,6 +24,7 @@ export default function App() {
         path="/"
         element={
           <RequireAuth>
+            <AppVoiceCommands />
             <AppLayout />
           </RequireAuth>
         }

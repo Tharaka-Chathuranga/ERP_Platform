@@ -1,0 +1,143 @@
+/* Animations for the voice assistant orb. Distinct motion per phase so the
+   state is readable at a glance: breathing (idle), pulsing rings (listening),
+   orbiting spinner (processing), equaliser bars (speaking). */
+
+.voiceOrb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #fff;
+  background: radial-gradient(circle at 30% 30%, #4dabf7, #1971c2);
+  box-shadow: 0 8px 24px rgba(25, 113, 194, 0.45);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+
+.voiceOrb:hover {
+  transform: scale(1.05);
+}
+
+.voiceOrb:focus-visible {
+  outline: 3px solid var(--mantine-color-blue-3);
+  outline-offset: 3px;
+}
+
+/* ── Idle: gentle breathing ── */
+.voiceOrb--idle {
+  animation: voiceBreathe 3.2s ease-in-out infinite;
+}
+
+@keyframes voiceBreathe {
+  0%, 100% { box-shadow: 0 8px 24px rgba(25, 113, 194, 0.35); }
+  50% { box-shadow: 0 8px 34px rgba(25, 113, 194, 0.6); }
+}
+
+/* ── Listening: teal, with expanding pulse rings ── */
+.voiceOrb--listening {
+  background: radial-gradient(circle at 30% 30%, #38d9a9, #0ca678);
+  box-shadow: 0 8px 28px rgba(12, 166, 120, 0.55);
+}
+
+.voiceRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(12, 166, 120, 0.6);
+  animation: voicePulse 1.8s ease-out infinite;
+  pointer-events: none;
+}
+
+.voiceRing--2 { animation-delay: 0.6s; }
+.voiceRing--3 { animation-delay: 1.2s; }
+
+@keyframes voicePulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+/* ── Processing: violet, with an orbiting spinner arc ── */
+.voiceOrb--processing {
+  background: radial-gradient(circle at 30% 30%, #b197fc, #7048e8);
+  box-shadow: 0 8px 28px rgba(112, 72, 232, 0.55);
+}
+
+.voiceSpinner {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.9);
+  border-right-color: rgba(255, 255, 255, 0.5);
+  animation: voiceSpin 0.9s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes voiceSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Speaking: indigo, with an equaliser ── */
+.voiceOrb--speaking {
+  background: radial-gradient(circle at 30% 30%, #748ffc, #4263eb);
+  box-shadow: 0 8px 28px rgba(66, 99, 235, 0.55);
+}
+
+.voiceBars {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+}
+
+.voiceBars span {
+  width: 3px;
+  height: 100%;
+  background: #fff;
+  border-radius: 2px;
+  animation: voiceEq 0.9s ease-in-out infinite;
+}
+
+.voiceBars span:nth-child(2) { animation-delay: 0.15s; }
+.voiceBars span:nth-child(3) { animation-delay: 0.3s; }
+.voiceBars span:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes voiceEq {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+
+/* ── Sparkle accent: sits just OUTSIDE the orb circle, top-right ── */
+.voiceSparkle {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  color: #ffd43b;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  animation: voiceTwinkle 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes voiceTwinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.85; }
+  50% { transform: scale(1.25) rotate(15deg); opacity: 1; }
+}
+
+/* ── Error: red, static ── */
+.voiceOrb--error {
+  background: radial-gradient(circle at 30% 30%, #ff8787, #e03131);
+  box-shadow: 0 8px 24px rgba(224, 49, 49, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voiceOrb--idle,
+  .voiceRing,
+  .voiceSpinner,
+  .voiceBars span,
+  .voiceSparkle {
+    animation: none;
+  }
+}

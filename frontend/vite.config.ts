@@ -19,6 +19,7 @@ export default defineConfig({
       "@core": r("./src/core"),
       "@nav": r("./src/nav"),
       "@screens": r("./src/screens"),
+      "@voice": r("./src/voice"),
     },
   },
   server: {

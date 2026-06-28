@@ -1,4 +1,4 @@
-import { ActionIcon, Box, Group, NavLink, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { ActionIcon, Box, Group, NavLink, ScrollArea, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight, type Icon } from "@tabler/icons-react";
 import { type ComponentType, useMemo } from "react";
 import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
@@ -82,7 +82,7 @@ export function Sidebar({
   const isActive = (to: string) => to === activeTo;
 
   return (
-    <Box pos="relative" h="100%">
+    <Box pos="relative" h="100%" style={{ display: "flex", flexDirection: "column" }}>
       {onToggle && (
         <Tooltip label={collapsed ? "Expand sidebar" : "Minimize sidebar"} position="right" withArrow>
           <ActionIcon
@@ -114,6 +114,7 @@ export function Sidebar({
         align="center"
         gap="sm"
         wrap="nowrap"
+        style={{ flexShrink: 0 }}
       >
         <Box
           style={{
@@ -145,6 +146,7 @@ export function Sidebar({
       </Group>
 
 
+      <ScrollArea style={{ flex: 1, minHeight: 0 }} type="hover" scrollbarSize={6} offsetScrollbars>
       {collapsed ? (
         <Stack gap={4}>
           {items.map(({ to, label, icon: Icon, color }) => (
@@ -215,6 +217,7 @@ export function Sidebar({
           })}
         </Stack>
       )}
+      </ScrollArea>
     </Box>
   );
 }
