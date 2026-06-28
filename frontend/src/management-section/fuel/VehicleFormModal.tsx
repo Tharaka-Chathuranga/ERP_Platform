@@ -52,7 +52,13 @@ export function VehicleFormModal({ opened, onClose, vehicle }: VehicleFormModalP
   });
 
   return (
-    <Modal opened={opened} onClose={onClose} title={editing ? "Edit vehicle" : "New vehicle"} centered>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={editing ? "Edit vehicle" : "New vehicle"}
+      centered
+      styles={{ title: { fontSize: "var(--mantine-font-size-xl)", fontWeight: 700 } }}
+    >
       <Stack>
         <TextInput
           label="Vehicle number"
@@ -81,7 +87,7 @@ export function VehicleFormModal({ opened, onClose, vehicle }: VehicleFormModalP
           autosize
           minRows={2}
         />
-        <Group justify="flex-end">
+        <Group justify="space-between">
           <Button variant="default" onClick={onClose}>
             Cancel
           </Button>
