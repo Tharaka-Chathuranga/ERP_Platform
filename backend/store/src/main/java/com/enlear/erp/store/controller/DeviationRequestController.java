@@ -72,7 +72,8 @@ public class DeviationRequestController {
 
     @GetMapping("/by-status")
     @PreAuthorize("hasAnyRole('ADMIN','QUALITY_ASSURANCE')")
-    public List<DeviationRequestResponse> listByStatus(@RequestParam DeviationStatus status) {
+    public List<DeviationRequestResponse> listByStatus(
+            @RequestParam(required = false) DeviationStatus status) {
         return requests.listByStatus(status).stream().map(DeviationRequestResponse::from).toList();
     }
 }

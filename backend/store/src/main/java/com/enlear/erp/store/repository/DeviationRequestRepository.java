@@ -17,6 +17,8 @@ public interface DeviationRequestRepository extends JpaRepository<DeviationReque
 
     List<DeviationRequest> findByStatusOrderByRequestedAtDesc(DeviationStatus status);
 
+    List<DeviationRequest> findAllByOrderByRequestedAtDesc();
+
     long countByStatus(DeviationStatus status);
 
     long countByStage(DeviationStage stage);

@@ -71,7 +71,9 @@ public class DeviationRequestService {
 
     @Transactional(readOnly = true)
     public List<DeviationRequest> listByStatus(DeviationStatus status) {
-        List<DeviationRequest> found = requests.findByStatusOrderByRequestedAtDesc(status);
+        List<DeviationRequest> found = status != null
+                ? requests.findByStatusOrderByRequestedAtDesc(status)
+                : requests.findAllByOrderByRequestedAtDesc();
         found.forEach(req -> Hibernate.initialize(req.getItems()));
         return found;
     }
