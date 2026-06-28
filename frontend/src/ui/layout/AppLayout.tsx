@@ -5,7 +5,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { NotificationsPopover } from "./NotificationsPopover";
 import { useAuth } from "@auth/AuthContext";
-import { VoiceAssistant } from "@voice/index";
+// import { VoiceAssistant } from "@voice/index";
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Administrator",
@@ -108,7 +108,7 @@ export function AppLayout() {
           </Box>
         </AppShell.Main>
 
-        <VoiceAssistant />
+        {/* Temporarily hidden: <VoiceAssistant /> */}
       </AppShell>
   );
 }
