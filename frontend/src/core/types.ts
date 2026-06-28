@@ -356,3 +356,100 @@ export interface AdminUser {
   department?: string;
   enabled: boolean;
 }
+
+// ── Fuel ──
+export type FuelTankPurpose = "INTERNAL" | "VEHICLE";
+export type TankStatus = "ACTIVE" | "INACTIVE";
+export type VehicleStatus = "ACTIVE" | "INACTIVE";
+
+export interface FuelTank {
+  id: string;
+  name: string;
+  purpose: FuelTankPurpose;
+  capacityLitres: number;
+  currentLitres: number;
+  status: TankStatus;
+}
+
+export interface FuelTankRefill {
+  id: string;
+  tankId: string;
+  litres: number;
+  refilledAt: string;
+  recordedByUserId: string;
+  note?: string;
+}
+
+export interface FuelTankReading {
+  id: string;
+  tankId: string;
+  litresMeasured: number;
+  readingAt: string;
+  recordedByUserId: string;
+  note?: string;
+  /** Fuel used since the previous reading; absent for the first reading. */
+  consumptionSincePrevious?: number;
+}
+
+export interface Vehicle {
+  id: string;
+  vehicleNumber: string;
+  fullTankCapacityLitres: number;
+  description?: string;
+  driverUserId?: string;
+  status: VehicleStatus;
+}
+
+export interface VehicleFuelIssue {
+  id: string;
+  vehicleId: string;
+  vehicleReadingBeforeIssueLitres: number;
+  litresIssued: number;
+  issuingUserId: string;
+  receivingUserId: string;
+  issuedAt: string;
+  /** Odometer reading (km) captured at the time of fuelling. Absent if not recorded. */
+  odometerReadingKm?: number;
+}
+
+export interface VehicleEfficiencyPoint {
+  date: string;
+  kmPerLitre: number;
+  kmDriven: number;
+  litresConsumed: number;
+}
+
+export interface VehicleEfficiencyReport {
+  vehicleId: string;
+  vehicleNumber: string;
+  driverUserId: string;
+  points: VehicleEfficiencyPoint[];
+}
+
+export interface FuelPrice {
+  id: string;
+  unitPrice: number;
+  effectiveFrom: string;
+  effectiveTo: string;
+  recordedByUserId: string;
+  note?: string;
+}
+
+export interface FuelOverviewTank {
+  purpose: FuelTankPurpose;
+  name: string;
+  currentLitres: number;
+  capacityLitres: number;
+}
+
+export interface FuelOverview {
+  tanks: FuelOverviewTank[];
+  todayIssueCount: number;
+  todayLitres: number;
+  currentPrice?: { unitPrice: number; effectiveFrom: string; effectiveTo: string };
+  lastInternalReading?: {
+    litresMeasured: number;
+    readingAt: string;
+    consumptionSincePrevious?: number;
+  };
+}

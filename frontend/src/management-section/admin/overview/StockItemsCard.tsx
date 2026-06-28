@@ -19,6 +19,8 @@ interface StockItemsCardProps {
   emptyText: string;
   /** Adds a unit-price column (used for the critical and normal lists). */
   showPrice?: boolean;
+  /** Shows the critical/low status column (off for the critical and normal lists). */
+  showStatus?: boolean;
 }
 
 /** Renders one stock-health bucket (critical / normal / warning / critical-warning). */
@@ -33,6 +35,7 @@ export function StockItemsCard({
   error,
   emptyText,
   showPrice = false,
+  showStatus = true,
 }: StockItemsCardProps) {
   const capped = items != null && items.length < total;
   const columns: Column<ItemStockRow>[] = [
@@ -43,20 +46,24 @@ export function StockItemsCard({
     ...(showPrice
       ? [{ header: "Price", render: (r: ItemStockRow) => money(r.unitPrice), align: "right" as const }]
       : []),
-    {
-      header: "Status",
-      render: (r) => (
-        <Group gap={6} wrap="nowrap" justify="flex-end">
-          {r.criticalItem && <StatusBadge status="CRITICAL" />}
-          {r.quantityOnHand < r.reorderLevel && (
-            <Badge color="orange" variant="light" radius="sm">
-              LOW
-            </Badge>
-          )}
-        </Group>
-      ),
-      align: "right",
-    },
+    ...(showStatus
+      ? [
+          {
+            header: "Status",
+            render: (r: ItemStockRow) => (
+              <Group gap={6} wrap="nowrap" justify="flex-end">
+                {r.criticalItem && <StatusBadge status="CRITICAL" />}
+                {r.quantityOnHand < r.reorderLevel && (
+                  <Badge color="orange" variant="light" radius="sm">
+                    LOW
+                  </Badge>
+                )}
+              </Group>
+            ),
+            align: "right" as const,
+          },
+        ]
+      : []),
   ];
 
   return (

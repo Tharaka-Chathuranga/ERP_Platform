@@ -43,20 +43,19 @@ export function StockHealthSection() {
         emptyText="No critical items below reorder — all good."
       />
 
+      <StockItemsCard
+        title="Warning items"
+        description="On hand below reorder level"
+        icon={<IconAlertTriangle size={22} />}
+        accent="orange"
+        items={h?.warningItems}
+        total={h?.warningCount ?? 0}
+        loading={loading}
+        error={error}
+        emptyText="Nothing below reorder level."
+      />
+
       <Grid>
-        <Grid.Col span={{ base: 12, lg: 6 }}>
-          <StockItemsCard
-            title="Warning items"
-            description="On hand below reorder level"
-            icon={<IconAlertTriangle size={22} />}
-            accent="orange"
-            items={h?.warningItems}
-            total={h?.warningCount ?? 0}
-            loading={loading}
-            error={error}
-            emptyText="Nothing below reorder level."
-          />
-        </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 6 }}>
           <StockItemsCard
             title="Critical items"
@@ -69,22 +68,25 @@ export function StockHealthSection() {
             error={error}
             emptyText="No items flagged critical."
             showPrice
+            showStatus={false}
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, lg: 6 }}>
+          <StockItemsCard
+            title="Normal items"
+            description="Healthy stock at or above reorder level"
+            icon={<IconCircleCheck size={22} />}
+            accent="teal"
+            items={h?.normalItems}
+            total={h?.normalCount ?? 0}
+            loading={loading}
+            error={error}
+            emptyText="No items at healthy stock levels."
+            showPrice
+            showStatus={false}
           />
         </Grid.Col>
       </Grid>
-
-      <StockItemsCard
-        title="Normal items"
-        description="Healthy stock at or above reorder level"
-        icon={<IconCircleCheck size={22} />}
-        accent="teal"
-        items={h?.normalItems}
-        total={h?.normalCount ?? 0}
-        loading={loading}
-        error={error}
-        emptyText="No items at healthy stock levels."
-        showPrice
-      />
     </>
   );
 }

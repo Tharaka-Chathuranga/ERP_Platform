@@ -30,7 +30,7 @@ import type { LowStockItem } from "@core/types";
 import { getDashboardSummary, getMovementTrend } from "./admin.api";
 import { MovementTrendChart } from "./MovementTrendChart";
 import { TopMoversChart } from "./TopMoversChart";
-import { StockHealthSection, TodayIssuesCard, TodayReceivalsCard } from "./overview";
+import { FuelOverviewSection, StockHealthSection, TodayIssuesCard, TodayReceivalsCard } from "./overview";
 
 const currency = new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" });
 
@@ -97,6 +97,19 @@ function AdminOverview() {
             <TodayIssuesCard />
           </Grid.Col>
         </Grid>
+      </div>
+
+      <div>
+        <Divider
+          label={
+            <Text fw={600} fz="xs" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
+              Fuel
+            </Text>
+          }
+          labelPosition="left"
+          mb="md"
+        />
+        <FuelOverviewSection />
       </div>
 
       <div>

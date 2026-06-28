@@ -4,5 +4,6 @@ include(
     ":shared",
     ":user",
     ":store",
+    ":fuel",
     ":bootstrap",
 )
