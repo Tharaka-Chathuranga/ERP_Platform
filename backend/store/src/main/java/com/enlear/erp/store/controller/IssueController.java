@@ -4,6 +4,7 @@ import com.enlear.erp.shared.web.PageResponse;
 import com.enlear.erp.store.service.issue.IssueService;
 import com.enlear.erp.store.controller.dto.CreateIssueRequest;
 import com.enlear.erp.store.controller.dto.DecideIssueLinesRequest;
+import com.enlear.erp.store.controller.dto.IssueItemsRequest;
 import com.enlear.erp.store.controller.dto.IssueResponses.IssueResponse;
 import com.enlear.erp.store.controller.dto.ReturnItemsRequest;
 import jakarta.validation.Valid;
@@ -60,11 +61,11 @@ public class IssueController {
         return IssueResponse.from(issues.decideLines(request.toCommand(id, approverId)));
     }
 
-    /** Physically issue an APPROVED document — posts ISSUE movements. */
+    /** Physically issue an APPROVED document from the chosen slots — posts ISSUE movements. */
     @PostMapping("/{id}/issue")
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
-    public IssueResponse issue(@PathVariable UUID id) {
-        return IssueResponse.from(issues.issue(id));
+    public IssueResponse issue(@PathVariable UUID id, @Valid @RequestBody IssueItemsRequest request) {
+        return IssueResponse.from(issues.issue(request.toCommand(id)));
     }
 
     @PostMapping("/{id}/returns")

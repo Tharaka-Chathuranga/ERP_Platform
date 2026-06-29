@@ -57,10 +57,6 @@ export function StockPanel({ item }: { item: Item }) {
   const quantityOnHand = onHand.data?.quantityOnHand;
   const belowReorder =
     item.reorderLevel > 0 && quantityOnHand != null && quantityOnHand <= item.reorderLevel;
-  const locationText = item.locations
-    .map((l) => [l.rack, l.row, l.column].filter(Boolean).join("/"))
-    .filter(Boolean)
-    .join(", ");
 
   return (
     <Stack gap="lg">
@@ -107,9 +103,32 @@ export function StockPanel({ item }: { item: Item }) {
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg" verticalSpacing="md">
           <Detail label="Reorder level" value={`${item.reorderLevel} ${item.unitOfMeasure}`} />
           <Detail label="Unit of measure" value={item.unitOfMeasure} />
-          <Detail label="Location" value={locationText || "—"} />
           <Detail label="Description" value={item.description || "—"} />
         </SimpleGrid>
+      </Paper>
+
+      <Paper withBorder radius="md" p="md">
+        <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb="xs">
+          Stock by location
+        </Text>
+        {item.locations.length === 0 ? (
+          <Text size="sm" c="dimmed">
+            No location stock recorded — receive items into a location to track it here.
+          </Text>
+        ) : (
+          <Stack gap={4}>
+            {item.locations.map((l, idx) => (
+              <Group key={idx} justify="space-between">
+                <Text size="sm">
+                  {[l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)"}
+                </Text>
+                <Text size="sm" fw={600}>
+                  {l.quantity ?? 0} {item.unitOfMeasure}
+                </Text>
+              </Group>
+            ))}
+          </Stack>
+        )}
       </Paper>
 
       <Divider label="Recent movements" labelPosition="left" />

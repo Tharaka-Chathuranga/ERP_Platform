@@ -63,6 +63,9 @@ export function NewReceivalPage() {
           itemId: l.itemId!,
           quantity: Number(l.quantity),
           unitCost: l.unitCost === "" || l.unitCost == null ? undefined : Number(l.unitCost),
+          rack: l.rack?.trim() || undefined,
+          row: l.row?.trim() || undefined,
+          column: l.column?.trim() || undefined,
         })),
       }),
     onSuccess: (receival) => {
@@ -167,7 +170,7 @@ export function NewReceivalPage() {
         <Divider />
         <Box p="xl">
           <StepHeading number={2} title="Which items were received?" />
-          <LineItemsEditor lines={lines} onChange={setLines} showUnitCost />
+          <LineItemsEditor lines={lines} onChange={setLines} showUnitCost showLocation />
         </Box>
 
         {/* Submit */}

@@ -5,6 +5,9 @@ export interface ReceivalLineInput {
   itemId: string;
   quantity: number;
   unitCost?: number;
+  rack?: string;
+  row?: string;
+  column?: string;
 }
 
 export interface CreateReceivalInput {

@@ -26,7 +26,8 @@ export interface Location {
   rack: string;
   row: string;
   column: string;
-  primary: boolean;
+  primary?: boolean;
+  quantity?: number;
 }
 
 export interface Item {

@@ -24,14 +24,18 @@ public record CreateReceivalRequest(
     public record ReceivalItem(
             @NotNull UUID itemId,
             @NotNull @DecimalMin(value = "0.0", inclusive = false) BigDecimal quantity,
-            @DecimalMin("0.0") BigDecimal unitCost) {
+            @DecimalMin("0.0") BigDecimal unitCost,
+            @Size(max = 64) String rack,
+            @Size(max = 64) String row,
+            @Size(max = 64) String column) {
     }
 
     public CreateReceivalCommand toCommand() {
         return new CreateReceivalCommand(poNumber, invoiceNumber, supplierId, supplierName,
                 allReceivedForPo, storeKeeperId, receivedAt,
                 receivalItems.stream()
-                        .map(l -> new CreateReceivalCommand.ReceivalItem(l.itemId(), l.quantity(), l.unitCost()))
+                        .map(l -> new CreateReceivalCommand.ReceivalItem(l.itemId(), l.quantity(),
+                                l.unitCost(), l.rack(), l.row(), l.column()))
                         .toList());
     }
 }

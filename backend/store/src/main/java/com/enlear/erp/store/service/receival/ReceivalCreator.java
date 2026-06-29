@@ -26,7 +26,8 @@ class ReceivalCreator {
                 cmd.allReceivedForPo(), cmd.storeKeeperId(),
                 cmd.receivedAt() != null ? cmd.receivedAt() : Instant.now());
         for (CreateReceivalCommand.ReceivalItem item : cmd.receivalItems()) {
-            receival.addLine(new ReceivalItem(item.itemId(), item.quantity(), item.unitCost()));
+            receival.addLine(new ReceivalItem(item.itemId(), item.quantity(), item.unitCost(),
+                    trimToNull(item.rack()), trimToNull(item.row()), trimToNull(item.column())));
         }
         return receival;
     }

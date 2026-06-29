@@ -50,9 +50,17 @@ export async function rejectIssue(id: string, approverId: string): Promise<Issue
   return data;
 }
 
-/** Physically issue an APPROVED document — posts ISSUE movements. */
-export async function issueDocument(id: string): Promise<Issue> {
-  const { data } = await api.post<Issue>(`/store/issues/${id}/issue`);
+export interface IssueAllocationInput {
+  lineId: string;
+  rack?: string;
+  row?: string;
+  column?: string;
+  quantity: number;
+}
+
+/** Physically issue an APPROVED document from the chosen slots — posts ISSUE movements. */
+export async function issueDocument(id: string, allocations: IssueAllocationInput[]): Promise<Issue> {
+  const { data } = await api.post<Issue>(`/store/issues/${id}/issue`, { allocations });
   return data;
 }
 

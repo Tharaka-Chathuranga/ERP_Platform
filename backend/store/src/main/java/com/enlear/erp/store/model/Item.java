@@ -94,6 +94,69 @@ public class Item extends BaseEntity {
         this.locations = newLocations != null ? new ArrayList<>(newLocations) : new ArrayList<>();
     }
 
+    /**
+     * Applies a signed quantity change to a storage slot. Receiving (positive)
+     * adds into the matching slot or creates it; issuing (negative) draws from
+     * the slot and drops it once empty. Rejects drawing more than the slot holds.
+     */
+    public void applyLocationDelta(Location target, BigDecimal signedDelta) {
+        List<Location> updated = new ArrayList<>();
+        boolean found = false;
+        for (Location slot : locations) {
+            if (sameSlot(slot, target)) {
+                found = true;
+                BigDecimal current = slot.quantity() != null ? slot.quantity() : BigDecimal.ZERO;
+                BigDecimal next = current.add(signedDelta);
+                if (next.signum() < 0) {
+                    throw insufficientAt(target, current, signedDelta.negate());
+                }
+                if (next.signum() > 0) {
+                    updated.add(new Location(slot.rack(), slot.row(), slot.column(), slot.primary(), next));
+                }
+                // next == 0 → drop the slot entirely
+            } else {
+                updated.add(slot);
+            }
+        }
+        if (!found) {
+            if (signedDelta.signum() < 0) {
+                throw insufficientAt(target, BigDecimal.ZERO, signedDelta.negate());
+            }
+            updated.add(new Location(target.rack(), target.row(), target.column(),
+                    target.primary(), signedDelta));
+        }
+        this.locations = updated;
+    }
+
+    private static boolean sameSlot(Location a, Location b) {
+        return normalize(a.rack()).equals(normalize(b.rack()))
+                && normalize(a.row()).equals(normalize(b.row()))
+                && normalize(a.column()).equals(normalize(b.column()));
+    }
+
+    private static String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
+    }
+
+    private static String slotLabel(Location slot) {
+        StringBuilder sb = new StringBuilder();
+        for (String part : new String[] {slot.rack(), slot.row(), slot.column()}) {
+            if (part != null && !part.isBlank()) {
+                if (sb.length() > 0) {
+                    sb.append('/');
+                }
+                sb.append(part.trim());
+            }
+        }
+        return sb.length() > 0 ? sb.toString() : "(unspecified)";
+    }
+
+    private BusinessRuleException insufficientAt(Location slot, BigDecimal have, BigDecimal need) {
+        return new BusinessRuleException("STORE_INSUFFICIENT_LOCATION_STOCK",
+                "Insufficient stock of %s at location %s: have %s, need %s"
+                        .formatted(itemCode, slotLabel(slot), have, need));
+    }
+
     /** Update the editable master-data fields (identity, code and on-hand are not touched). */
     public void updateDetails(String name, String description, String category,
                               BigDecimal reorderLevel, boolean criticalItem,
