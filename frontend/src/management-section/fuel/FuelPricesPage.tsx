@@ -15,7 +15,8 @@ import { AddPriceModal } from "./AddPriceModal";
 
 function isCurrent(price: FuelPrice): boolean {
   const today = dayjs();
-  return !today.isBefore(dayjs(price.effectiveFrom)) && !today.isAfter(dayjs(price.effectiveTo));
+  if (today.isBefore(dayjs(price.effectiveFrom))) return false;
+  return !price.effectiveTo || !today.isAfter(dayjs(price.effectiveTo));
 }
 
 export function FuelPricesPage() {
@@ -32,8 +33,7 @@ export function FuelPricesPage() {
     if (!from && !to) return all;
     return all.filter((p) => {
       const effectiveFrom = dayjs(p.effectiveFrom);
-      const effectiveTo = dayjs(p.effectiveTo);
-      if (from && effectiveTo.isBefore(dayjs(from).startOf("day"))) return false;
+      if (from && p.effectiveTo && dayjs(p.effectiveTo).isBefore(dayjs(from).startOf("day"))) return false;
       if (to && effectiveFrom.isAfter(dayjs(to).endOf("day"))) return false;
       return true;
     });
@@ -42,7 +42,7 @@ export function FuelPricesPage() {
   const columns: Column<FuelPrice>[] = [
     { header: "Unit price", emphasis: true, render: (p) => p.unitPrice },
     { header: "Effective from", render: (p) => dayjs(p.effectiveFrom).format("MMM D, YYYY") },
-    { header: "Effective to", render: (p) => dayjs(p.effectiveTo).format("MMM D, YYYY") },
+    { header: "Effective to", render: (p) => (p.effectiveTo ? dayjs(p.effectiveTo).format("MMM D, YYYY") : "Current") },
     {
       header: "",
       render: (p) => (isCurrent(p) ? <Badge color="teal" variant="light" radius="sm">Current</Badge> : null),

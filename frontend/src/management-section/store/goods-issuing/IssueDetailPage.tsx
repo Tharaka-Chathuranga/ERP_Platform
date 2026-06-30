@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  ActionIcon,
   Badge,
   Box,
   Button,
   Card,
   Divider,
   Group,
+  Loader,
   Modal,
   NumberInput,
+  Select,
   Stack,
   Text,
   ThemeIcon,
@@ -20,6 +23,8 @@ import {
   IconClipboardList,
   IconHourglass,
   IconPackageExport,
+  IconPlus,
+  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -48,9 +53,12 @@ import {
   getIssue,
   issueDocument,
   returnIssueItems,
+  type IssueAllocationInput,
   type LineDecisionInput,
   type ReturnLineInput,
 } from "@store/goods-issuing/issuing.api";
+import { getItem } from "@store/inventory/items.api";
+import type { Location } from "@core/types";
 import { notifyError, notifySuccess } from "@core/notify";
 import { IssueApprovalList } from "./IssueApprovalList";
 import { IssueItemCards } from "./IssueItemCards";
@@ -64,6 +72,7 @@ export function IssueDetailPage() {
   const itemLabel = useItemLabels();
   const userLabel = useUserLabels();
   const [returnsOpen, setReturnsOpen] = useState(false);
+  const [issueOpen, setIssueOpen] = useState(false);
 
   const { data: issue, isLoading, error } = useQuery({
     queryKey: qk.issue(id),
@@ -78,11 +87,6 @@ export function IssueDetailPage() {
   const decideLines = useMutation({
     mutationFn: (decisions: LineDecisionInput[]) => decideIssueLines(id, userId!, decisions),
     onSuccess: () => { notifySuccess("Approval decisions saved"); invalidate(); },
-    onError: notifyError,
-  });
-  const doIssue = useMutation({
-    mutationFn: () => issueDocument(id),
-    onSuccess: () => { notifySuccess("Stock issued"); invalidate(); },
     onError: notifyError,
   });
 
@@ -200,8 +204,7 @@ export function IssueDetailPage() {
                     {issue.status === "APPROVED" && (
                       <Button
                         leftSection={<IconPackageExport size={16} />}
-                        loading={doIssue.isPending}
-                        onClick={() => doIssue.mutate()}
+                        onClick={() => setIssueOpen(true)}
                       >
                         Issue stock
                       </Button>
@@ -215,6 +218,21 @@ export function IssueDetailPage() {
                 </>
               )}
             </Card>
+
+            <IssueStockModal
+              opened={issueOpen}
+              onClose={() => setIssueOpen(false)}
+              issueId={id}
+              lines={issue.lines
+                .filter((l) => l.approvalStatus === "APPROVED")
+                .map((l) => ({
+                  lineId: l.id,
+                  itemId: l.itemId,
+                  label: itemLabel(l.itemId),
+                  quantity: l.quantity,
+                }))}
+              onDone={invalidate}
+            />
 
             <ReturnsModal
               opened={returnsOpen}
@@ -320,6 +338,204 @@ function ReturnsModal({
           </Button>
         </Group>
       </Stack>
+    </Modal>
+  );
+}
+
+interface IssueLineRow {
+  lineId: string;
+  itemId: string;
+  label: string;
+  quantity: number;
+}
+
+interface Alloc {
+  rack: string;
+  row: string;
+  column: string;
+  quantity: number | "";
+}
+
+const slotKey = (l: Location) => [l.rack, l.row, l.column].join("|");
+const slotText = (l: Pick<Location, "rack" | "row" | "column">) =>
+  [l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)";
+
+/** Choose which storage slot(s) each approved line is drawn from, then issue. */
+function IssueStockModal({
+  opened,
+  onClose,
+  issueId,
+  lines,
+  onDone,
+}: {
+  opened: boolean;
+  onClose: () => void;
+  issueId: string;
+  lines: IssueLineRow[];
+  onDone: () => void;
+}) {
+  const itemIds = [...new Set(lines.map((l) => l.itemId))];
+  const itemsQuery = useQuery({
+    queryKey: ["issue-stock-items", issueId, itemIds],
+    queryFn: () => Promise.all(itemIds.map((id) => getItem(id))),
+    enabled: opened && lines.length > 0,
+  });
+  const locationsByItem = new Map<string, Location[]>();
+  (itemsQuery.data ?? []).forEach((it) => locationsByItem.set(it.id, it.locations ?? []));
+
+  const [allocs, setAllocs] = useState<Record<string, Alloc[]>>({});
+  const lineKey = lines.map((l) => l.lineId).join(",");
+
+  useEffect(() => {
+    if (opened) {
+      const init: Record<string, Alloc[]> = {};
+      lines.forEach((l) => {
+        init[l.lineId] = [{ rack: "", row: "", column: "", quantity: l.quantity }];
+      });
+      setAllocs(init);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opened, lineKey]);
+
+  const setRow = (lineId: string, idx: number, patch: Partial<Alloc>) =>
+    setAllocs((p) => ({
+      ...p,
+      [lineId]: (p[lineId] ?? []).map((r, i) => (i === idx ? { ...r, ...patch } : r)),
+    }));
+  const addRow = (lineId: string) =>
+    setAllocs((p) => ({
+      ...p,
+      [lineId]: [...(p[lineId] ?? []), { rack: "", row: "", column: "", quantity: "" }],
+    }));
+  const removeRow = (lineId: string, idx: number) =>
+    setAllocs((p) => ({ ...p, [lineId]: (p[lineId] ?? []).filter((_, i) => i !== idx) }));
+
+  const allocatedFor = (lineId: string) =>
+    (allocs[lineId] ?? []).reduce((s, r) => s + Number(r.quantity || 0), 0);
+
+  const valid = lines.every((line) => {
+    const rows = allocs[line.lineId] ?? [];
+    return (
+      rows.length > 0 &&
+      rows.every((r) => r.rack || r.row || r.column) &&
+      allocatedFor(line.lineId) === line.quantity
+    );
+  });
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const payload: IssueAllocationInput[] = lines.flatMap((line) =>
+        (allocs[line.lineId] ?? []).map((r) => ({
+          lineId: line.lineId,
+          rack: r.rack || undefined,
+          row: r.row || undefined,
+          column: r.column || undefined,
+          quantity: Number(r.quantity || 0),
+        })),
+      );
+      return issueDocument(issueId, payload);
+    },
+    onSuccess: () => {
+      notifySuccess("Stock issued");
+      onClose();
+      onDone();
+    },
+    onError: notifyError,
+  });
+
+  return (
+    <Modal opened={opened} onClose={onClose} title="Issue stock — choose locations" centered size="lg">
+      {itemsQuery.isLoading ? (
+        <Group justify="center" py="lg">
+          <Loader size="sm" />
+        </Group>
+      ) : (
+        <Stack>
+          {lines.map((line) => {
+            const slots = (locationsByItem.get(line.itemId) ?? []).filter(
+              (l) => (l.quantity ?? 0) > 0,
+            );
+            const rows = allocs[line.lineId] ?? [];
+            const allocated = allocatedFor(line.lineId);
+            const remaining = line.quantity - allocated;
+            return (
+              <Card key={line.lineId} withBorder radius="sm" padding="sm">
+                <Group justify="space-between" mb="xs">
+                  <Text size="sm" fw={600}>
+                    {line.label}
+                  </Text>
+                  <Text size="xs" c={remaining === 0 ? "green" : "red"}>
+                    {allocated} / {line.quantity} allocated
+                  </Text>
+                </Group>
+                {slots.length === 0 && (
+                  <Text size="xs" c="red" mb="xs">
+                    No location stock for this item — receive it into a location first.
+                  </Text>
+                )}
+                <Stack gap="xs">
+                  {rows.map((r, idx) => (
+                    <Group key={idx} gap="xs" wrap="nowrap">
+                      <Select
+                        flex={1}
+                        placeholder="Location"
+                        data={slots.map((s) => ({
+                          value: slotKey(s),
+                          label: `${slotText(s)} (${s.quantity ?? 0} avail)`,
+                        }))}
+                        value={r.rack || r.row || r.column ? slotKey({ rack: r.rack, row: r.row, column: r.column, primary: false, quantity: 0 }) : null}
+                        onChange={(v) => {
+                          const s = slots.find((x) => slotKey(x) === v);
+                          setRow(line.lineId, idx, {
+                            rack: s?.rack ?? "",
+                            row: s?.row ?? "",
+                            column: s?.column ?? "",
+                          });
+                        }}
+                      />
+                      <NumberInput
+                        w={110}
+                        min={0}
+                        placeholder="Qty"
+                        value={r.quantity}
+                        onChange={(v) =>
+                          setRow(line.lineId, idx, { quantity: v === "" ? "" : Number(v) })
+                        }
+                      />
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => removeRow(line.lineId, idx)}
+                        disabled={rows.length === 1}
+                        aria-label="Remove allocation"
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
+                  ))}
+                </Stack>
+                <Button
+                  mt="xs"
+                  variant="subtle"
+                  size="xs"
+                  leftSection={<IconPlus size={14} />}
+                  onClick={() => addRow(line.lineId)}
+                >
+                  Add another location
+                </Button>
+              </Card>
+            );
+          })}
+          <Group justify="flex-end">
+            <Button variant="default" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button loading={mutation.isPending} disabled={!valid} onClick={() => mutation.mutate()}>
+              Issue stock
+            </Button>
+          </Group>
+        </Stack>
+      )}
     </Modal>
   );
 }

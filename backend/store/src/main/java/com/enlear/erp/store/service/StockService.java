@@ -46,6 +46,9 @@ public class StockService {
                 cmd.unitCost(), cmd.reference(), cmd.occurredAt());
 
         item.adjustOnHand(movement.signedQuantity());
+        if (cmd.location() != null) {
+            item.applyLocationDelta(cmd.location(), movement.signedQuantity());
+        }
 
         StockMovement saved = movements.save(movement);
 

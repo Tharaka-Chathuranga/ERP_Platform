@@ -70,6 +70,8 @@ export async function listReadings(tankId: string): Promise<FuelTankReading[]> {
 
 export interface VehicleInput {
   vehicleNumber: string;
+  name?: string;
+  category?: string;
   fullTankCapacityLitres: number;
   description?: string;
   driverUserId?: string;
@@ -136,7 +138,7 @@ export async function createVehicleIssue(input: CreateVehicleFuelIssueInput): Pr
 export interface CreateFuelPriceInput {
   unitPrice: number;
   effectiveFrom: string;
-  effectiveTo: string;
+  effectiveTo?: string;
   recordedByUserId: string;
   note?: string;
 }

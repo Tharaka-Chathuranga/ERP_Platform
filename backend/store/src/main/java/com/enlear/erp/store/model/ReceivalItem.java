@@ -24,9 +24,28 @@ public class ReceivalItem extends BaseEntity {
     @Column(name = "unit_cost", precision = 19, scale = 4)
     private BigDecimal unitCost;
 
-    public ReceivalItem(UUID itemId, BigDecimal quantity, BigDecimal unitCost) {
+    /** Storage slot this line is put away into. */
+    @Column(length = 64)
+    private String rack;
+
+    @Column(name = "`row`", length = 64)
+    private String row;
+
+    @Column(name = "`column`", length = 64)
+    private String column;
+
+    public ReceivalItem(UUID itemId, BigDecimal quantity, BigDecimal unitCost,
+                        String rack, String row, String column) {
         this.itemId = itemId;
         this.quantity = quantity;
         this.unitCost = unitCost;
+        this.rack = rack;
+        this.row = row;
+        this.column = column;
+    }
+
+    /** The slot this line was placed into, with this line's quantity. */
+    public Location toLocation() {
+        return new Location(rack, row, column, false, quantity);
     }
 }

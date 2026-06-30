@@ -14,10 +14,12 @@ public final class ReceivalResponses {
     }
 
     public record ReceivalItemResponse(
-            UUID id, UUID itemId, BigDecimal quantity, BigDecimal unitCost) {
+            UUID id, UUID itemId, BigDecimal quantity, BigDecimal unitCost,
+            String rack, String row, String column) {
 
         public static ReceivalItemResponse from(ReceivalItem l) {
-            return new ReceivalItemResponse(l.getId(), l.getItemId(), l.getQuantity(), l.getUnitCost());
+            return new ReceivalItemResponse(l.getId(), l.getItemId(), l.getQuantity(), l.getUnitCost(),
+                    l.getRack(), l.getRow(), l.getColumn());
         }
     }
 

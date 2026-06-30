@@ -15,6 +15,7 @@ public record CreateReceivalCommand(
         Instant receivedAt,
         List<ReceivalItem> receivalItems) {
 
-    public record ReceivalItem(UUID itemId, BigDecimal quantity, BigDecimal unitCost) {
+    public record ReceivalItem(UUID itemId, BigDecimal quantity, BigDecimal unitCost,
+                               String rack, String row, String column) {
     }
 }

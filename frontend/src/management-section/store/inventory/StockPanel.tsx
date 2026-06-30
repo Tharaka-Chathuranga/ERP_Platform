@@ -1,21 +1,10 @@
-import { useState } from "react";
-import {
-  Badge,
-  Button,
-  Divider,
-  Group,
-  NumberInput,
-  Select,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, type ReactNode } from "react";
+import { Badge, Divider, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { getMovements, getOnHand, postMovement } from "@store/inventory/items.api";
-import { notifyError, notifySuccess } from "@core/notify";
+import { getMovements, getOnHand } from "@store/inventory/items.api";
 import type { Item, MovementType, StockMovement } from "@core/types";
 
 const MOVEMENT_TYPES: { value: MovementType; label: string }[] = [
@@ -25,8 +14,19 @@ const MOVEMENT_TYPES: { value: MovementType; label: string }[] = [
   { value: "ADJUSTMENT_OUT", label: "Adjustment −" },
 ];
 
-export function StockPanel({ item, showHeader = true }: { item: Item; showHeader?: boolean }) {
-  const qc = useQueryClient();
+/** A single labelled detail (uppercase caption above the value). */
+function Detail({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div>
+      <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb={2}>
+        {label}
+      </Text>
+      <Text size="sm">{value}</Text>
+    </div>
+  );
+}
+
+export function StockPanel({ item }: { item: Item }) {
   const onHand = useQuery({ queryKey: ["onHand", item.id], queryFn: () => getOnHand(item.id) });
   const movements = useQuery({
     queryKey: ["movements", item.id],
@@ -41,9 +41,6 @@ export function StockPanel({ item, showHeader = true }: { item: Item; showHeader
 
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
-  const [type, setType] = useState<MovementType>("RECEIPT");
-  const [quantity, setQuantity] = useState<number | "">("");
-  const [reference, setReference] = useState("");
 
   const TYPE_FILTER_OPTIONS = [
     { value: "ALL", label: "All types" },
@@ -57,82 +54,82 @@ export function StockPanel({ item, showHeader = true }: { item: Item; showHeader
     return true;
   });
 
-  const mutation = useMutation({
-    mutationFn: () =>
-      postMovement({
-        itemId: item.id,
-        type,
-        quantity: Number(quantity),
-        reference: reference || undefined,
-      }),
-    onSuccess: () => {
-      notifySuccess("Movement posted");
-      setQuantity("");
-      setReference("");
-      qc.invalidateQueries({ queryKey: ["onHand", item.id] });
-      qc.invalidateQueries({ queryKey: ["movements", item.id] });
-    },
-    onError: notifyError,
-  });
+  const quantityOnHand = onHand.data?.quantityOnHand;
+  const belowReorder =
+    item.reorderLevel > 0 && quantityOnHand != null && quantityOnHand <= item.reorderLevel;
 
   return (
-    <Stack gap="sm">
-      {showHeader && (
+    <Stack gap="lg">
+      <Group justify="space-between" align="flex-start" wrap="nowrap">
         <div>
-          <Title order={4}>{item.itemCode}</Title>
-          <Text c="dimmed" size="sm">
-            {item.name}
-          </Text>
+          <Title order={3}>{item.name}</Title>
+          <Group gap="xs" mt={6}>
+            <Text c="dimmed" size="sm">
+              {item.itemCode}
+            </Text>
+            {item.category && (
+              <Badge variant="light" color="gray" radius="sm">
+                {item.category}
+              </Badge>
+            )}
+          </Group>
         </div>
-      )}
+        <Paper withBorder radius="md" p="md" miw={150} ta="right">
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+            On hand
+          </Text>
+          <Text fw={700} size="xl" c={belowReorder ? "red" : undefined}>
+            {quantityOnHand != null ? quantityOnHand : "…"}{" "}
+            <Text span size="sm" c="dimmed">
+              {item.unitOfMeasure}
+            </Text>
+          </Text>
+        </Paper>
+      </Group>
 
-      <Group>
-        <Badge size="lg" variant="light">
-          On hand: {onHand.data?.quantityOnHand ?? "…"} {item.unitOfMeasure}
+      <Group gap="sm">
+        <Badge color={belowReorder ? "red" : "green"} variant="light" radius="sm">
+          {belowReorder ? "Below reorder level" : "Stock above reorder"}
         </Badge>
-        {item.reorderLevel > 0 &&
-          onHand.data != null &&
-          onHand.data.quantityOnHand <= item.reorderLevel && (
-            <Badge size="lg" color="red" variant="light">
-              At / below reorder ({item.reorderLevel})
-            </Badge>
-          )}
+        <Badge color={item.criticalItem ? "red" : "gray"} variant="light" radius="sm">
+          {item.criticalItem ? "Critical item" : "Non-critical"}
+        </Badge>
+        <Badge color={item.approvalRequiredForIssue ? "grape" : "gray"} variant="light" radius="sm">
+          {item.approvalRequiredForIssue ? "Approval required to issue" : "No issue approval"}
+        </Badge>
       </Group>
 
-      {item.locations.length > 0 && (
-        <Text size="sm" c="dimmed">
-          Location:{" "}
-          {item.locations
-            .map((l) => [l.rack, l.row, l.column].filter(Boolean).join("/"))
-            .join(", ")}
+      <Paper withBorder radius="md" p="md">
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg" verticalSpacing="md">
+          <Detail label="Reorder level" value={`${item.reorderLevel} ${item.unitOfMeasure}`} />
+          <Detail label="Unit of measure" value={item.unitOfMeasure} />
+          <Detail label="Description" value={item.description || "—"} />
+        </SimpleGrid>
+      </Paper>
+
+      <Paper withBorder radius="md" p="md">
+        <Text size="xs" c="dimmed" tt="uppercase" fw={600} mb="xs">
+          Stock by location
         </Text>
-      )}
-
-      <Divider label="Post movement" labelPosition="left" />
-      <Group align="flex-end" gap="sm">
-        <Select
-          label="Type"
-          data={MOVEMENT_TYPES}
-          value={type}
-          onChange={(v) => setType((v as MovementType) ?? "RECEIPT")}
-          w={150}
-          allowDeselect={false}
-        />
-        <NumberInput
-          label="Quantity"
-          min={0}
-          value={quantity}
-          onChange={(v) => setQuantity(v === "" ? "" : Number(v))}
-          w={120}
-        />
-        <Button
-          onClick={() => mutation.mutate()}
-          loading={mutation.isPending}
-          disabled={quantity === "" || Number(quantity) <= 0}
-        >
-          Post
-        </Button>
-      </Group>
+        {item.locations.length === 0 ? (
+          <Text size="sm" c="dimmed">
+            No location stock recorded — receive items into a location to track it here.
+          </Text>
+        ) : (
+          <Stack gap={4}>
+            {item.locations.map((l, idx) => (
+              <Group key={idx} justify="space-between">
+                <Text size="sm">
+                  {[l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)"}
+                </Text>
+                <Text size="sm" fw={600}>
+                  {l.quantity ?? 0} {item.unitOfMeasure}
+                </Text>
+              </Group>
+            ))}
+          </Stack>
+        )}
+      </Paper>
 
       <Divider label="Recent movements" labelPosition="left" />
       <TableToolbar

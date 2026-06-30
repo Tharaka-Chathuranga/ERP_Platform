@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Group, NumberInput, Paper, Stack, Switch, Table, Text } from "@mantine/core";
+import { ActionIcon, Button, Group, NumberInput, Paper, Stack, Switch, Table, Text, TextInput } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { ItemSelect } from "./ItemSelect";
@@ -8,6 +8,9 @@ export interface EditableLine {
   quantity: number | "";
   unitCost?: number | "";
   returnable?: boolean;
+  rack?: string;
+  row?: string;
+  column?: string;
 }
 
 interface LineItemsEditorProps {
@@ -15,13 +18,20 @@ interface LineItemsEditorProps {
   onChange: (lines: EditableLine[]) => void;
   showUnitCost?: boolean;
   showReturnable?: boolean;
+  /** Show Rack / Row / Column inputs so a line records the slot it is put away into. */
+  showLocation?: boolean;
 }
 
-const emptyLine = (showUnitCost?: boolean, showReturnable?: boolean): EditableLine => ({
+const emptyLine = (
+  showUnitCost?: boolean,
+  showReturnable?: boolean,
+  showLocation?: boolean,
+): EditableLine => ({
   itemId: null,
   quantity: "",
   ...(showUnitCost ? { unitCost: "" } : {}),
   ...(showReturnable ? { returnable: false } : {}),
+  ...(showLocation ? { rack: "", row: "", column: "" } : {}),
 });
 
 export function LineItemsEditor({
@@ -29,12 +39,13 @@ export function LineItemsEditor({
   onChange,
   showUnitCost,
   showReturnable,
+  showLocation,
 }: LineItemsEditorProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const update = (i: number, patch: Partial<EditableLine>) =>
     onChange(lines.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
   const remove = (i: number) => onChange(lines.filter((_, idx) => idx !== i));
-  const add = () => onChange([...lines, emptyLine(showUnitCost, showReturnable)]);
+  const add = () => onChange([...lines, emptyLine(showUnitCost, showReturnable, showLocation)]);
 
   const addButton = (
     <Button variant="default" size="xs" leftSection={<IconPlus size={14} />} onClick={add}>
@@ -78,6 +89,25 @@ export function LineItemsEditor({
                     onChange={(e) => update(i, { returnable: e.currentTarget.checked })}
                   />
                 )}
+                {showLocation && (
+                  <Group grow>
+                    <TextInput
+                      label="Rack"
+                      value={line.rack ?? ""}
+                      onChange={(e) => update(i, { rack: e.currentTarget.value })}
+                    />
+                    <TextInput
+                      label="Row"
+                      value={line.row ?? ""}
+                      onChange={(e) => update(i, { row: e.currentTarget.value })}
+                    />
+                    <TextInput
+                      label="Column"
+                      value={line.column ?? ""}
+                      onChange={(e) => update(i, { column: e.currentTarget.value })}
+                    />
+                  </Group>
+                )}
                 <Group justify="flex-end">
                   <ActionIcon
                     variant="subtle"
@@ -113,6 +143,7 @@ export function LineItemsEditor({
             <Table.Th w={130}>Quantity</Table.Th>
             {showUnitCost && <Table.Th w={130}>Unit cost</Table.Th>}
             {showReturnable && <Table.Th w={110}>Returnable</Table.Th>}
+            {showLocation && <Table.Th w={260}>Location (rack / row / column)</Table.Th>}
             <Table.Th w={40} />
           </Table.Tr>
         </Table.Thead>
@@ -147,6 +178,27 @@ export function LineItemsEditor({
                     checked={!!line.returnable}
                     onChange={(e) => update(i, { returnable: e.currentTarget.checked })}
                   />
+                </Table.Td>
+              )}
+              {showLocation && (
+                <Table.Td>
+                  <Group gap="xs" wrap="nowrap">
+                    <TextInput
+                      placeholder="Rack"
+                      value={line.rack ?? ""}
+                      onChange={(e) => update(i, { rack: e.currentTarget.value })}
+                    />
+                    <TextInput
+                      placeholder="Row"
+                      value={line.row ?? ""}
+                      onChange={(e) => update(i, { row: e.currentTarget.value })}
+                    />
+                    <TextInput
+                      placeholder="Col"
+                      value={line.column ?? ""}
+                      onChange={(e) => update(i, { column: e.currentTarget.value })}
+                    />
+                  </Group>
                 </Table.Td>
               )}
               <Table.Td>

@@ -8,6 +8,7 @@ import com.enlear.erp.store.model.IssueStatus;
 import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.service.command.CreateIssueCommand;
 import com.enlear.erp.store.service.command.DecideIssueLinesCommand;
+import com.enlear.erp.store.service.command.IssueItemsCommand;
 import com.enlear.erp.store.service.command.ReturnItemsCommand;
 import java.util.UUID;
 import org.hibernate.Hibernate;
@@ -61,10 +62,10 @@ public class IssueService {
     }
 
     /** Posts ISSUE movements for the APPROVED lines of an issue and marks it ISSUED. */
-    public Issue issue(UUID id) {
-        Issue issue = getIssue(id);
+    public Issue issue(IssueItemsCommand cmd) {
+        Issue issue = getIssue(cmd.issueId());
         issue.markIssued();
-        movements.postIssue(issue);
+        movements.postIssue(issue, cmd.allocations());
         return issues.save(issue);
     }
 

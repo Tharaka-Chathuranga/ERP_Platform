@@ -11,7 +11,7 @@ import java.util.UUID;
 public record CreateFuelPriceRequest(
         @NotNull @DecimalMin("0.0") BigDecimal unitPrice,
         @NotNull LocalDate effectiveFrom,
-        @NotNull LocalDate effectiveTo,
+        LocalDate effectiveTo,
         @NotNull UUID recordedByUserId,
         @Size(max = 1000) String note) {
 

@@ -30,7 +30,9 @@ export function FuelOverviewSection() {
         to="/fuel/prices"
         hint={
           data?.currentPrice
-            ? `Until ${dayjs(data.currentPrice.effectiveTo).format("MMM D")}`
+            ? data.currentPrice.effectiveTo
+              ? `Until ${dayjs(data.currentPrice.effectiveTo).format("MMM D")}`
+              : "Current price"
             : "No price set"
         }
       />

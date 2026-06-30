@@ -26,7 +26,8 @@ export interface Location {
   rack: string;
   row: string;
   column: string;
-  primary: boolean;
+  primary?: boolean;
+  quantity?: number;
 }
 
 export interface Item {
@@ -394,6 +395,8 @@ export interface FuelTankReading {
 export interface Vehicle {
   id: string;
   vehicleNumber: string;
+  name?: string;
+  category?: string;
   fullTankCapacityLitres: number;
   description?: string;
   driverUserId?: string;
@@ -430,7 +433,7 @@ export interface FuelPrice {
   id: string;
   unitPrice: number;
   effectiveFrom: string;
-  effectiveTo: string;
+  effectiveTo: string | null;
   recordedByUserId: string;
   note?: string;
 }
@@ -446,7 +449,7 @@ export interface FuelOverview {
   tanks: FuelOverviewTank[];
   todayIssueCount: number;
   todayLitres: number;
-  currentPrice?: { unitPrice: number; effectiveFrom: string; effectiveTo: string };
+  currentPrice?: { unitPrice: number; effectiveFrom: string; effectiveTo: string | null };
   lastInternalReading?: {
     litresMeasured: number;
     readingAt: string;

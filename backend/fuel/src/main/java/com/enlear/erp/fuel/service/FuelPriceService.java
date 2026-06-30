@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Append-only fuel-price history. New rows carry an explicit date range and may
- * not overlap an existing one; existing rows are never updated or deleted.
+ * Fuel-price history. The newest price is open-ended ({@code effectiveTo} null)
+ * and counts as the current price. Adding a new price automatically closes the
+ * previous one on the day before the new price starts, so {@code effectiveTo} is
+ * optional and ranges never overlap.
  */
 @Service
 @Transactional
@@ -29,16 +31,31 @@ public class FuelPriceService {
             throw new BusinessRuleException("FUEL_INVALID_PRICE",
                     "Unit price must be zero or more");
         }
-        if (cmd.effectiveFrom() == null || cmd.effectiveTo() == null
-                || cmd.effectiveTo().isBefore(cmd.effectiveFrom())) {
+        if (cmd.effectiveFrom() == null) {
+            throw new BusinessRuleException("FUEL_INVALID_PRICE_RANGE",
+                    "Effective-from is required");
+        }
+        if (cmd.effectiveTo() != null && cmd.effectiveTo().isBefore(cmd.effectiveFrom())) {
             throw new BusinessRuleException("FUEL_INVALID_PRICE_RANGE",
                     "Effective-to must be on or after effective-from");
         }
-        if (prices.countOverlapping(cmd.effectiveFrom(), cmd.effectiveTo()) > 0) {
-            throw new BusinessRuleException("FUEL_PRICE_RANGE_OVERLAP",
-                    "The date range %s – %s overlaps an existing price"
-                            .formatted(cmd.effectiveFrom(), cmd.effectiveTo()));
+
+        // Close the most recent price so the new one supersedes it from its start date.
+        Optional<FuelPrice> latest = prices.findTopByOrderByEffectiveFromDesc();
+        if (latest.isPresent()) {
+            FuelPrice previous = latest.get();
+            if (!cmd.effectiveFrom().isAfter(previous.getEffectiveFrom())) {
+                throw new BusinessRuleException("FUEL_PRICE_RANGE_OVERLAP",
+                        "A new price must start after the most recent price (%s)"
+                                .formatted(previous.getEffectiveFrom()));
+            }
+            if (previous.getEffectiveTo() == null
+                    || !previous.getEffectiveTo().isBefore(cmd.effectiveFrom())) {
+                previous.closeOn(cmd.effectiveFrom().minusDays(1));
+                prices.save(previous);
+            }
         }
+
         FuelPrice price = new FuelPrice(cmd.unitPrice(), cmd.effectiveFrom(), cmd.effectiveTo(),
                 cmd.recordedByUserId(), cmd.note());
         return prices.save(price);
