@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":user"))
     implementation(project(":store"))
     implementation(project(":fuel"))
+    implementation(project(":notification"))
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${property("springdocVersion")}")
