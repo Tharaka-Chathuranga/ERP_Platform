@@ -44,6 +44,14 @@ erp:
       issuer: erp-platform
       expiration-minutes: 120
 
+  # ── Stock Management Agent ─────────────────────────────────────────
+  store:
+    agent:
+      # Master switch for the reorder-evaluation listener.
+      enabled: ${ERP_STORE_AGENT_ENABLED:true}
+      # Active agent implementation: `rule-based` (no LLM, default) or `llm`.
+      mode: ${ERP_STORE_AGENT_MODE:rule-based}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
