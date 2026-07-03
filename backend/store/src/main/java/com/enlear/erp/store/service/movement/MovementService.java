@@ -4,6 +4,8 @@ import com.enlear.erp.store.controller.dto.StoreResponses.ItemMovementSummaryRes
 import com.enlear.erp.store.model.MovementType;
 import com.enlear.erp.store.model.StockMovement;
 import com.enlear.erp.store.repository.StockMovementRepository;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MovementService {
 
     private static final int MAX_ITEMS = 50;
+    private static final int MAX_DAYS = 365;
 
     private final StockMovementRepository movements;
 
@@ -34,13 +37,15 @@ public class MovementService {
     }
 
     /**
-     * Received vs issued totals per item, busiest items first — aggregated
-     * across all receiving and issuing. The data behind the bar chart.
+     * Received vs issued totals per item, busiest items first — aggregated over
+     * the last {@code days} days so it lines up with the movement-trend chart.
      */
-    public List<ItemMovementSummaryResponse> summaryByItem(int limit) {
-        int capped = Math.max(1, Math.min(limit, MAX_ITEMS));
+    public List<ItemMovementSummaryResponse> summaryByItem(int limit, int days) {
+        int cappedItems = Math.max(1, Math.min(limit, MAX_ITEMS));
+        int cappedDays = Math.max(1, Math.min(days, MAX_DAYS));
+        Instant since = Instant.now().minus(Duration.ofDays(cappedDays));
         return movements
-                .sumByItem(MovementType.RECEIPT, MovementType.ISSUE, PageRequest.of(0, capped))
+                .sumByItem(MovementType.RECEIPT, MovementType.ISSUE, since, PageRequest.of(0, cappedItems))
                 .stream()
                 .map(t -> new ItemMovementSummaryResponse(
                         t.getItemId(), t.getReceived(), t.getIssued()))

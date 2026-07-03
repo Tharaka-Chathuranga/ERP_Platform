@@ -31,7 +31,7 @@ export function TopMoversChart({ data, itemLabel }: TopMoversChartProps) {
   return (
     <Card withBorder radius="md" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
-        <Text fw={600}>Top movers</Text>
+        <Text fw={600}>Top movers · Last 30 days</Text>
         <Group gap="md">
           <Group gap={6}>
             <Box style={{ width: 10, height: 10, borderRadius: 2, background: RECEIVED_COLOR }} />

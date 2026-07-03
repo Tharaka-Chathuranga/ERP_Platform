@@ -23,7 +23,7 @@ export function MovementTrendChart({ data }: { data: MovementTrendPoint[] }) {
   return (
     <Card withBorder radius="md" padding="lg" h="100%">
       <Text fw={600} mb="md">
-        Movement trend
+        Movement trend · Last 30 days
       </Text>
       <ResponsiveContainer width="100%" height={260}>
         <AreaChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>

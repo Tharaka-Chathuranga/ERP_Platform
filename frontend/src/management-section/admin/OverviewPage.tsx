@@ -46,7 +46,7 @@ function AdminOverview() {
   const itemCode = useItemCodes();
   const summary = useQuery({ queryKey: qk.adminSummary(), queryFn: getDashboardSummary });
   const trend = useQuery({ queryKey: qk.movementTrend(30), queryFn: () => getMovementTrend(30) });
-  const topMovers = useQuery({ queryKey: qk.movementSummary(), queryFn: () => getMovementSummary(8) });
+  const topMovers = useQuery({ queryKey: qk.movementSummary(), queryFn: () => getMovementSummary(8, 30) });
   const s = summary.data;
 
   return (

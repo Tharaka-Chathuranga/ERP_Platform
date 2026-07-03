@@ -30,10 +30,12 @@ public class MovementController {
         return PageResponse.of(movements.list(pageable), StockMovementResponse::from);
     }
 
-    /** Received vs issued totals per item, busiest first. */
+    /** Received vs issued totals per item over the last {@code days} days, busiest first. */
     @GetMapping("/summary")
     @PreAuthorize("hasAnyRole('ADMIN','STORE_KEEPER')")
-    public List<ItemMovementSummaryResponse> summary(@RequestParam(defaultValue = "12") int limit) {
-        return movements.summaryByItem(limit);
+    public List<ItemMovementSummaryResponse> summary(
+            @RequestParam(defaultValue = "12") int limit,
+            @RequestParam(defaultValue = "30") int days) {
+        return movements.summaryByItem(limit, days);
     }
 }
