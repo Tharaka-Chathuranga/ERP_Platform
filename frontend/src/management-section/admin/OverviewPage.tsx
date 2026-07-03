@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
-import { useItemLabels } from "@core/hooks/useLookups";
+import { useItemCodes } from "@core/hooks/useLookups";
 import { getLowStockItems } from "@store/inventory/items.api";
 import { getMovementSummary } from "@store/stock-movements/movements.api";
 import { listDeviations } from "@store/defects/deviations.api";
@@ -43,7 +43,7 @@ const WELCOME_BANNER_STYLE = {
 
 function AdminOverview() {
   const { username } = useAuth();
-  const itemLabel = useItemLabels();
+  const itemCode = useItemCodes();
   const summary = useQuery({ queryKey: qk.adminSummary(), queryFn: getDashboardSummary });
   const trend = useQuery({ queryKey: qk.movementTrend(30), queryFn: () => getMovementTrend(30) });
   const topMovers = useQuery({ queryKey: qk.movementSummary(), queryFn: () => getMovementSummary(8) });
@@ -75,7 +75,7 @@ function AdminOverview() {
           <MovementTrendChart data={trend.data ?? []} />
         </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 5 }}>
-          <TopMoversChart data={topMovers.data ?? []} itemLabel={itemLabel} />
+          <TopMoversChart data={topMovers.data ?? []} itemLabel={itemCode} />
         </Grid.Col>
       </Grid>
 
