@@ -76,7 +76,6 @@ export interface ItemMovementSummary {
   issued: number;
 }
 
-// ── Suppliers ──
 export type SupplierStatus = "ACTIVE" | "INACTIVE";
 
 export interface Supplier {
@@ -99,7 +98,6 @@ export interface SupplierItem {
   lastPurchasePrice?: number;
 }
 
-// ── Goods receipts (receiving) ──
 export type GrnStatus = "DRAFT" | "POSTED";
 
 export interface GoodsReceiptLine {
@@ -122,7 +120,6 @@ export interface GoodsReceipt {
   lines: GoodsReceiptLine[];
 }
 
-// ── Receivals (the physical "goods arrived" event) ──
 export interface ReceivalItem {
   id: string;
   itemId: string;
@@ -135,13 +132,10 @@ export interface Receival {
   receivalNumber: string;
   poNumber?: string;
   invoiceNumber?: string;
-  /** Set when received from a registered supplier. */
   supplierId?: string;
-  /** Set when received from an unregistered supplier. */
   supplierName?: string;
   allReceivedForPo: boolean;
   storeKeeperId: string;
-  /** Set once this receival has been rolled into a generated GRN. */
   goodReceiveNoteId?: string;
   receivedAt: string;
   lines: ReceivalItem[];
@@ -156,7 +150,6 @@ export type IssueStatus =
   | "REJECTED"
   | "RETURNED";
 
-/** Per-line approval state, independent of the document status. */
 export type IssueLineStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface IssueLine {
@@ -182,7 +175,6 @@ export interface Issue {
   lines: IssueLine[];
 }
 
-// ── Deviation (defect) requests ──
 export type DeviationStage = "INCOMING" | "IN_PROGRESS" | "FINAL";
 export type DeviationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -203,7 +195,6 @@ export interface DeviationRequest {
   approvedAt?: string;
 }
 
-/** Quality-assurance dashboard headline counts (mirrors QaDefectSummaryResponse). */
 export interface QaDefectSummary {
   pendingCount: number;
   approvedCount: number;
@@ -214,7 +205,6 @@ export interface QaDefectSummary {
   totalCount: number;
 }
 
-// ── Borrow requests ──
 export type BorrowRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "ISSUED";
 
 export interface BorrowRequest {
@@ -237,7 +227,6 @@ export interface Page<T> {
   last: boolean;
 }
 
-// ── Admin: stock count-adjustment requests ──
 export type CountAdjustmentStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface CountAdjustmentRequest {
@@ -281,13 +270,11 @@ export interface LowStockItem {
 }
 
 export interface MovementTrendPoint {
-  /** ISO timestamp at the start of the day bucket. */
   day: string;
   received: number;
   issued: number;
 }
 
-/** A single defective item line flattened out of its deviation request. */
 export interface DeviationItemRow {
   requestId: string;
   itemId: string;
@@ -298,31 +285,34 @@ export interface DeviationItemRow {
   requestedAt: string;
 }
 
-/** A receival document recorded today (mirrors TodayReceivalRowResponse). */
 export interface TodayReceivalRow {
   receivalId: string;
   receivalNumber: string;
   supplierName?: string;
   lineCount: number;
   totalQuantity: number;
-  /** Sum of each line's quantity × receipt unit cost. */
   totalValue: number;
   receivedAt: string;
 }
 
-/** An issue document physically issued today (mirrors TodayIssueRowResponse). */
 export interface TodayIssueRow {
   issueId: string;
   issueNumber: string;
   borrowingUserId: string;
   lineCount: number;
   totalQuantity: number;
-  /** Sum of each line's quantity × the item's current unit price. */
   totalValue: number;
-  issuedAt: string;
+  issuedAt: string | null;
+  status: IssueStatus;
+  itemTypeCount: number;
+  lines: TodayIssueLine[];
 }
 
-/** A single item row shared across the stock-health lists. */
+export interface TodayIssueLine {
+  itemName: string;
+  quantity: number;
+}
+
 export interface ItemStockRow {
   itemId: string;
   itemCode: string;
@@ -330,16 +320,10 @@ export interface ItemStockRow {
   unitOfMeasure: string;
   quantityOnHand: number;
   reorderLevel: number;
-  /** Current unit price of the item. */
   unitPrice: number;
   criticalItem: boolean;
 }
 
-/**
- * Stock-health snapshot for the admin overview: items grouped into critical,
- * normal, warning (below reorder) and critical-warning buckets. Each list may
- * be capped server-side; the matching `*Count` field is the true total.
- */
 export interface StockHealth {
   criticalItems: ItemStockRow[];
   normalItems: ItemStockRow[];
@@ -351,7 +335,6 @@ export interface StockHealth {
   criticalWarningCount: number;
 }
 
-// ── Admin: user management (full view, includes `enabled`) ──
 export interface AdminUser {
   id: string;
   username: string;
@@ -391,7 +374,6 @@ export interface FuelTankReading {
   readingAt: string;
   recordedByUserId: string;
   note?: string;
-  /** Fuel used since the previous reading; absent for the first reading. */
   consumptionSincePrevious?: number;
 }
 
@@ -414,7 +396,6 @@ export interface VehicleFuelIssue {
   issuingUserId: string;
   receivingUserId: string;
   issuedAt: string;
-  /** Odometer reading (km) captured at the time of fuelling. Absent if not recorded. */
   odometerReadingKm?: number;
 }
 

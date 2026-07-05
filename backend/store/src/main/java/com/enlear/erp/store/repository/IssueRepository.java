@@ -26,4 +26,8 @@ public interface IssueRepository extends JpaRepository<Issue, UUID> {
     @EntityGraph(attributePaths = "lines")
     List<Issue> findByStatusAndIssuedAtGreaterThanEqualAndIssuedAtLessThanOrderByIssuedAtDesc(
             IssueStatus status, Instant start, Instant end);
+
+    @EntityGraph(attributePaths = "lines")
+    List<Issue> findByCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDesc(
+            Instant start, Instant end);
 }
