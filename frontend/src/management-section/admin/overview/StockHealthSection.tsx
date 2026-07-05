@@ -11,11 +11,6 @@ import { StatCard } from "@ui/feedback/StatCard";
 import { getStockHealth } from "../admin.api";
 import { StockItemsCard } from "./StockItemsCard";
 
-/**
- * Owns the single stock-health query and lays out the four buckets: the
- * critical-warning list (most urgent, full width) followed by warning,
- * critical and normal lists, with headline counts on top.
- */
 export function StockHealthSection() {
   const health = useQuery({ queryKey: qk.stockHealth(), queryFn: getStockHealth });
   const h = health.data;
@@ -33,7 +28,6 @@ export function StockHealthSection() {
         <Grid.Col span={{ base: 12, lg: 6 }}>
           <StockItemsCard
             title="Critical warning items"
-            description="Flagged critical and below reorder — act first"
             icon={<IconAlertHexagon size={22} />}
             accent="red"
             items={h?.criticalWarningItems}
@@ -41,12 +35,12 @@ export function StockHealthSection() {
             loading={loading}
             error={error}
             emptyText="No critical items below reorder — all good."
+            filterByStockLevel={false}
           />
         </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 6 }}>
           <StockItemsCard
             title="Warning items"
-            description="On hand below reorder level (excluding critical)"
             icon={<IconAlertTriangle size={22} />}
             accent="orange"
             items={h?.warningItems}
@@ -54,6 +48,7 @@ export function StockHealthSection() {
             loading={loading}
             error={error}
             emptyText="Nothing below reorder level."
+            filterByStockLevel={false}
           />
         </Grid.Col>
       </Grid>
@@ -62,7 +57,6 @@ export function StockHealthSection() {
         <Grid.Col span={{ base: 12, lg: 6 }}>
           <StockItemsCard
             title="Critical items"
-            description="Flagged critical, lowest stock first"
             icon={<IconShieldCheck size={22} />}
             accent="grape"
             items={h?.criticalItems}
@@ -77,7 +71,6 @@ export function StockHealthSection() {
         <Grid.Col span={{ base: 12, lg: 6 }}>
           <StockItemsCard
             title="Normal items"
-            description="Healthy stock at or above reorder level"
             icon={<IconCircleCheck size={22} />}
             accent="teal"
             items={h?.normalItems}

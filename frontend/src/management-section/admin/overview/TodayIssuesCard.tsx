@@ -1,33 +1,44 @@
 import { Text } from "@mantine/core";
 import { IconPackageExport } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { qk } from "@core/queryKeys";
 import { useUserLabels } from "@core/hooks/useLookups";
-import { DataTable } from "@ui/data/DataTable";
+import { DataTable, TableToolbar } from "@ui/data";
 import { StackedCell } from "@ui/data/cells";
 import type { TodayIssueRow } from "@core/types";
 import { getTodayIssues } from "../admin.api";
 import { OverviewCard } from "./OverviewCard";
 import { money } from "./format";
 
-/** Lists every issue document physically issued today. */
 export function TodayIssuesCard() {
   const navigate = useNavigate();
   const userLabel = useUserLabels();
   const issues = useQuery({ queryKey: qk.todayIssues(), queryFn: getTodayIssues });
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return issues.data;
+    return (issues.data ?? []).filter(
+      (r) => r.issueNumber.toLowerCase().includes(q) || userLabel(r.borrowingUserId).toLowerCase().includes(q),
+    );
+  }, [issues.data, search, userLabel]);
 
   return (
     <OverviewCard
       title="Today's issuing"
-      description="Goods issued so far today"
       icon={<IconPackageExport size={22} />}
       accent="grape"
       count={issues.data?.length}
+      toolbar={
+        <TableToolbar search={{ value: search, onChange: setSearch, placeholder: "Search issue or user…" }} />
+      }
     >
       <DataTable<TodayIssueRow>
-        data={issues.data}
+        data={filtered}
         loading={issues.isLoading}
         error={issues.error}
         withCard={false}

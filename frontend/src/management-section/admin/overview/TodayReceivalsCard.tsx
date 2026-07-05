@@ -1,31 +1,42 @@
 import { Text } from "@mantine/core";
 import { IconPackageImport } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { qk } from "@core/queryKeys";
-import { DataTable } from "@ui/data/DataTable";
+import { DataTable, TableToolbar } from "@ui/data";
 import { StackedCell } from "@ui/data/cells";
 import type { TodayReceivalRow } from "@core/types";
 import { getTodayReceivals } from "../admin.api";
 import { OverviewCard } from "./OverviewCard";
 import { money } from "./format";
 
-/** Lists every receival document recorded today. */
 export function TodayReceivalsCard() {
   const navigate = useNavigate();
   const receivals = useQuery({ queryKey: qk.todayReceivals(), queryFn: getTodayReceivals });
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return receivals.data;
+    return (receivals.data ?? []).filter(
+      (r) => r.receivalNumber.toLowerCase().includes(q) || (r.supplierName ?? "").toLowerCase().includes(q),
+    );
+  }, [receivals.data, search]);
 
   return (
     <OverviewCard
       title="Today's receiving"
-      description="Goods received so far today"
       icon={<IconPackageImport size={22} />}
       accent="teal"
       count={receivals.data?.length}
+      toolbar={
+        <TableToolbar search={{ value: search, onChange: setSearch, placeholder: "Search receival or supplier…" }} />
+      }
     >
       <DataTable<TodayReceivalRow>
-        data={receivals.data}
+        data={filtered}
         loading={receivals.isLoading}
         error={receivals.error}
         withCard={false}
