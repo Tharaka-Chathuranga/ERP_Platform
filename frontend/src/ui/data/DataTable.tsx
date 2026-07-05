@@ -1,4 +1,5 @@
-import { Box, Card, Checkbox, Collapse, Table } from "@mantine/core";
+import { ActionIcon, Box, Card, Checkbox, Collapse, Table } from "@mantine/core";
+import { IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 
@@ -11,11 +12,8 @@ export interface Column<T> {
 }
 
 export interface Selection<T> {
-  /** Currently selected row keys. */
   selected: Set<string>;
-  /** Called with the next selection whenever it changes. */
   onChange: (next: Set<string>) => void;
-  /** Optional per-row guard; rows returning false can't be selected. */
   selectable?: (row: T) => boolean;
 }
 
@@ -28,17 +26,13 @@ interface DataTableProps<T> {
   error?: unknown;
   empty?: ReactNode;
   withCard?: boolean;
-  /** Pass to render a leading checkbox column with select-all support. */
   selection?: Selection<T>;
-  /** Highlights the row whose key matches (master/detail selection). */
   activeRowKey?: string;
-  /** Returns a background CSS value for a given row; ignored when activeRowKey matches. */
   rowBg?: (row: T) => string | undefined;
-  /** Returns content to show in a collapsible detail row revealed on hover. */
   expandOnHover?: (row: T) => ReactNode;
+  expandable?: (row: T) => ReactNode;
 }
 
-// Dimmed, uppercase column headers — the shared list-table look.
 const TH = { c: "dimmed", fz: "xs", tt: "uppercase", fw: 600 } as const;
 
 export function DataTable<T>({
@@ -54,10 +48,19 @@ export function DataTable<T>({
   activeRowKey,
   rowBg,
   expandOnHover,
+  expandable,
 }: DataTableProps<T>) {
   const rows = data ?? [];
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  const totalCols = columns.length + (selection ? 1 : 0);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+  const toggleExpand = (key: string) =>
+    setExpandedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  const totalCols = columns.length + (selection ? 1 : 0) + (expandable ? 1 : 0);
   const selectableRows = useMemo(
     () => (selection?.selectable ? rows.filter(selection.selectable) : rows),
     [rows, selection],
@@ -89,6 +92,7 @@ export function DataTable<T>({
         >
           <Table.Thead>
             <Table.Tr>
+              {expandable && <Table.Th w={40} />}
               {selection && (
                 <Table.Th w={48}>
                   <Checkbox
@@ -122,6 +126,18 @@ export function DataTable<T>({
                       if (!rel?.closest?.(`[data-expand-key="${key}"]`)) setHoveredKey(null);
                     } : undefined}
                   >
+                    {expandable && (
+                      <Table.Td onClick={(e) => e.stopPropagation()}>
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
+                          aria-label={expandedKeys.has(key) ? "Collapse row" : "Expand row"}
+                          onClick={() => toggleExpand(key)}
+                        >
+                          {expandedKeys.has(key) ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
+                        </ActionIcon>
+                      </Table.Td>
+                    )}
                     {selection && (
                       <Table.Td onClick={(e) => e.stopPropagation()}>
                         {canSelect && (
@@ -148,6 +164,15 @@ export function DataTable<T>({
                       <Table.Td colSpan={totalCols} p={0}>
                         <Collapse in={hoveredKey === key}>
                           {expandOnHover(row)}
+                        </Collapse>
+                      </Table.Td>
+                    </Table.Tr>
+                  )}
+                  {expandable && (
+                    <Table.Tr>
+                      <Table.Td colSpan={totalCols} p={0} style={{ borderTop: "none" }}>
+                        <Collapse in={expandedKeys.has(key)}>
+                          <Box px="lg" py="sm">{expandable(row)}</Box>
                         </Collapse>
                       </Table.Td>
                     </Table.Tr>

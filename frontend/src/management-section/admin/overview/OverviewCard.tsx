@@ -18,27 +18,17 @@ interface OverviewCardProps {
   title: string;
   description?: string;
   icon: ReactNode;
-  /** Mantine colour for the icon and the count badge. */
   accent: string;
-  /** Total count shown in the header badge (the list itself may be capped). */
   count?: number;
-  /** Rendered between the header and the scroll area (e.g. search / filter bar). */
   toolbar?: ReactNode;
-  children: ReactNode;
+  children: ReactNode | ((expanded: boolean) => ReactNode);
 }
 
-/** Max height of the inline scroll area before the body starts scrolling. */
 const BODY_MAX_HEIGHT = 320;
 
-/**
- * Shared shell for the overview panels: a titled, bordered card with an accent
- * icon, optional description and a count badge. The body is a fixed-height
- * scroll area, and an expand control in the header opens a fullscreen focus
- * modal that re-renders the same content uncapped. Keeps every overview section
- * visually consistent and the panel components focused on their table content.
- */
 export function OverviewCard({ title, description, icon, accent, count, toolbar, children }: OverviewCardProps) {
   const [expanded, { open, close }] = useDisclosure(false);
+  const body = (isExpanded: boolean) => (typeof children === "function" ? children(isExpanded) : children);
 
   const heading = (
     <Group gap="sm" wrap="nowrap">
@@ -77,7 +67,7 @@ export function OverviewCard({ title, description, icon, accent, count, toolbar,
           </Group>
           {toolbar}
           <ScrollArea.Autosize mah={BODY_MAX_HEIGHT} type="auto">
-            {children}
+            {body(false)}
           </ScrollArea.Autosize>
         </Stack>
       </Paper>
@@ -91,7 +81,7 @@ export function OverviewCard({ title, description, icon, accent, count, toolbar,
         scrollAreaComponent={ScrollArea.Autosize}
       >
         {toolbar && <div style={{ padding: "0 0 12px" }}>{toolbar}</div>}
-        {children}
+        {body(true)}
       </Modal>
     </>
   );

@@ -5,6 +5,7 @@ import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DeviationItem
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.ItemStockRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.MovementTrendPointResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.StockHealthResponse;
+import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayIssueLineResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayIssueRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayReceivalRowResponse;
 import com.enlear.erp.store.model.BorrowRequestStatus;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -42,18 +44,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Read-only aggregation for the admin dashboard. Composes counts and totals from
- * the existing repositories without loading entities where a count/sum suffices,
- * keeping the dashboard cheap to render. Writes stay in their owning services.
- */
 @Service
 @Transactional(readOnly = true)
 public class AdminDashboardQueryService {
 
     private static final int MAX_TREND_DAYS = 365;
 
-    /** Upper bound on rows returned for the (potentially large) normal-stock list. */
     private static final int MAX_NORMAL_ROWS = 50;
 
     private final ItemRepository items;
@@ -65,7 +61,6 @@ public class AdminDashboardQueryService {
     private final ReceivalRepository receivals;
     private final StockMovementRepository movements;
 
-    /** Zone used to resolve "today" boundaries for the daily movement lists. */
     private final ZoneId zone;
 
     public AdminDashboardQueryService(ItemRepository items, SupplierRepository suppliers,
@@ -122,7 +117,6 @@ public class AdminDashboardQueryService {
                 .toList();
     }
 
-    /** Receival documents recorded today, newest first. */
     public List<TodayReceivalRowResponse> todayReceivals() {
         Instant start = startOfToday();
         Instant end = startOfTomorrow();
@@ -132,21 +126,18 @@ public class AdminDashboardQueryService {
                 .toList();
     }
 
-    /** Issue documents physically issued today, newest first. */
     public List<TodayIssueRowResponse> todayIssues() {
         Instant start = startOfToday();
         Instant end = startOfTomorrow();
-        List<Issue> todays = issues.findByStatusAndIssuedAtGreaterThanEqualAndIssuedAtLessThanOrderByIssuedAtDesc(
-                IssueStatus.ISSUED, start, end);
-        Map<UUID, BigDecimal> priceByItemId = unitPricesFor(todays);
+        List<Issue> todays = issues.findByCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByCreatedAtDesc(start, end);
+        Map<UUID, Item> itemsById = itemsFor(todays);
         return todays.stream()
-                .map(i -> toIssueRow(i, priceByItemId))
+                .map(i -> toIssueRow(i, itemsById))
                 .toList();
     }
 
-    /** Current unit price per item referenced by any line of the given issues. */
-    private Map<UUID, BigDecimal> unitPricesFor(List<Issue> issuesToPrice) {
-        Set<UUID> itemIds = issuesToPrice.stream()
+    private Map<UUID, Item> itemsFor(List<Issue> issuesToLoad) {
+        Set<UUID> itemIds = issuesToLoad.stream()
                 .flatMap(i -> i.getLines().stream())
                 .map(IssueLine::getItemId)
                 .collect(Collectors.toSet());
@@ -154,10 +145,9 @@ public class AdminDashboardQueryService {
             return Map.of();
         }
         return items.findAllById(itemIds).stream()
-                .collect(Collectors.toMap(Item::getId, AdminDashboardQueryService::priceOf));
+                .collect(Collectors.toMap(Item::getId, Function.identity()));
     }
 
-    /** Critical / normal / warning / critical-warning stock buckets with their full counts. */
     public StockHealthResponse stockHealth() {
         var critical = items.findCriticalItems().stream()
                 .map(AdminDashboardQueryService::toStockRow).toList();
@@ -189,13 +179,26 @@ public class AdminDashboardQueryService {
                 value, r.getReceivedAt());
     }
 
-    private static TodayIssueRowResponse toIssueRow(Issue i, Map<UUID, BigDecimal> priceByItemId) {
+    private static TodayIssueRowResponse toIssueRow(Issue i, Map<UUID, Item> itemsById) {
         BigDecimal value = i.getLines().stream()
-                .map(l -> l.getQuantity().multiply(priceByItemId.getOrDefault(l.getItemId(), BigDecimal.ZERO)))
+                .map(l -> l.getQuantity().multiply(priceOf(itemsById.get(l.getItemId()))))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long itemTypeCount = i.getLines().stream()
+                .map(l -> itemsById.get(l.getItemId()))
+                .filter(Objects::nonNull)
+                .map(Item::getCategory)
+                .filter(c -> c != null && !c.isBlank())
+                .distinct()
+                .count();
+        List<TodayIssueLineResponse> lines = i.getLines().stream()
+                .map(l -> {
+                    Item item = itemsById.get(l.getItemId());
+                    return new TodayIssueLineResponse(item != null ? item.getName() : "Unknown item", l.getQuantity());
+                })
+                .toList();
         return new TodayIssueRowResponse(i.getId(), i.getIssueNumber(), i.getBorrowingUserId(),
                 i.getLines().size(), sumQuantity(i.getLines(), IssueLine::getQuantity),
-                value, i.getIssuedAt());
+                value, i.getIssuedAt(), i.getStatus(), itemTypeCount, lines);
     }
 
     private static ItemStockRowResponse toStockRow(Item item) {
@@ -205,7 +208,7 @@ public class AdminDashboardQueryService {
     }
 
     private static BigDecimal priceOf(Item item) {
-        return nullToZero(item.getUnitPrice());
+        return item != null ? nullToZero(item.getUnitPrice()) : BigDecimal.ZERO;
     }
 
     private static BigDecimal nullToZero(BigDecimal value) {
