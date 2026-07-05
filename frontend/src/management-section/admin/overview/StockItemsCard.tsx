@@ -1,10 +1,16 @@
 import { Badge, Group, Stack, Text } from "@mantine/core";
-import type { ReactNode } from "react";
-import { DataTable, type Column } from "@ui/data/DataTable";
+import { useMemo, useState, type ReactNode } from "react";
+import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import type { ItemStockRow } from "@core/types";
 import { OverviewCard } from "./OverviewCard";
 import { money } from "./format";
+
+const STOCK_LEVEL_OPTIONS = [
+  { value: "ALL", label: "All stock levels" },
+  { value: "LOW", label: "Below reorder" },
+  { value: "OK", label: "At / above reorder" },
+];
 
 interface StockItemsCardProps {
   title: string;
@@ -12,18 +18,15 @@ interface StockItemsCardProps {
   icon: ReactNode;
   accent: string;
   items: ItemStockRow[] | undefined;
-  /** True total — the list may be capped server-side, so this drives the badge. */
   total: number;
   loading?: boolean;
   error?: unknown;
   emptyText: string;
-  /** Adds a unit-price column (used for the critical and normal lists). */
   showPrice?: boolean;
-  /** Shows the critical/low status column (off for the critical and normal lists). */
   showStatus?: boolean;
+  filterByStockLevel?: boolean;
 }
 
-/** Renders one stock-health bucket (critical / normal / warning / critical-warning). */
 export function StockItemsCard({
   title,
   description,
@@ -36,8 +39,23 @@ export function StockItemsCard({
   emptyText,
   showPrice = false,
   showStatus = true,
+  filterByStockLevel = true,
 }: StockItemsCardProps) {
-  const capped = items != null && items.length < total;
+  const [search, setSearch] = useState("");
+  const [stockLevel, setStockLevel] = useState("ALL");
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return (items ?? []).filter((r) => {
+      if (stockLevel === "LOW" && r.quantityOnHand >= r.reorderLevel) return false;
+      if (stockLevel === "OK" && r.quantityOnHand < r.reorderLevel) return false;
+      if (q && !r.itemCode.toLowerCase().includes(q) && !r.name.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [items, search, stockLevel]);
+
+  const isFiltering = search.trim() !== "" || stockLevel !== "ALL";
+  const capped = items != null && items.length < total && !isFiltering;
   const columns: Column<ItemStockRow>[] = [
     { header: "Code", render: (r) => r.itemCode, emphasis: true },
     { header: "Name", render: (r) => r.name },
@@ -67,15 +85,31 @@ export function StockItemsCard({
   ];
 
   return (
-    <OverviewCard title={title} description={description} icon={icon} accent={accent} count={total}>
+    <OverviewCard
+      title={title}
+      description={description}
+      icon={icon}
+      accent={accent}
+      count={total}
+      toolbar={
+        <TableToolbar
+          search={{ value: search, onChange: setSearch, placeholder: "Search code or name…" }}
+          filters={
+            filterByStockLevel
+              ? [{ label: "Stock level", value: stockLevel, onChange: setStockLevel, options: STOCK_LEVEL_OPTIONS }]
+              : undefined
+          }
+        />
+      }
+    >
       <Stack gap="xs">
         <DataTable<ItemStockRow>
-          data={items}
+          data={items ? filtered : undefined}
           loading={loading}
           error={error}
           withCard={false}
           rowKey={(r) => r.itemId}
-          empty={<Text c="dimmed" p="md">{emptyText}</Text>}
+          empty={<Text c="dimmed" p="md">{isFiltering ? "No items match your search." : emptyText}</Text>}
           columns={columns}
         />
         {capped && (
