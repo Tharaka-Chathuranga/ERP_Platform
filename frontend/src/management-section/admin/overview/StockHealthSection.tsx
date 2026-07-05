@@ -24,36 +24,39 @@ export function StockHealthSection() {
 
   return (
     <>
-      <SimpleGrid cols={{ base: 2, lg: 4 }}>
-        <StatCard label="Critical warnings" value={h?.criticalWarningCount ?? 0} icon={<IconAlertHexagon size={22} />} color="red" hint="Critical & below reorder" />
-        <StatCard label="Warning items" value={h?.warningCount ?? 0} icon={<IconAlertTriangle size={22} />} color="orange" hint="Below reorder level" />
+      <SimpleGrid cols={{ base: 1, sm: 2 }}>
         <StatCard label="Critical items" value={h?.criticalCount ?? 0} icon={<IconShieldCheck size={22} />} color="grape" hint="Flagged critical" />
         <StatCard label="Normal items" value={h?.normalCount ?? 0} icon={<IconCircleCheck size={22} />} color="teal" hint="Healthy stock" />
       </SimpleGrid>
 
-      <StockItemsCard
-        title="Critical warning items"
-        description="Flagged critical and below reorder — act first"
-        icon={<IconAlertHexagon size={22} />}
-        accent="red"
-        items={h?.criticalWarningItems}
-        total={h?.criticalWarningCount ?? 0}
-        loading={loading}
-        error={error}
-        emptyText="No critical items below reorder — all good."
-      />
-
-      <StockItemsCard
-        title="Warning items"
-        description="On hand below reorder level"
-        icon={<IconAlertTriangle size={22} />}
-        accent="orange"
-        items={h?.warningItems}
-        total={h?.warningCount ?? 0}
-        loading={loading}
-        error={error}
-        emptyText="Nothing below reorder level."
-      />
+      <Grid>
+        <Grid.Col span={{ base: 12, lg: 6 }}>
+          <StockItemsCard
+            title="Critical warning items"
+            description="Flagged critical and below reorder — act first"
+            icon={<IconAlertHexagon size={22} />}
+            accent="red"
+            items={h?.criticalWarningItems}
+            total={h?.criticalWarningCount ?? 0}
+            loading={loading}
+            error={error}
+            emptyText="No critical items below reorder — all good."
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, lg: 6 }}>
+          <StockItemsCard
+            title="Warning items"
+            description="On hand below reorder level (excluding critical)"
+            icon={<IconAlertTriangle size={22} />}
+            accent="orange"
+            items={h?.warningItems}
+            total={h?.warningCount ?? 0}
+            loading={loading}
+            error={error}
+            emptyText="Nothing below reorder level."
+          />
+        </Grid.Col>
+      </Grid>
 
       <Grid>
         <Grid.Col span={{ base: 12, lg: 6 }}>

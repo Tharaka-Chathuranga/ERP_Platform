@@ -70,6 +70,20 @@ public interface ItemRepository extends JpaRepository<Item, UUID> {
             + "order by (i.quantityOnHand - i.reorderLevel) asc")
     List<Item> findCriticalLowStock();
 
+    /** Active items below reorder level that are NOT flagged critical, biggest shortfall first. */
+    @Query("select i from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.criticalItem = false "
+            + "and i.quantityOnHand < i.reorderLevel "
+            + "order by (i.quantityOnHand - i.reorderLevel) asc")
+    List<Item> findNormalLowStock();
+
+    @Query("select count(i) from Item i "
+            + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
+            + "and i.criticalItem = false "
+            + "and i.quantityOnHand < i.reorderLevel")
+    long countNormalLowStock();
+
     @Query("select count(i) from Item i "
             + "where i.status = com.enlear.erp.store.model.ItemStatus.ACTIVE "
             + "and i.criticalItem = true")

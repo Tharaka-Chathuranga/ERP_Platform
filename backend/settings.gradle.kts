@@ -5,5 +5,6 @@ include(
     ":user",
     ":store",
     ":fuel",
+    ":notification",
     ":bootstrap",
 )

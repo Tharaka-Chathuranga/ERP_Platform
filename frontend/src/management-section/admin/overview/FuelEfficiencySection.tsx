@@ -144,7 +144,7 @@ function SummaryCard({ rows, vehicleOptions, userLabel, loading, error }: {
   return (
     <OverviewCard
       title="Efficiency summary"
-      description="Last 30 days — all vehicles"
+      description="Last 30 days — all vehicles fuel consumption summary"
       icon={<IconChartBar size={22} />}
       accent="blue"
       count={rows.length}
@@ -207,7 +207,6 @@ function DeclineCard({ rows, vehicleOptions, userLabel, loading }: {
   return (
     <OverviewCard
       title="High fuel consumption"
-      description="Vehicles consuming more than expected"
       icon={<IconTrendingDown size={22} />}
       accent="orange"
       count={rows.length}
@@ -269,7 +268,6 @@ function ImproveCard({ rows, vehicleOptions, userLabel, loading }: {
   return (
     <OverviewCard
       title="Improved fuel efficiency"
-      description="Vehicles performing better than expected"
       icon={<IconTrendingUp size={22} />}
       accent="teal"
       count={rows.length}

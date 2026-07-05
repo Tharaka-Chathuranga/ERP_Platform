@@ -55,11 +55,23 @@ public class FlywayConfig {
                 .load();
     }
 
+    @Bean(initMethod = "migrate")
+    @DependsOn("fuelFlyway")
+    public Flyway notificationFlyway(DataSource dataSource) {
+        return Flyway.configure()
+                .dataSource(dataSource)
+                .schemas("notification")
+                .defaultSchema("notification")
+                .locations("classpath:db/migration/notification")
+                .baselineOnMigrate(true)
+                .load();
+    }
+
     /** Forces the JPA EntityManagerFactory to wait until migrations have run. */
     @Configuration
     static class JpaDependsOnFlyway extends EntityManagerFactoryDependsOnPostProcessor {
         JpaDependsOnFlyway() {
-            super("userFlyway", "storeFlyway", "fuelFlyway");
+            super("userFlyway", "storeFlyway", "fuelFlyway", "notificationFlyway");
         }
     }
 }

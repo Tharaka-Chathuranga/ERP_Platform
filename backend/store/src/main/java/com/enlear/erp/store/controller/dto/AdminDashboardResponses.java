@@ -20,11 +20,14 @@ public final class AdminDashboardResponses {
             long supplierCount,
             BigDecimal totalInventoryValue,
             long lowStockItemCount,
+            long lowStockCriticalItemCount,
+            long lowStockNormalItemCount,
             long pendingIssueApprovalCount,
             long pendingDeviationCount,
             long pendingBorrowRequestCount,
             long pendingCountAdjustmentCount,
-            long receivalCount) {
+            long receivalCount,
+            long issuedCount) {
     }
 
     /** Received vs issued totals for a single day. */
@@ -65,8 +68,9 @@ public final class AdminDashboardResponses {
 
     /**
      * Stock-health snapshot for the admin overview: items grouped into critical,
-     * normal (healthy), warning (below reorder) and critical-warning (flagged
-     * critical and below reorder) buckets, each with its full count.
+     * normal (healthy), warning (below reorder but not flagged critical) and
+     * critical-warning (flagged critical and below reorder) buckets, each with its
+     * full count. Warning and critical-warning partition the below-reorder items.
      */
     public record StockHealthResponse(
             List<ItemStockRowResponse> criticalItems,

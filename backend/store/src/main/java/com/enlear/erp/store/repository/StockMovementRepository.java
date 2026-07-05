@@ -20,18 +20,21 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, UU
     Page<StockMovement> findAllByOrderByOccurredAtDesc(Pageable pageable);
 
     /**
-     * Per-item received vs issued totals, busiest items first. Lets the chart
-     * show what actually moved instead of one aggregate number.
+     * Per-item received vs issued totals since {@code since}, busiest items
+     * first. Lets the chart show what actually moved instead of one aggregate
+     * number, over the same window as the movement-trend chart.
      */
     @Query("select m.itemId as itemId, "
             + "sum(case when m.type = :received then m.quantity else 0 end) as received, "
             + "sum(case when m.type = :issued then m.quantity else 0 end) as issued "
             + "from StockMovement m "
+            + "where m.occurredAt >= :since "
             + "group by m.itemId "
             + "order by sum(m.quantity) desc")
     List<ItemMovementTotals> sumByItem(
             @Param("received") MovementType received,
             @Param("issued") MovementType issued,
+            @Param("since") Instant since,
             Pageable pageable);
 
     /** Projection for {@link #sumByItem}. */

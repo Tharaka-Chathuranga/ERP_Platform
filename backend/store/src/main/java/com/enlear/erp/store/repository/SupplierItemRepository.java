@@ -9,5 +9,7 @@ public interface SupplierItemRepository extends JpaRepository<SupplierItem, UUID
 
     List<SupplierItem> findBySupplierId(UUID supplierId);
 
+    List<SupplierItem> findByItemId(UUID itemId);
+
     boolean existsBySupplierIdAndItemId(UUID supplierId, UUID itemId);
 }
