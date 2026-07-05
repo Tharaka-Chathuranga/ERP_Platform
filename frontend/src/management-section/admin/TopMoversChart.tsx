@@ -1,5 +1,9 @@
-import { Box, Card, Group, ScrollArea, Select, Table, Text } from "@mantine/core";
+import { ActionIcon, Box, Card, Group, Modal, ScrollArea, Select, Table, Text, Tooltip } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { IconArrowsMaximize } from "@tabler/icons-react";
 import type { ItemMovementSummary } from "@core/types";
+
+const TITLE = "Top movers";
 
 interface TopMoversChartProps {
   data: ItemMovementSummary[];
@@ -33,24 +37,20 @@ function MovementBar({ value, max, color, label }: { value: number; max: number;
   );
 }
 
-/** Received vs issued totals for the busiest items, shown as an item table with inline bars. */
-export function TopMoversChart({ data, itemLabel, days, onDaysChange }: TopMoversChartProps) {
-  const max = Math.max(1, ...data.flatMap((d) => [d.received, d.issued]));
-
+/** Legend + movement table, so the same markup renders both inline and full screen. */
+function TopMoversBody({
+  data,
+  itemLabel,
+  max,
+  mah,
+}: {
+  data: ItemMovementSummary[];
+  itemLabel: (id: string) => string;
+  max: number;
+  mah: number | string;
+}) {
   return (
-    <Card withBorder radius="md" padding="lg" h="100%">
-      <Group justify="space-between" mb="md">
-        <Text fw={600}>Top movers</Text>
-        <Select
-          size="xs"
-          w={130}
-          allowDeselect={false}
-          data={RANGE_OPTIONS}
-          value={String(days)}
-          onChange={(value) => onDaysChange(Number(value))}
-          aria-label="Top movers time range"
-        />
-      </Group>
+    <>
       <Group gap="md" mb="sm">
         <Group gap={6}>
           <Box style={{ width: 10, height: 10, borderRadius: 2, background: RECEIVED_COLOR }} />
@@ -71,7 +71,7 @@ export function TopMoversChart({ data, itemLabel, days, onDaysChange }: TopMover
           No movement recorded yet.
         </Text>
       ) : (
-        <ScrollArea.Autosize mah={260} type="hover">
+        <ScrollArea.Autosize mah={mah} type="hover">
           <Table verticalSpacing="sm" layout="fixed" stickyHeader>
             <Table.Thead>
               <Table.Tr>
@@ -101,6 +101,50 @@ export function TopMoversChart({ data, itemLabel, days, onDaysChange }: TopMover
           </Table>
         </ScrollArea.Autosize>
       )}
-    </Card>
+    </>
+  );
+}
+
+/** Received vs issued totals for the busiest items, shown as an item table with inline bars. */
+export function TopMoversChart({ data, itemLabel, days, onDaysChange }: TopMoversChartProps) {
+  const [expanded, { open, close }] = useDisclosure(false);
+  const max = Math.max(1, ...data.flatMap((d) => [d.received, d.issued]));
+
+  const rangeSelect = (
+    <Select
+      size="xs"
+      w={130}
+      allowDeselect={false}
+      data={RANGE_OPTIONS}
+      value={String(days)}
+      onChange={(value) => onDaysChange(Number(value))}
+      aria-label="Top movers time range"
+    />
+  );
+
+  return (
+    <>
+      <Card withBorder radius="md" padding="lg" h="100%">
+        <Group justify="space-between" mb="md" wrap="nowrap">
+          <Text fw={600}>{TITLE}</Text>
+          <Group gap="xs" wrap="nowrap">
+            {rangeSelect}
+            <Tooltip label="Open full screen" withArrow>
+              <ActionIcon variant="subtle" color="gray" onClick={open} aria-label={`Expand ${TITLE}`}>
+                <IconArrowsMaximize size={18} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
+        </Group>
+        <TopMoversBody data={data} itemLabel={itemLabel} max={max} mah={260} />
+      </Card>
+
+      <Modal opened={expanded} onClose={close} fullScreen radius={0} title={<Text fw={600}>{TITLE}</Text>}>
+        <Group justify="flex-end" mb="md">
+          {rangeSelect}
+        </Group>
+        <TopMoversBody data={data} itemLabel={itemLabel} max={max} mah="calc(100vh - 160px)" />
+      </Modal>
+    </>
   );
 }
