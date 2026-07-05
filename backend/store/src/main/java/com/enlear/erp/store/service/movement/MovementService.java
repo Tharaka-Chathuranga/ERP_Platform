@@ -36,14 +36,12 @@ public class MovementService {
         return movements.findAllByOrderByOccurredAtDesc(pageable);
     }
 
-    /**
-     * Received vs issued totals per item, busiest items first — aggregated over
-     * the last {@code days} days so it lines up with the movement-trend chart.
-     */
+    /** Received vs issued totals per item over the last {@code days} days ({@code 0} = all time), busiest first. */
     public List<ItemMovementSummaryResponse> summaryByItem(int limit, int days) {
         int cappedItems = Math.max(1, Math.min(limit, MAX_ITEMS));
-        int cappedDays = Math.max(1, Math.min(days, MAX_DAYS));
-        Instant since = Instant.now().minus(Duration.ofDays(cappedDays));
+        Instant since = days <= 0
+                ? Instant.EPOCH
+                : Instant.now().minus(Duration.ofDays(Math.min(days, MAX_DAYS)));
         return movements
                 .sumByItem(MovementType.RECEIPT, MovementType.ISSUE, since, PageRequest.of(0, cappedItems))
                 .stream()

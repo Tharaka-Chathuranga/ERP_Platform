@@ -12,6 +12,7 @@ import {
   IconPackageImport,
   IconX,
 } from "@tabler/icons-react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@auth/AuthContext";
@@ -46,7 +47,8 @@ function AdminOverview() {
   const itemCode = useItemCodes();
   const summary = useQuery({ queryKey: qk.adminSummary(), queryFn: getDashboardSummary });
   const trend = useQuery({ queryKey: qk.movementTrend(30), queryFn: () => getMovementTrend(30) });
-  const topMovers = useQuery({ queryKey: qk.movementSummary(), queryFn: () => getMovementSummary(8, 30) });
+  const [moverDays, setMoverDays] = useState(30);
+  const topMovers = useQuery({ queryKey: qk.movementSummary(moverDays), queryFn: () => getMovementSummary(8, moverDays) });
   const s = summary.data;
 
   return (
@@ -75,7 +77,7 @@ function AdminOverview() {
           <MovementTrendChart data={trend.data ?? []} />
         </Grid.Col>
         <Grid.Col span={{ base: 12, lg: 5 }}>
-          <TopMoversChart data={topMovers.data ?? []} itemLabel={itemCode} />
+          <TopMoversChart data={topMovers.data ?? []} itemLabel={itemCode} days={moverDays} onDaysChange={setMoverDays} />
         </Grid.Col>
       </Grid>
 

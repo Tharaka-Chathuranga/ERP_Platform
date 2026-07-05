@@ -30,7 +30,7 @@ export const qk = {
 
   // ── Stock movements (cross-item reporting) ──
   allMovements: () => ["movements"] as const,
-  movementSummary: () => ["movements", "summary"] as const,
+  movementSummary: (days: number) => ["movements", "summary", days] as const,
 
   // ── Suppliers ──
   suppliers: () => ["suppliers"] as const,

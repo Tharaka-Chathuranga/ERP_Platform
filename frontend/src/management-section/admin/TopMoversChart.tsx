@@ -1,13 +1,22 @@
-import { Box, Card, Group, ScrollArea, Table, Text } from "@mantine/core";
+import { Box, Card, Group, ScrollArea, Select, Table, Text } from "@mantine/core";
 import type { ItemMovementSummary } from "@core/types";
 
 interface TopMoversChartProps {
   data: ItemMovementSummary[];
   itemLabel: (id: string) => string;
+  days: number;
+  onDaysChange: (days: number) => void;
 }
 
 const RECEIVED_COLOR = "var(--mantine-color-teal-5)";
 const ISSUED_COLOR = "var(--mantine-color-yellow-5)";
+
+const RANGE_OPTIONS = [
+  { value: "1", label: "Today" },
+  { value: "7", label: "Last 7 days" },
+  { value: "30", label: "Last 30 days" },
+  { value: "0", label: "All time" },
+];
 
 /** A single coloured horizontal bar with its value, scaled against the busiest item. */
 function MovementBar({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
@@ -25,26 +34,35 @@ function MovementBar({ value, max, color, label }: { value: number; max: number;
 }
 
 /** Received vs issued totals for the busiest items, shown as an item table with inline bars. */
-export function TopMoversChart({ data, itemLabel }: TopMoversChartProps) {
+export function TopMoversChart({ data, itemLabel, days, onDaysChange }: TopMoversChartProps) {
   const max = Math.max(1, ...data.flatMap((d) => [d.received, d.issued]));
 
   return (
     <Card withBorder radius="md" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
-        <Text fw={600}>Top movers · Last 30 days</Text>
-        <Group gap="md">
-          <Group gap={6}>
-            <Box style={{ width: 10, height: 10, borderRadius: 2, background: RECEIVED_COLOR }} />
-            <Text size="xs" c="dimmed">
-              Received
-            </Text>
-          </Group>
-          <Group gap={6}>
-            <Box style={{ width: 10, height: 10, borderRadius: 2, background: ISSUED_COLOR }} />
-            <Text size="xs" c="dimmed">
-              Issued
-            </Text>
-          </Group>
+        <Text fw={600}>Top movers</Text>
+        <Select
+          size="xs"
+          w={130}
+          allowDeselect={false}
+          data={RANGE_OPTIONS}
+          value={String(days)}
+          onChange={(value) => onDaysChange(Number(value))}
+          aria-label="Top movers time range"
+        />
+      </Group>
+      <Group gap="md" mb="sm">
+        <Group gap={6}>
+          <Box style={{ width: 10, height: 10, borderRadius: 2, background: RECEIVED_COLOR }} />
+          <Text size="xs" c="dimmed">
+            Received
+          </Text>
+        </Group>
+        <Group gap={6}>
+          <Box style={{ width: 10, height: 10, borderRadius: 2, background: ISSUED_COLOR }} />
+          <Text size="xs" c="dimmed">
+            Issued
+          </Text>
         </Group>
       </Group>
 
