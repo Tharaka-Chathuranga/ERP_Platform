@@ -4,12 +4,12 @@ import {
   IconAlertTriangle,
   IconArrowsExchange,
   IconBug,
-  IconBuildingWarehouse,
   IconCheck,
   IconClipboardCheck,
   IconCoin,
   IconPackageExport,
   IconPackageImport,
+  IconThumbUp,
   IconX,
 } from "@tabler/icons-react";
 import { useState } from "react";
@@ -64,10 +64,12 @@ function AdminOverview() {
       </Paper>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
-        <StatCard label="Active items" value={s?.activeItemCount ?? 0} icon={<IconBuildingWarehouse size={22} />} color="brand" to="/store" />
-        <StatCard label="Low stock" value={s?.lowStockItemCount ?? 0} icon={<IconAlertTriangle size={22} />} color="red" to="/warnings" hint="Below reorder level" />
+        <StatCard label="Received" value={s?.receivalCount ?? 0} icon={<IconPackageImport size={22} />} color="teal" to="/receiving" hint="Total receivals" />
+        <StatCard label="Issued" value={s?.issuedCount ?? 0} icon={<IconPackageExport size={22} />} color="blue" to="/issuing" hint="Total issues" />
+        <StatCard label="Low stock · critical" value={s?.lowStockCriticalItemCount ?? 0} icon={<IconAlertHexagon size={22} />} color="red" to="/warnings" hint="Critical & below reorder" />
+        <StatCard label="Low stock · normal" value={s?.lowStockNormalItemCount ?? 0} icon={<IconAlertTriangle size={22} />} color="orange" to="/warnings" hint="Below reorder level" />
         <StatCard label="Inventory value" value={s ? currency.format(s.totalInventoryValue) : "—"} icon={<IconCoin size={22} />} color="teal" />
-        <StatCard label="Pending approvals" value={s?.pendingIssueApprovalCount ?? 0} icon={<IconPackageExport size={22} />} color="yellow" />
+        <StatCard label="Pending approvals" value={s?.pendingIssueApprovalCount ?? 0} icon={<IconThumbUp size={22} />} color="yellow" />
         <StatCard label="Open defects" value={s?.pendingDeviationCount ?? 0} icon={<IconBug size={22} />} color="grape" to="/defects" />
         <StatCard label="Count requests" value={s?.pendingCountAdjustmentCount ?? 0} icon={<IconClipboardCheck size={22} />} color="indigo" to="/count-requests" hint="Awaiting approval" />
       </SimpleGrid>
@@ -105,6 +107,21 @@ function AdminOverview() {
         <Divider
           label={
             <Text fw={600} fz="xs" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
+              Stock health
+            </Text>
+          }
+          labelPosition="left"
+          mb="md"
+        />
+        <Stack gap="lg">
+          <StockHealthSection />
+        </Stack>
+      </div>
+
+      <div>
+        <Divider
+          label={
+            <Text fw={600} fz="xs" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
               Fuel
             </Text>
           }
@@ -115,21 +132,6 @@ function AdminOverview() {
           <FuelOverviewSection />
           <FuelTankCapacitySection />
           <FuelEfficiencySection />
-        </Stack>
-      </div>
-
-      <div>
-        <Divider
-          label={
-            <Text fw={600} fz="xs" tt="uppercase" style={{ letterSpacing: "0.05em" }}>
-              Stock health
-            </Text>
-          }
-          labelPosition="left"
-          mb="md"
-        />
-        <Stack gap="lg">
-          <StockHealthSection />
         </Stack>
       </div>
     </Stack>

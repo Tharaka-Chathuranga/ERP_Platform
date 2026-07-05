@@ -260,11 +260,14 @@ export interface DashboardSummary {
   supplierCount: number;
   totalInventoryValue: number;
   lowStockItemCount: number;
+  lowStockCriticalItemCount: number;
+  lowStockNormalItemCount: number;
   pendingIssueApprovalCount: number;
   pendingDeviationCount: number;
   pendingBorrowRequestCount: number;
   pendingCountAdjustmentCount: number;
   receivalCount: number;
+  issuedCount: number;
 }
 
 export interface LowStockItem {

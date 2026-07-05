@@ -86,17 +86,22 @@ public class AdminDashboardQueryService {
     }
 
     public DashboardSummaryResponse summary() {
+        long lowStock = items.countLowStock();
+        long lowStockCritical = items.countCriticalLowStock();
         return new DashboardSummaryResponse(
                 items.countByStatus(ItemStatus.ACTIVE),
                 items.countByStatus(ItemStatus.INACTIVE),
                 suppliers.count(),
                 items.totalInventoryValue(),
-                items.countLowStock(),
+                lowStock,
+                lowStockCritical,
+                lowStock - lowStockCritical,
                 issues.countByStatus(IssueStatus.PENDING_APPROVAL),
                 deviations.countByStatus(DeviationStatus.PENDING),
                 borrowRequests.countByStatus(BorrowRequestStatus.PENDING),
                 countRequests.countByStatus(CountAdjustmentStatus.PENDING),
-                receivals.count());
+                receivals.count(),
+                issues.countByStatus(IssueStatus.ISSUED));
     }
 
     public List<MovementTrendPointResponse> movementTrend(int days) {
@@ -156,7 +161,7 @@ public class AdminDashboardQueryService {
     public StockHealthResponse stockHealth() {
         var critical = items.findCriticalItems().stream()
                 .map(AdminDashboardQueryService::toStockRow).toList();
-        var warning = items.findLowStock().stream()
+        var warning = items.findNormalLowStock().stream()
                 .map(AdminDashboardQueryService::toStockRow).toList();
         var criticalWarning = items.findCriticalLowStock().stream()
                 .map(AdminDashboardQueryService::toStockRow).toList();
@@ -164,7 +169,7 @@ public class AdminDashboardQueryService {
                 .map(AdminDashboardQueryService::toStockRow).toList();
         return new StockHealthResponse(critical, normal, warning, criticalWarning,
                 items.countCritical(), items.countNormalStock(),
-                items.countLowStock(), items.countCriticalLowStock());
+                items.countNormalLowStock(), items.countCriticalLowStock());
     }
 
     private Instant startOfToday() {
