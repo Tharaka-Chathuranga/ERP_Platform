@@ -1,3 +1,3 @@
-export * from "./StockMovementsPage";
-export * from "./StockMovementDetailPage";
-export * from "./movements.api";
+export * from "./api";
+export * from "./pages/StockMovementsPage";
+export * from "./pages/StockMovementDetailPage";

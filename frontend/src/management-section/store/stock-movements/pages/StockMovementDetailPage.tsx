@@ -10,8 +10,8 @@ import { EmptyState } from "@ui/feedback/EmptyState";
 import { useItemCodes } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import type { MovementType, StockMovement } from "@core/types";
-import { listMovements } from "./movements.api";
-import { isOutbound } from "./movementStats";
+import { listMovements } from "../api";
+import { isOutbound } from "../utils/movementStats";
 
 const TYPES: MovementType[] = [
   "RECEIPT",

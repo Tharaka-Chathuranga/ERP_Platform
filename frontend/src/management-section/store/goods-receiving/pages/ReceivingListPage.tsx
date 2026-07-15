@@ -10,8 +10,8 @@ import { DataTable, type Column } from "@ui/data/DataTable";
 import { TableToolbar } from "@ui/data";
 import { qk } from "@core/queryKeys";
 import type { Receival } from "@core/types";
-import { listReceivals } from "@store/goods-receiving/receiving.api";
-import { listSuppliers } from "@store/inventory/suppliers.api";
+import { listReceivals } from "../api";
+import { listSuppliers } from "@store/inventory";
 
 export function ReceivingListPage() {
   const navigate = useNavigate();

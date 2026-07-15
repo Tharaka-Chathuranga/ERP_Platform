@@ -5,7 +5,7 @@ import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
-import { recordRefill } from "./fuel.api";
+import { recordRefill } from "../api";
 
 interface RecordRefillModalProps {
   opened: boolean;

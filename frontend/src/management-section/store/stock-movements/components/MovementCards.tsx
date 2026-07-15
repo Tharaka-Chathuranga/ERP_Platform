@@ -4,7 +4,7 @@ import { IconArrowRight, IconClipboardList } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import type { ItemMovement } from "./movementStats";
+import type { ItemMovement } from "../utils/movementStats";
 
 const fmt = (n: number) => n.toLocaleString();
 

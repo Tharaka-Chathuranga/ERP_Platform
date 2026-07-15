@@ -8,8 +8,8 @@ import { TableToolbar } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { AdminUser } from "@core/types";
-import { listUsers } from "./users.api";
-import { UserFormModal } from "./UserFormModal";
+import { listUsers } from "../api";
+import { UserFormModal } from "../components/UserFormModal";
 
 const ROLE_OPTIONS = [
   { label: "All roles", value: "ALL" },

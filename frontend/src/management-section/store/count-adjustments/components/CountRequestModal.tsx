@@ -5,7 +5,7 @@ import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { ItemSelect } from "@ui/primitives/ItemSelect";
-import { createCountRequest } from "./count-requests.api";
+import { createCountRequest } from "../api";
 
 /** Raise a new count-adjustment request (item + target quantity + reason). */
 export function CountRequestModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {

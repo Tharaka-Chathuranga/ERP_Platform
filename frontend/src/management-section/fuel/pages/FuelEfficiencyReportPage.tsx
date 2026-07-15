@@ -20,7 +20,7 @@ import { DataTable, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import { getEfficiencyReport } from "./fuel.api";
+import { getEfficiencyReport } from "../api";
 
 const LINE_COLORS = [
   "var(--mantine-color-blue-5)",

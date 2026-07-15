@@ -8,9 +8,9 @@ import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { useCan } from "@auth/useCan";
 import { ITEM_EDIT } from "@auth/permissions";
-import { getOnHand, listItems } from "@store/inventory/items.api";
+import { getOnHand, listItems } from "../api";
 import type { Item } from "@core/types";
-import { CreateItemModal } from "./CreateItemModal";
+import { CreateItemModal } from "../components/CreateItemModal";
 
 export function ItemsPage() {
   const can = useCan();

@@ -16,14 +16,14 @@ import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { useCriticalItems, useItemCodes } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import { listMovements } from "./movements.api";
+import { listMovements } from "../api";
 import {
   computeMovementStats,
   criticalItems,
   inPeriod,
   type Period,
-} from "./movementStats";
-import { MovementLogNavCard, SectionCard, TopItemsCard } from "./MovementCards";
+} from "../utils/movementStats";
+import { MovementLogNavCard, SectionCard, TopItemsCard } from "../components/MovementCards";
 
 const fmt = (n: number) => n.toLocaleString();
 

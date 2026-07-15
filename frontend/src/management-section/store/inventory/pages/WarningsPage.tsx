@@ -7,7 +7,7 @@ import { TableToolbar } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { LowStockItem } from "@core/types";
-import { getLowStockItems } from "./items.api";
+import { getLowStockItems } from "../api";
 
 /** Items whose on-hand has dropped below their reorder level. Visible to both roles. */
 export function WarningsPage() {

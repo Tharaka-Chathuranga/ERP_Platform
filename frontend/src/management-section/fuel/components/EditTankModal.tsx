@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
-import { updateTank } from "./fuel.api";
+import { updateTank } from "../api";
 
 interface EditTankModalProps {
   opened: boolean;

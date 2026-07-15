@@ -9,7 +9,7 @@ import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, TableToolbar, PersonCell, StackedCell, type Column } from "@ui/data";
 import { useUsers } from "@core/hooks/useUsers";
-import { listIssues } from "@store/goods-issuing/issuing.api";
+import { listIssues } from "../api";
 import type { Issue, IssueStatus, UserSummary } from "@core/types";
 
 const FILTERS: { label: string; value: string }[] = [

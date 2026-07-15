@@ -8,7 +8,7 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import type { DeviationRequest } from "@core/types";
-import { listDeviationsByStatus } from "./qa.api";
+import { listDeviationsByStatus } from "../api";
 
 export function QualityAssuranceDefectReviewPage() {
   const navigate = useNavigate();

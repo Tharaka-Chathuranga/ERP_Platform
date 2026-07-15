@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { qk } from "@core/queryKeys";
 import { StatCard } from "@ui/feedback/StatCard";
-import { getFuelOverview } from "@fuel/fuel.api";
+import { getFuelOverview } from "@fuel";
 
 /** Fuel stat cards for the admin overview: today's issues, price, last reading. */
 export function FuelOverviewSection() {

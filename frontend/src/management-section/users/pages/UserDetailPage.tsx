@@ -10,8 +10,8 @@ import { DefinitionList } from "@ui/data/DefinitionList";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
-import { disableUser, enableUser, getUser, resetUserPassword } from "./users.api";
-import { UserFormModal } from "./UserFormModal";
+import { disableUser, enableUser, getUser, resetUserPassword } from "../api";
+import { UserFormModal } from "../components/UserFormModal";
 
 export function UserDetailPage() {
   const { id = "" } = useParams();

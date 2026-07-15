@@ -15,9 +15,9 @@ import {
   deactivateSupplier,
   listSupplierItems,
   listSuppliers,
-} from "@store/inventory/suppliers.api";
+} from "../api";
 import type { Supplier, SupplierItem } from "@core/types";
-import { SupplierFormModal } from "./SupplierFormModal";
+import { SupplierFormModal } from "../components/SupplierFormModal";
 
 export function SuppliersPage() {
   const qc = useQueryClient();

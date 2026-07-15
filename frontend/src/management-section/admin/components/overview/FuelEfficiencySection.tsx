@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import { getEfficiencyReport, listVehicles } from "@fuel/fuel.api";
+import { getEfficiencyReport, listVehicles } from "@fuel";
 import { OverviewCard } from "./OverviewCard";
 
 interface SummaryRow {

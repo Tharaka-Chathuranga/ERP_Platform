@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import { getMovements, getOnHand } from "@store/inventory/items.api";
+import { getMovements, getOnHand } from "../api";
 import type { Item, MovementType, StockMovement } from "@core/types";
 
 const MOVEMENT_TYPES: { value: MovementType; label: string }[] = [

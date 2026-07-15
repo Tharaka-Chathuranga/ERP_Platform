@@ -21,8 +21,8 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { StepHeading } from "@ui/layout/StepHeading";
 import { LineItemsEditor, newLine, type EditableLine } from "@ui/primitives/LineItemsEditor";
 import { useAuth } from "@auth/AuthContext";
-import { listSuppliers } from "@store/inventory/suppliers.api";
-import { createReceival } from "@store/goods-receiving/receiving.api";
+import { listSuppliers } from "@store/inventory";
+import { createReceival } from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
 import { qk } from "@core/queryKeys";
 

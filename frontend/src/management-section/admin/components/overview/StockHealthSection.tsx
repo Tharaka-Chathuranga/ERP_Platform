@@ -8,7 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { qk } from "@core/queryKeys";
 import { StatCard } from "@ui/feedback/StatCard";
-import { getStockHealth } from "../admin.api";
+import { getStockHealth } from "../../api";
 import { StockItemsCard } from "./StockItemsCard";
 
 export function StockHealthSection() {

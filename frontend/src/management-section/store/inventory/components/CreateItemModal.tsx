@@ -9,7 +9,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createItem } from "@store/inventory/items.api";
+import { createItem } from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { ValuationMethod } from "@core/types";
 

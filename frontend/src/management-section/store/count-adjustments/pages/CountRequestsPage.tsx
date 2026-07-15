@@ -18,8 +18,8 @@ import {
   approveCountRequest,
   listCountRequests,
   rejectCountRequest,
-} from "./count-requests.api";
-import { CountRequestModal } from "./CountRequestModal";
+} from "../api";
+import { CountRequestModal } from "../components/CountRequestModal";
 
 const FILTERS = ["ALL", "PENDING", "APPROVED", "REJECTED"] as const;
 

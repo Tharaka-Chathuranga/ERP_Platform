@@ -8,7 +8,7 @@ import { DataTable, TableToolbar } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import type { DeviationItemRow, DeviationStage } from "@core/types";
-import { getDefectItems } from "./deviations.api";
+import { getDefectItems } from "../api";
 
 const FILTERS = ["ALL", "INCOMING", "IN_PROGRESS", "FINAL"] as const;
 

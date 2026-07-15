@@ -18,7 +18,7 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import { getEfficiencyReport, getVehicle } from "./fuel.api";
+import { getEfficiencyReport, getVehicle } from "../api";
 
 const BAR_COLOR = "var(--mantine-color-blue-5)";
 

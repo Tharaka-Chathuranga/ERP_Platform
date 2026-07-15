@@ -9,7 +9,7 @@ import { StepHeading } from "@ui/layout/StepHeading";
 import { LineItemsEditor, newLine, type EditableLine } from "@ui/primitives/LineItemsEditor";
 import { UserSelect } from "@ui/primitives/UserSelect";
 import { useAuth } from "@auth/AuthContext";
-import { createDeviation } from "@store/defects/deviations.api";
+import { createDeviation } from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { DeviationStage } from "@core/types";
 

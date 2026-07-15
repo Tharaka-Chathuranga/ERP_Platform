@@ -10,8 +10,8 @@ import { useCan } from "@auth/useCan";
 import { FUEL_MANAGE } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { FuelPrice } from "@core/types";
-import { listFuelPrices } from "./fuel.api";
-import { AddPriceModal } from "./AddPriceModal";
+import { listFuelPrices } from "../api";
+import { AddPriceModal } from "../components/AddPriceModal";
 
 function isCurrent(price: FuelPrice): boolean {
   const today = dayjs();

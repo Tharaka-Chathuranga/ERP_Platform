@@ -3,8 +3,8 @@ import { Button, Group, Modal, Select, Stack, Textarea } from "@mantine/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@auth/AuthContext";
-import { listIssues } from "@store/goods-issuing/issuing.api";
-import { createBorrowRequest } from "@store/borrow-requests/borrowRequests.api";
+import { listIssues } from "@store/goods-issuing";
+import { createBorrowRequest } from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
 
 export function NewBorrowRequestModal({

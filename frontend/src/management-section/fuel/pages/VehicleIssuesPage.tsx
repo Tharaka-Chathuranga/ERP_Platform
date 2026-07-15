@@ -12,7 +12,7 @@ import { useCan } from "@auth/useCan";
 import { FUEL_VIEW } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { VehicleFuelIssue } from "@core/types";
-import { listVehicleIssues, listVehicles } from "./fuel.api";
+import { listVehicleIssues, listVehicles } from "../api";
 
 export function VehicleIssuesPage() {
   const navigate = useNavigate();

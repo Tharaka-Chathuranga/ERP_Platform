@@ -2,7 +2,7 @@ import { Grid, Group, Paper, Progress, Stack, Text, ThemeIcon } from "@mantine/c
 import { IconGasStation, IconTruckLoading } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { qk } from "@core/queryKeys";
-import { getFuelOverview } from "@fuel/fuel.api";
+import { getFuelOverview } from "@fuel";
 import type { FuelOverviewTank } from "@core/types";
 
 const CONFIG: Record<string, { label: string; icon: React.ReactNode; color: string }> = {

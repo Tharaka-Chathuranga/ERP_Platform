@@ -10,8 +10,8 @@ import { DataTable, DefinitionList, TableToolbar, type Column, type Definition }
 import type { ReceivalItem } from "@core/types";
 import { useItemLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import { getGoodsReceipt, getReceival } from "@store/goods-receiving/receiving.api";
-import { listSuppliers } from "@store/inventory/suppliers.api";
+import { getGoodsReceipt, getReceival } from "../api";
+import { listSuppliers } from "@store/inventory";
 
 export function ReceivalDetailPage() {
   const { id = "" } = useParams();

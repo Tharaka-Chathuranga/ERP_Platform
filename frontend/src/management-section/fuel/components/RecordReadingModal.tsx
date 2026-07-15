@@ -5,7 +5,7 @@ import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
-import { recordReading } from "./fuel.api";
+import { recordReading } from "../api";
 
 interface RecordReadingModalProps {
   opened: boolean;

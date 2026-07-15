@@ -8,9 +8,9 @@ import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { TableToolbar } from "@ui/data";
 import { useCan } from "@auth/useCan";
 import { ITEM_EDIT } from "@auth/permissions";
-import { getItem } from "@store/inventory/items.api";
-import { ItemEditModal } from "./ItemEditModal";
-import { StockPanel } from "./StockPanel";
+import { getItem } from "../api";
+import { ItemEditModal } from "../components/ItemEditModal";
+import { StockPanel } from "../components/StockPanel";
 
 export function ItemDetailPage() {
   const { id = "" } = useParams();

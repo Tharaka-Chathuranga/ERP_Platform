@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
-import { getLowStockItems } from "@store/inventory/items.api";
-import { listDeviations } from "@store/defects/deviations.api";
-import { listCountRequests } from "@store/count-adjustments/count-requests.api";
-import { getDashboardSummary } from "@admin/admin.api";
-import { getQaDefectSummary } from "@qa/qa.api";
+import { getLowStockItems } from "@store/inventory";
+import { listDeviations } from "@store/defects";
+import { listCountRequests } from "@store/count-adjustments";
+import { getDashboardSummary } from "@admin";
+import { getQaDefectSummary } from "@qa";
 
 export interface AppNotification {
   id: string;

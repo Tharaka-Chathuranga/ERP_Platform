@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { Item } from "@core/types";
-import { updateItem } from "./items.api";
+import { updateItem } from "../api";
 
 interface ItemEditModalProps {
   /** The item to edit; the modal is open while this is non-null. */

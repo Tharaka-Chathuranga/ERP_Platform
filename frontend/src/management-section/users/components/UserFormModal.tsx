@@ -5,7 +5,7 @@ import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import { DepartmentSelect } from "@ui/primitives/DepartmentSelect";
 import type { AdminUser } from "@core/types";
-import { createUser, updateUser } from "./users.api";
+import { createUser, updateUser } from "../api";
 
 const ROLES = [
   { value: "ADMIN", label: "Admin" },

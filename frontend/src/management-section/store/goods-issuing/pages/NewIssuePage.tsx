@@ -13,8 +13,8 @@ import { useAuth } from "@auth/AuthContext";
 import { useUsers } from "@core/hooks/useUsers";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
-import { createIssue } from "@store/goods-issuing/issuing.api";
-import { IssueProgress } from "./IssueProgress";
+import { createIssue } from "../api";
+import { IssueProgress } from "../components/IssueProgress";
 
 const roleLabel = (role: string) => (role === "ADMIN" ? "Administrator" : "Store Keeper");
 

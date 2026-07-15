@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { TableToolbar } from "@ui/data/TableToolbar";
-import { listDeviations } from "@store/defects/deviations.api";
+import { listDeviations } from "../api";
 import type { DeviationRequest, DeviationStage, DeviationStatus } from "@core/types";
 
 const STAGE_META: Record<DeviationStage, { title: string; color: string; icon: React.ReactNode }> = {

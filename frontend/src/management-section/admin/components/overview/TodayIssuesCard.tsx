@@ -8,9 +8,9 @@ import { qk } from "@core/queryKeys";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
-import { IssueStatusIcon } from "@store/goods-issuing/IssueStatusIcon";
+import { IssueStatusIcon } from "@store/goods-issuing";
 import type { TodayIssueRow } from "@core/types";
-import { getTodayIssues } from "../admin.api";
+import { getTodayIssues } from "../../api";
 import { OverviewCard } from "./OverviewCard";
 
 export function TodayIssuesCard() {

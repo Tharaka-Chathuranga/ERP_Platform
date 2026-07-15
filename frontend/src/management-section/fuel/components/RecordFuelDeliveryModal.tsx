@@ -19,7 +19,7 @@ import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
-import { listTanks, recordFuelDelivery, type FuelDeliveryLineInput } from "./fuel.api";
+import { listTanks, recordFuelDelivery, type FuelDeliveryLineInput } from "../api";
 
 interface RecordFuelDeliveryModalProps {
   opened: boolean;

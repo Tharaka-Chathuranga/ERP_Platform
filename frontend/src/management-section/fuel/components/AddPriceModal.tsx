@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
-import { addFuelPrice } from "./fuel.api";
+import { addFuelPrice } from "../api";
 
 interface AddPriceModalProps {
   opened: boolean;

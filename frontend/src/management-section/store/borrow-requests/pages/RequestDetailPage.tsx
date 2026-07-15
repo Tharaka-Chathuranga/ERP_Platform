@@ -11,7 +11,7 @@ import {
   approveBorrowRequest,
   getBorrowRequest,
   rejectBorrowRequest,
-} from "@store/borrow-requests/borrowRequests.api";
+} from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {

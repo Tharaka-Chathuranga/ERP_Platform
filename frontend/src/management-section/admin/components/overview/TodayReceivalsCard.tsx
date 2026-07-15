@@ -8,7 +8,7 @@ import { qk } from "@core/queryKeys";
 import { DataTable, TableToolbar } from "@ui/data";
 import { StackedCell } from "@ui/data/cells";
 import type { TodayReceivalRow } from "@core/types";
-import { getTodayReceivals } from "../admin.api";
+import { getTodayReceivals } from "../../api";
 import { OverviewCard } from "./OverviewCard";
 import { money } from "./format";
 

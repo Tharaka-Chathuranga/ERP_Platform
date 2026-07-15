@@ -11,8 +11,8 @@ import { useCan } from "@auth/useCan";
 import { DASHBOARD_ADMIN, FUEL_MANAGE } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { Vehicle } from "@core/types";
-import { listVehicles } from "./fuel.api";
-import { VehicleFormModal } from "./VehicleFormModal";
+import { listVehicles } from "../api";
+import { VehicleFormModal } from "../components/VehicleFormModal";
 
 export function VehiclesPage() {
   const navigate = useNavigate();

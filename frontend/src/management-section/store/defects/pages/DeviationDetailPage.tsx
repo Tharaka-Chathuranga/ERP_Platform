@@ -33,7 +33,7 @@ import {
   getDeviation,
   listDeviations,
   rejectDeviation,
-} from "@store/defects/deviations.api";
+} from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { DeviationItem } from "@core/types";
 

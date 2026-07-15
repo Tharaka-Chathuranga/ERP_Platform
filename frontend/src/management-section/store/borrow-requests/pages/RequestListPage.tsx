@@ -9,9 +9,9 @@ import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import { DataTable, TableToolbar, PersonCell, type Column } from "@ui/data";
 import { useUserLabels } from "@core/hooks/useLookups";
-import { listBorrowRequests } from "@store/borrow-requests/borrowRequests.api";
+import { listBorrowRequests } from "../api";
 import type { BorrowRequest, BorrowRequestStatus } from "@core/types";
-import { NewBorrowRequestModal } from "./NewBorrowRequestModal";
+import { NewBorrowRequestModal } from "../components/NewBorrowRequestModal";
 
 const FILTERS = [
   { label: "All", value: "ALL" },

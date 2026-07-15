@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button, Group, NumberInput, Stack, Text } from "@mantine/core";
 import { IconCheck, IconChevronRight, IconX } from "@tabler/icons-react";
 import type { IssueLine } from "@core/types";
-import type { LineDecisionInput } from "./issuing.api";
+import type { LineDecisionInput } from "../api";
 import { IssueItemRow, LINE_TONE } from "./IssueItemRow";
 
 type Choice = "APPROVED" | "REJECTED";

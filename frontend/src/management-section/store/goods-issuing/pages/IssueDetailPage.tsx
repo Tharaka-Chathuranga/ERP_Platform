@@ -56,13 +56,13 @@ import {
   type IssueAllocationInput,
   type LineDecisionInput,
   type ReturnLineInput,
-} from "@store/goods-issuing/issuing.api";
-import { getItem } from "@store/inventory/items.api";
+} from "../api";
+import { getItem } from "@store/inventory";
 import type { Location } from "@core/types";
 import { notifyError, notifySuccess } from "@core/notify";
-import { IssueApprovalList } from "./IssueApprovalList";
-import { IssueItemCards } from "./IssueItemCards";
-import { IssueProgress } from "./IssueProgress";
+import { IssueApprovalList } from "../components/IssueApprovalList";
+import { IssueItemCards } from "../components/IssueItemCards";
+import { IssueProgress } from "../components/IssueProgress";
 
 export function IssueDetailPage() {
   const { id = "" } = useParams();
