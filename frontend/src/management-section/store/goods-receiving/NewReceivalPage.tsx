@@ -76,6 +76,7 @@ export function NewReceivalPage() {
       );
       qc.invalidateQueries({ queryKey: qk.receivals() });
       qc.invalidateQueries({ queryKey: qk.goodsReceipts() });
+      validLines.forEach((l) => qc.invalidateQueries({ queryKey: qk.item(l.itemId!) }));
       navigate(`/receiving/${receival.id}`);
     },
     onError: notifyError,

@@ -3,6 +3,7 @@ package com.enlear.erp.store.service;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import com.enlear.erp.store.model.CountAdjustmentStatus;
 import com.enlear.erp.store.model.Item;
+import com.enlear.erp.store.model.Location;
 import com.enlear.erp.store.model.MovementType;
 import com.enlear.erp.store.model.StockCountAdjustmentRequest;
 import com.enlear.erp.store.repository.ItemRepository;
@@ -16,12 +17,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Workflow for count-adjustment requests. Requests are raised against an item's
- * current on-hand and only mutate stock on approval, at which point the
- * reconciling movement is posted through {@link StockService} so the immutable
- * ledger stays authoritative. Rejection leaves stock untouched.
- */
 @Service
 @Transactional
 public class StockCountAdjustmentService {
@@ -46,12 +41,6 @@ public class StockCountAdjustmentService {
         return requests.save(request);
     }
 
-    /**
-     * Approve the request and reconcile on-hand to the requested quantity. The
-     * delta is computed against live on-hand (not the request-time snapshot) so
-     * concurrent movements between request and approval are not double-counted.
-     * A zero delta approves without posting a movement.
-     */
     public StockCountAdjustmentRequest approve(UUID id, UUID approverId) {
         StockCountAdjustmentRequest request = get(id);
         request.approve(approverId);
@@ -61,7 +50,7 @@ public class StockCountAdjustmentService {
             MovementType type = delta.signum() > 0 ? MovementType.ADJUSTMENT_IN : MovementType.ADJUSTMENT_OUT;
             stockService.postMovement(new PostStockMovementCommand(
                     request.getItemId(), type, delta.abs(), null,
-                    "Count adjustment " + request.getId(), Instant.now()));
+                    "Count adjustment " + request.getId(), Instant.now(), Location.general(delta.abs())));
         }
         return requests.save(request);
     }

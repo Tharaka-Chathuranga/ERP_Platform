@@ -111,7 +111,8 @@ public class Item extends BaseEntity {
                     throw insufficientAt(target, current, signedDelta.negate());
                 }
                 if (next.signum() > 0) {
-                    updated.add(new Location(slot.rack(), slot.row(), slot.column(), slot.primary(), next));
+                    updated.add(new Location(slot.rack(), slot.row(), slot.column(),
+                            slot.primary(), slot.general(), next));
                 }
                 // next == 0 → drop the slot entirely
             } else {
@@ -123,12 +124,15 @@ public class Item extends BaseEntity {
                 throw insufficientAt(target, BigDecimal.ZERO, signedDelta.negate());
             }
             updated.add(new Location(target.rack(), target.row(), target.column(),
-                    target.primary(), signedDelta));
+                    target.primary(), target.general(), signedDelta));
         }
         this.locations = updated;
     }
 
     private static boolean sameSlot(Location a, Location b) {
+        if (a.general() || b.general()) {
+            return a.general() && b.general();
+        }
         return normalize(a.rack()).equals(normalize(b.rack()))
                 && normalize(a.row()).equals(normalize(b.row()))
                 && normalize(a.column()).equals(normalize(b.column()));
@@ -139,6 +143,9 @@ public class Item extends BaseEntity {
     }
 
     private static String slotLabel(Location slot) {
+        if (slot.general()) {
+            return "General";
+        }
         StringBuilder sb = new StringBuilder();
         for (String part : new String[] {slot.rack(), slot.row(), slot.column()}) {
             if (part != null && !part.isBlank()) {

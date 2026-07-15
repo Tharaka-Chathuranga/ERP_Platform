@@ -44,8 +44,13 @@ public class ReceivalItem extends BaseEntity {
         this.column = column;
     }
 
-    /** The slot this line was placed into, with this line's quantity. */
     public Location toLocation() {
-        return new Location(rack, row, column, false, quantity);
+        boolean hasSlot = isPresent(rack) || isPresent(row) || isPresent(column);
+        return hasSlot ? new Location(rack, row, column, false, quantity)
+                : Location.general(quantity);
+    }
+
+    private static boolean isPresent(String value) {
+        return value != null && !value.isBlank();
     }
 }

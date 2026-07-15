@@ -27,6 +27,7 @@ export interface Location {
   row: string;
   column: string;
   primary?: boolean;
+  general?: boolean;
   quantity?: number;
 }
 

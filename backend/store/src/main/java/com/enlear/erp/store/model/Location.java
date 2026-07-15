@@ -2,10 +2,19 @@ package com.enlear.erp.store.model;
 
 import java.math.BigDecimal;
 
-/**
- * A storage slot for an item and the quantity currently held there. Stock is
- * tracked per slot: receiving adds into the matching slot (or creates one) and
- * issuing draws from a chosen slot, removing it once it reaches zero.
- */
-public record Location(String rack, String row, String column, boolean primary, BigDecimal quantity) {
+public record Location(String rack, String row, String column, boolean primary, boolean general,
+                       BigDecimal quantity) {
+
+    public Location(String rack, String row, String column, boolean primary, BigDecimal quantity) {
+        this(rack, row, column, primary, false, quantity);
+    }
+
+
+    public static Location general(BigDecimal quantity) {
+        return new Location(null, null, null, false, true, quantity);
+    }
+
+    public boolean isGeneral() {
+        return general;
+    }
 }

@@ -24,11 +24,6 @@ class IssueMovementCreator {
         this.stock = stock;
     }
 
-    /**
-     * Posts ISSUE movements for every approved line, drawing from the storage
-     * slots given per line — rejected lines never leave the store. The slot
-     * counts of a line must sum to its approved quantity.
-     */
     void postIssue(Issue issue, List<IssueItemsCommand.LineLocation> allocations) {
         Map<java.util.UUID, List<IssueItemsCommand.LineLocation>> byLine = allocations.stream()
                 .collect(Collectors.groupingBy(IssueItemsCommand.LineLocation::lineId));
@@ -52,15 +47,23 @@ class IssueMovementCreator {
             }
             for (IssueItemsCommand.LineLocation slot : slots) {
                 stock.postMovement(new PostStockMovementCommand(line.getItemId(), MovementType.ISSUE,
-                        slot.quantity(), null, issue.getIssueNumber(), Instant.now(),
-                        new Location(slot.rack(), slot.row(), slot.column(), false, null)));
+                        slot.quantity(), null, issue.getIssueNumber(), Instant.now(), slotOf(slot)));
             }
         }
     }
 
-    /** Posts a RECEIPT movement returning a quantity of a line back into the store. */
     void postReturn(Issue issue, IssueLine line, BigDecimal quantity) {
         stock.postMovement(new PostStockMovementCommand(line.getItemId(), MovementType.RECEIPT,
-                quantity, null, issue.getIssueNumber(), Instant.now()));
+                quantity, null, issue.getIssueNumber(), Instant.now(), Location.general(quantity)));
+    }
+
+    private static Location slotOf(IssueItemsCommand.LineLocation slot) {
+        boolean hasSlot = isPresent(slot.rack()) || isPresent(slot.row()) || isPresent(slot.column());
+        return hasSlot ? new Location(slot.rack(), slot.row(), slot.column(), false, null)
+                : Location.general(null);
+    }
+
+    private static boolean isPresent(String value) {
+        return value != null && !value.isBlank();
     }
 }

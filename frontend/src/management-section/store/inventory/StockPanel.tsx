@@ -120,7 +120,9 @@ export function StockPanel({ item }: { item: Item }) {
             {item.locations.map((l, idx) => (
               <Group key={idx} justify="space-between">
                 <Text size="sm">
-                  {[l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)"}
+                  {l.general
+                    ? "General (unassigned)"
+                    : [l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)"}
                 </Text>
                 <Text size="sm" fw={600}>
                   {l.quantity ?? 0} {item.unitOfMeasure}

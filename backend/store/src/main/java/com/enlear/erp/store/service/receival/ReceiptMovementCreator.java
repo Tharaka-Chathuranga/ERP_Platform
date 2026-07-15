@@ -18,10 +18,9 @@ class ReceiptMovementCreator {
 
     void postFor(Receival receival) {
         for (ReceivalItem line : receival.getLines()) {
-            boolean hasSlot = line.getRack() != null || line.getRow() != null || line.getColumn() != null;
             stock.postMovement(new PostStockMovementCommand(line.getItemId(), MovementType.RECEIPT,
                     line.getQuantity(), line.getUnitCost(), receival.getReceivalNumber(),
-                    receival.getReceivedAt(), hasSlot ? line.toLocation() : null));
+                    receival.getReceivedAt(), line.toLocation()));
         }
     }
 }

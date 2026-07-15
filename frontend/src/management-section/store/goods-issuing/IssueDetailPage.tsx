@@ -350,15 +350,17 @@ interface IssueLineRow {
 }
 
 interface Alloc {
+  general: boolean;
   rack: string;
   row: string;
   column: string;
   quantity: number | "";
 }
 
-const slotKey = (l: Location) => [l.rack, l.row, l.column].join("|");
-const slotText = (l: Pick<Location, "rack" | "row" | "column">) =>
-  [l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)";
+const slotKey = (l: Pick<Location, "rack" | "row" | "column" | "general">) =>
+  l.general ? "__general__" : [l.rack, l.row, l.column].join("|");
+const slotText = (l: Pick<Location, "rack" | "row" | "column" | "general">) =>
+  l.general ? "General" : [l.rack, l.row, l.column].filter(Boolean).join(" / ") || "(unspecified)";
 
 /** Choose which storage slot(s) each approved line is drawn from, then issue. */
 function IssueStockModal({
@@ -390,7 +392,7 @@ function IssueStockModal({
     if (opened) {
       const init: Record<string, Alloc[]> = {};
       lines.forEach((l) => {
-        init[l.lineId] = [{ rack: "", row: "", column: "", quantity: l.quantity }];
+        init[l.lineId] = [{ general: false, rack: "", row: "", column: "", quantity: l.quantity }];
       });
       setAllocs(init);
     }
@@ -405,7 +407,7 @@ function IssueStockModal({
   const addRow = (lineId: string) =>
     setAllocs((p) => ({
       ...p,
-      [lineId]: [...(p[lineId] ?? []), { rack: "", row: "", column: "", quantity: "" }],
+      [lineId]: [...(p[lineId] ?? []), { general: false, rack: "", row: "", column: "", quantity: "" }],
     }));
   const removeRow = (lineId: string, idx: number) =>
     setAllocs((p) => ({ ...p, [lineId]: (p[lineId] ?? []).filter((_, i) => i !== idx) }));
@@ -417,7 +419,7 @@ function IssueStockModal({
     const rows = allocs[line.lineId] ?? [];
     return (
       rows.length > 0 &&
-      rows.every((r) => r.rack || r.row || r.column) &&
+      rows.every((r) => r.general || r.rack || r.row || r.column) &&
       allocatedFor(line.lineId) === line.quantity
     );
   });
@@ -427,9 +429,9 @@ function IssueStockModal({
       const payload: IssueAllocationInput[] = lines.flatMap((line) =>
         (allocs[line.lineId] ?? []).map((r) => ({
           lineId: line.lineId,
-          rack: r.rack || undefined,
-          row: r.row || undefined,
-          column: r.column || undefined,
+          rack: r.general ? undefined : r.rack || undefined,
+          row: r.general ? undefined : r.row || undefined,
+          column: r.general ? undefined : r.column || undefined,
           quantity: Number(r.quantity || 0),
         })),
       );
@@ -483,10 +485,11 @@ function IssueStockModal({
                           value: slotKey(s),
                           label: `${slotText(s)} (${s.quantity ?? 0} avail)`,
                         }))}
-                        value={r.rack || r.row || r.column ? slotKey({ rack: r.rack, row: r.row, column: r.column, primary: false, quantity: 0 }) : null}
+                        value={r.general || r.rack || r.row || r.column ? slotKey(r) : null}
                         onChange={(v) => {
                           const s = slots.find((x) => slotKey(x) === v);
                           setRow(line.lineId, idx, {
+                            general: s?.general ?? false,
                             rack: s?.rack ?? "",
                             row: s?.row ?? "",
                             column: s?.column ?? "",
