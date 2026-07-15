@@ -377,6 +377,32 @@ export interface FuelTankReading {
   consumptionSincePrevious?: number;
 }
 
+export interface FuelDeliveryLine {
+  id: string;
+  tankId: string;
+  litresDelivered: number;
+  dipBeforeLitres?: number;
+  dipAfterLitres?: number;
+  /** dipAfter − dipBefore − litresDelivered; ~0 when the dip readings reconcile. */
+  dipReconciliationVariance?: number;
+}
+
+export interface FuelDelivery {
+  id: string;
+  deliveryReference: string;
+  supplierName?: string;
+  orderedLitres: number;
+  deliveredLitres: number;
+  /** deliveredLitres − orderedLitres; positive = over-delivered, negative = short. */
+  orderedVsDeliveredVariance: number;
+  deliveredOn: string;
+  dischargeStartedAt?: string;
+  dischargeFinishedAt?: string;
+  recordedByUserId: string;
+  note?: string;
+  lines: FuelDeliveryLine[];
+}
+
 export interface Vehicle {
   id: string;
   vehicleNumber: string;
