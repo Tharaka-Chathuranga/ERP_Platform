@@ -1,10 +1,9 @@
 export * from "./api";
-
-export { VehicleIssuesPage } from "./pages/VehicleIssuesPage";
-export { NewVehicleIssuePage } from "./pages/NewVehicleIssuePage";
-export { VehiclesPage } from "./pages/VehiclesPage";
-export { FuelTanksPage } from "./pages/FuelTanksPage";
-export { FuelDeliveriesPage } from "./pages/FuelDeliveriesPage";
-export { FuelPricesPage } from "./pages/FuelPricesPage";
-export { FuelEfficiencyReportPage } from "./pages/FuelEfficiencyReportPage";
-export { VehicleEfficiencyPage } from "./pages/VehicleEfficiencyPage";
+export { VehicleIssuesPage } from "./pages/vehicle-issues";
+export { NewVehicleIssuePage } from "./pages/new-vehicle-issue";
+export { VehiclesPage } from "./pages/vehicles";
+export { FuelTanksPage } from "./pages/fuel-tanks";
+export { FuelDeliveriesPage } from "./pages/fuel-deliveries";
+export { FuelPricesPage } from "./pages/fuel-prices";
+export { FuelEfficiencyReportPage } from "./pages/fuel-efficiency-report";
+export { VehicleEfficiencyPage } from "./pages/vehicle-efficiency";

@@ -11,8 +11,8 @@ import { useCan } from "@auth/useCan";
 import { FUEL_VIEW } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { FuelDelivery } from "@core/types";
-import { listFuelDeliveries, listTanks } from "../api";
-import { RecordFuelDeliveryModal } from "../components/RecordFuelDeliveryModal";
+import { listFuelDeliveries, listTanks } from "../../api";
+import { RecordFuelDeliveryModal } from "../../components/record-fuel-delivery-modal";
 
 /** Signed litres variance, coloured; green when balanced within tolerance. */
 function Variance({ value, tolerance = 0 }: { value: number; tolerance?: number }) {

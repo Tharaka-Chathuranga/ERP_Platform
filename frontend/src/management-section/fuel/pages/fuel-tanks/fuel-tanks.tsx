@@ -19,10 +19,10 @@ import { useCan } from "@auth/useCan";
 import { FUEL_MANAGE } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { FuelTank, FuelTankReading, FuelTankRefill } from "@core/types";
-import { listReadings, listRefills, listTanks } from "../api";
-import { EditTankModal } from "../components/EditTankModal";
-import { RecordReadingModal } from "../components/RecordReadingModal";
-import { RecordRefillModal } from "../components/RecordRefillModal";
+import { listReadings, listRefills, listTanks } from "../../api";
+import { EditTankModal } from "../../components/edit-tank-modal";
+import { RecordReadingModal } from "../../components/record-reading-modal";
+import { RecordRefillModal } from "../../components/record-refill-modal";
 
 const PURPOSE_LABEL: Record<string, string> = {
   INTERNAL: "Internal work",

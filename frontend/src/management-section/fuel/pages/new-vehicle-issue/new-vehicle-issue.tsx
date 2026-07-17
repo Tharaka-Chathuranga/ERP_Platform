@@ -21,7 +21,7 @@ import { DefinitionList } from "@ui/data/DefinitionList";
 import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
-import { createVehicleIssue, listVehicles } from "../api";
+import { createVehicleIssue, listVehicles } from "../../api";
 
 export function NewVehicleIssuePage() {
   const navigate = useNavigate();

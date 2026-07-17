@@ -5,19 +5,19 @@ import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
-import { recordReading } from "../api";
+import { recordRefill } from "../../api";
 
-interface RecordReadingModalProps {
+interface RecordRefillModalProps {
   opened: boolean;
   onClose: () => void;
   tank?: FuelTank;
 }
 
-/** Record a timed level reading; reconciles the tank's running level to it. */
-export function RecordReadingModal({ opened, onClose, tank }: RecordReadingModalProps) {
+/** Record a fuel delivery into a tank; adds to its running level. */
+export function RecordRefillModal({ opened, onClose, tank }: RecordRefillModalProps) {
   const qc = useQueryClient();
   const { userId } = useAuth();
-  const [litresMeasured, setLitres] = useState<number | "">("");
+  const [litres, setLitres] = useState<number | "">("");
   const [note, setNote] = useState("");
 
   useEffect(() => {
@@ -29,29 +29,24 @@ export function RecordReadingModal({ opened, onClose, tank }: RecordReadingModal
 
   const mutation = useMutation({
     mutationFn: () =>
-      recordReading(tank!.id, {
-        litresMeasured: Number(litresMeasured),
-        recordedByUserId: userId!,
-        note: note || undefined,
-      }),
+      recordRefill(tank!.id, { litres: Number(litres), recordedByUserId: userId!, note: note || undefined }),
     onSuccess: () => {
-      notifySuccess("Reading recorded");
+      notifySuccess("Refill recorded");
       qc.invalidateQueries({ queryKey: qk.fuelTanks() });
-      qc.invalidateQueries({ queryKey: qk.tankReadings(tank!.id) });
+      qc.invalidateQueries({ queryKey: qk.tankRefills(tank!.id) });
       onClose();
     },
     onError: notifyError,
   });
 
   return (
-    <Modal opened={opened} onClose={onClose} title={`Record reading — ${tank?.name ?? ""}`} centered>
+    <Modal opened={opened} onClose={onClose} title={`Record refill — ${tank?.name ?? ""}`} centered>
       <Stack>
         <NumberInput
-          label="Measured level (L)"
-          description="How much fuel the tank holds at this moment"
+          label="Litres delivered"
           min={0}
           decimalScale={2}
-          value={litresMeasured}
+          value={litres}
           onChange={(v) => setLitres(v === "" ? "" : Number(v))}
           required
         />
@@ -62,7 +57,7 @@ export function RecordReadingModal({ opened, onClose, tank }: RecordReadingModal
           </Button>
           <Button
             loading={mutation.isPending}
-            disabled={litresMeasured === "" || Number(litresMeasured) < 0 || !userId}
+            disabled={litres === "" || Number(litres) <= 0 || !userId}
             onClick={() => mutation.mutate()}
           >
             Record

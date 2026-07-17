@@ -5,7 +5,7 @@ import { UserSelect } from "@ui/primitives/UserSelect";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { Vehicle } from "@core/types";
-import { createVehicle, updateVehicle, type VehicleInput } from "../api";
+import { createVehicle, updateVehicle, type VehicleInput } from "../../api";
 
 interface VehicleFormModalProps {
   opened: boolean;
