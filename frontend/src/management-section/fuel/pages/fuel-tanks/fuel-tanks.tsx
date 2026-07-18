@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { IconDroplet, IconGauge, IconPencil, IconRuler2 } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { DataTable, type Column } from "@ui/data";
@@ -22,7 +23,6 @@ import type { FuelTank, FuelTankReading, FuelTankRefill } from "@core/types";
 import { listReadings, listRefills, listTanks } from "../../api";
 import { EditTankModal } from "../../components/edit-tank-modal";
 import { RecordReadingModal } from "../../components/record-reading-modal";
-import { RecordFuelDeliveryModal } from "../../components/record-fuel-delivery-modal";
 
 const PURPOSE_LABEL: Record<string, string> = {
   INTERNAL: "Internal work",
@@ -85,11 +85,11 @@ function RefillsTable({ tankId }: { tankId: string }) {
 
 export function FuelTanksPage() {
   const can = useCan();
+  const navigate = useNavigate();
   const canManage = can(FUEL_MANAGE);
   const canRecord = can(FUEL_VIEW);
   const tanks = useQuery({ queryKey: qk.fuelTanks(), queryFn: listTanks });
 
-  const [recordingDelivery, setRecordingDelivery] = useState(false);
   const [readingTank, setReadingTank] = useState<FuelTank | undefined>();
   const [editTank, setEditTank] = useState<FuelTank | undefined>();
 
@@ -101,7 +101,7 @@ export function FuelTanksPage() {
         title="Fuel tanks"
         actions={
           canRecord ? (
-            <Button leftSection={<IconDroplet size={16} />} onClick={() => setRecordingDelivery(true)}>
+            <Button leftSection={<IconDroplet size={16} />} onClick={() => navigate("/fuel/deliveries/new")}>
               Record fuel delivery
             </Button>
           ) : undefined
@@ -175,7 +175,6 @@ export function FuelTanksPage() {
 
       <RecordReadingModal opened={!!readingTank} onClose={() => setReadingTank(undefined)} tank={readingTank} />
       <EditTankModal opened={!!editTank} onClose={() => setEditTank(undefined)} tank={editTank} />
-      <RecordFuelDeliveryModal opened={recordingDelivery} onClose={() => setRecordingDelivery(false)} />
     </div>
   );
 }

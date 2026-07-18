@@ -4,6 +4,7 @@ export { NewVehicleIssuePage } from "./pages/new-vehicle-issue";
 export { VehiclesPage } from "./pages/vehicles";
 export { FuelTanksPage } from "./pages/fuel-tanks";
 export { FuelDeliveriesPage } from "./pages/fuel-deliveries";
+export { NewFuelDeliveryPage } from "./pages/new-fuel-delivery";
 export { FuelPricesPage } from "./pages/fuel-prices";
 export { FuelEfficiencyReportPage } from "./pages/fuel-efficiency-report";
 export { VehicleEfficiencyPage } from "./pages/vehicle-efficiency";

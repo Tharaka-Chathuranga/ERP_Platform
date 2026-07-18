@@ -1,30 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Badge,
+  Box,
   Button,
   Card,
   Divider,
+  Grid,
   Group,
-  Modal,
+  LoadingOverlay,
   NumberInput,
   Stack,
   Text,
   TextInput,
   Textarea,
+  ThemeIcon,
 } from "@mantine/core";
 import { DatePickerInput, TimeInput } from "@mantine/dates";
+import {
+  IconCalendar,
+  IconClock,
+  IconDropletFilled,
+  IconGasStation,
+  IconTruckDelivery,
+} from "@tabler/icons-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
+import { StepHeading } from "@ui/layout/StepHeading";
 import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
-import { listTanks, recordFuelDelivery, type FuelDeliveryLineInput } from "../../api";
-
-interface RecordFuelDeliveryModalProps {
-  opened: boolean;
-  onClose: () => void;
-}
+import { listTanks, recordFuelDelivery, type FuelDeliveryLineInput } from "../../../api";
 
 /** Per-tank editable line: litres discharged plus the before/after dip readings. */
 interface LineDraft {
@@ -50,7 +57,8 @@ function num(value: number | ""): number | undefined {
  * vs delivered litres, discharge timing, and a per-tank line carrying the dip
  * readings before and after discharge, with the reconciliation shown live.
  */
-export function RecordFuelDeliveryModal({ opened, onClose }: RecordFuelDeliveryModalProps) {
+export function FuelDeliveryForm() {
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const { userId } = useAuth();
   const tanksQuery = useQuery({ queryKey: qk.fuelTanks(), queryFn: listTanks });
@@ -66,18 +74,6 @@ export function RecordFuelDeliveryModal({ opened, onClose }: RecordFuelDeliveryM
   const [dischargeFinish, setDischargeFinish] = useState("");
   const [note, setNote] = useState("");
   const [lines, setLines] = useState<Record<string, LineDraft>>({});
-
-  useEffect(() => {
-    if (opened) {
-      setSupplierName("Toboi Stores & Supply");
-      setOrderedLitres("");
-      setDeliveredOn(new Date());
-      setDischargeStart("");
-      setDischargeFinish("");
-      setNote("");
-      setLines({});
-    }
-  }, [opened]);
 
   const lineOf = (tankId: string): LineDraft => lines[tankId] ?? EMPTY_LINE;
   const setLineField = (tankId: string, field: keyof LineDraft, value: number | "") =>
@@ -130,102 +126,146 @@ export function RecordFuelDeliveryModal({ opened, onClose }: RecordFuelDeliveryM
       qc.invalidateQueries({ queryKey: qk.fuelDeliveries() });
       qc.invalidateQueries({ queryKey: qk.fuelTanks() });
       qc.invalidateQueries({ queryKey: qk.fuelOverview() });
-      onClose();
+      navigate("/fuel/deliveries");
     },
     onError: notifyError,
   });
 
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title="Record fuel delivery"
-      centered
-      size="lg"
-      styles={{ title: { fontSize: "var(--mantine-font-size-xl)", fontWeight: 700 } }}
-    >
-      <Stack>
-        <TextInput
-          label="Supplier"
-          value={supplierName}
-          onChange={(e) => setSupplierName(e.currentTarget.value)}
-        />
-        <Group grow>
-          <DatePickerInput
-            label="Delivery date"
-            value={deliveredOn}
-            onChange={setDeliveredOn}
-            valueFormat="MMM D, YYYY"
-            defaultDate={new Date()}
-            required
-          />
-          <NumberInput
-            label="Ordered (L)"
-            min={0}
-            decimalScale={2}
-            value={orderedLitres}
-            onChange={(v) => setOrderedLitres(v === "" ? "" : Number(v))}
-            required
-          />
-        </Group>
-        <Group grow>
-          <TimeInput
-            label="Discharge start"
-            value={dischargeStart}
-            onChange={(e) => setDischargeStart(e.currentTarget.value)}
-          />
-          <TimeInput
-            label="Discharge finish"
-            value={dischargeFinish}
-            onChange={(e) => setDischargeFinish(e.currentTarget.value)}
-            error={dischargeOutOfOrder ? "Finish is before start" : undefined}
-          />
-        </Group>
+    <Card withBorder radius="md" padding={0} pos="relative">
+      <LoadingOverlay visible={mutation.isPending} overlayProps={{ blur: 1 }} />
 
-        <Divider label="Tanks discharged into" labelPosition="left" />
-        <Text c="dimmed" fz="xs" mt={-8}>
+      <Box p="xl">
+        <StepHeading number={1} title="Delivery details" />
+        <Grid gutter="md">
+          <Grid.Col span={12}>
+            <TextInput
+              label="Supplier"
+              description="Who supplied and discharged the fuel"
+              leftSection={<IconTruckDelivery size={16} />}
+              value={supplierName}
+              onChange={(e) => setSupplierName(e.currentTarget.value)}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <DatePickerInput
+              label="Delivery date"
+              description="Date the delivery was received"
+              leftSection={<IconCalendar size={16} />}
+              value={deliveredOn}
+              onChange={setDeliveredOn}
+              valueFormat="MMM D, YYYY"
+              defaultDate={new Date()}
+              required
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <NumberInput
+              label="Ordered (L)"
+              description="Litres ordered from the supplier"
+              leftSection={<IconDropletFilled size={16} />}
+              min={0}
+              decimalScale={2}
+              thousandSeparator=","
+              value={orderedLitres}
+              onChange={(v) => setOrderedLitres(v === "" ? "" : Number(v))}
+              required
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <TimeInput
+              label="Discharge start"
+              description="When discharge into the tanks began"
+              leftSection={<IconClock size={16} />}
+              value={dischargeStart}
+              onChange={(e) => setDischargeStart(e.currentTarget.value)}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <TimeInput
+              label="Discharge finish"
+              description="When discharge finished"
+              leftSection={<IconClock size={16} />}
+              value={dischargeFinish}
+              onChange={(e) => setDischargeFinish(e.currentTarget.value)}
+              error={dischargeOutOfOrder ? "Finish is before start" : undefined}
+            />
+          </Grid.Col>
+        </Grid>
+      </Box>
+
+      <Divider />
+
+      <Box p="xl">
+        <StepHeading number={2} title="Tanks discharged into" />
+        <Text c="dimmed" fz="sm" mb="md">
           Enter delivered litres for each tank that received fuel. Leave a tank at 0 if not applicable.
         </Text>
 
-        {activeTanks.map((tank) => (
-          <TankLineEditor
-            key={tank.id}
-            tank={tank}
-            line={lineOf(tank.id)}
-            onChange={(field, value) => setLineField(tank.id, field, value)}
-          />
-        ))}
+        <Stack gap="md">
+          {activeTanks.map((tank) => (
+            <TankLineEditor
+              key={tank.id}
+              tank={tank}
+              line={lineOf(tank.id)}
+              onChange={(field, value) => setLineField(tank.id, field, value)}
+            />
+          ))}
+        </Stack>
 
-        <Divider />
-        <Group justify="space-between">
-          <Text fw={600}>Total delivered</Text>
-          <Text fw={700}>{totalDelivered.toLocaleString()} L</Text>
-        </Group>
-        {orderedVsDelivered !== null && (
-          <Group justify="space-between">
-            <Text c="dimmed" fz="sm">Ordered vs delivered</Text>
-            <VarianceText value={orderedVsDelivered} unit="L" />
+        <Card withBorder radius="md" padding="lg" mt="lg" bg="var(--mantine-color-brand-light)">
+          <Group justify="space-between" align="flex-end">
+            <div>
+              <Text fz="xs" tt="uppercase" fw={600} c="dimmed">
+                Total delivered
+              </Text>
+              <Text fz={28} fw={700} lh={1.1}>
+                {totalDelivered.toLocaleString()}
+                <Text component="span" fz="md" fw={500} c="dimmed" ml={6}>
+                  L
+                </Text>
+              </Text>
+            </div>
+            {orderedVsDelivered !== null && (
+              <div style={{ textAlign: "right" }}>
+                <Text fz="xs" tt="uppercase" fw={600} c="dimmed">
+                  Ordered vs delivered
+                </Text>
+                <VarianceText value={orderedVsDelivered} unit="L" large />
+              </div>
+            )}
           </Group>
-        )}
+        </Card>
 
         <Textarea
           label="Note"
+          description="Anything worth recording about this delivery"
+          mt="md"
           value={note}
           onChange={(e) => setNote(e.currentTarget.value)}
           autosize
           minRows={2}
         />
+      </Box>
 
+      <Divider />
+
+      <Box p="xl">
         <Group justify="space-between">
-          <Button variant="default" onClick={onClose}>
+          <Button variant="default" onClick={() => navigate("/fuel/deliveries")}>
             Cancel
           </Button>
-          <Button loading={mutation.isPending} disabled={!valid} onClick={() => mutation.mutate()}>
+          <Button
+            leftSection={<IconGasStation size={16} />}
+            loading={mutation.isPending}
+            disabled={!valid}
+            onClick={() => mutation.mutate()}
+          >
             Record delivery
           </Button>
         </Group>
-      </Stack>
-    </Modal>
+      </Box>
+    </Card>
   );
 }
 
@@ -241,6 +281,7 @@ function TankLineEditor({
   line: LineDraft;
   onChange: (field: keyof LineDraft, value: number | "") => void;
 }) {
+  const isInternal = tank.purpose === "INTERNAL";
   const delivered = Number(line.litresDelivered) || 0;
   const hasDips = line.dipBeforeLitres !== "" && line.dipAfterLitres !== "";
   const dipVariance = hasDips
@@ -249,64 +290,79 @@ function TankLineEditor({
 
   return (
     <Card withBorder radius="md" padding="md">
-      <Group justify="space-between" mb="xs">
-        <Text fw={600}>{tank.name}</Text>
-        <Badge variant="light" color={tank.purpose === "INTERNAL" ? "grape" : "teal"} radius="sm">
+      <Group justify="space-between" mb="sm">
+        <Group gap="sm">
+          <ThemeIcon variant="light" color={isInternal ? "grape" : "teal"} radius="md" size="lg">
+            <IconGasStation size={18} />
+          </ThemeIcon>
+          <Text fw={600}>{tank.name}</Text>
+        </Group>
+        <Badge variant="light" color={isInternal ? "grape" : "teal"} radius="sm">
           {PURPOSE_LABEL[tank.purpose] ?? tank.purpose}
         </Badge>
       </Group>
-      <Stack gap="xs">
-        <NumberInput
-          label="Delivered (L)"
-          min={0}
-          decimalScale={2}
-          value={line.litresDelivered}
-          onChange={(v) => onChange("litresDelivered", v === "" ? "" : Number(v))}
-        />
-        <Group grow>
+      <Grid gutter="sm">
+        <Grid.Col span={{ base: 12, sm: 4 }}>
+          <NumberInput
+            label="Delivered (L)"
+            min={0}
+            decimalScale={2}
+            thousandSeparator=","
+            value={line.litresDelivered}
+            onChange={(v) => onChange("litresDelivered", v === "" ? "" : Number(v))}
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 4 }}>
           <NumberInput
             label="Dip before (L)"
             min={0}
             decimalScale={2}
+            thousandSeparator=","
             value={line.dipBeforeLitres}
             onChange={(v) => onChange("dipBeforeLitres", v === "" ? "" : Number(v))}
           />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 4 }}>
           <NumberInput
             label="Dip after (L)"
             min={0}
             decimalScale={2}
+            thousandSeparator=","
             value={line.dipAfterLitres}
             onChange={(v) => onChange("dipAfterLitres", v === "" ? "" : Number(v))}
           />
+        </Grid.Col>
+      </Grid>
+      {dipVariance !== null && delivered > 0 && (
+        <Group gap="xs" mt="sm">
+          <Text c="dimmed" fz="xs">Dip reconciliation</Text>
+          <VarianceText value={dipVariance} unit="L" small tolerance={0.5} />
         </Group>
-        {dipVariance !== null && delivered > 0 && (
-          <Group gap="xs">
-            <Text c="dimmed" fz="xs">Dip reconciliation</Text>
-            <VarianceText value={dipVariance} unit="L" small tolerance={0.5} />
-          </Group>
-        )}
-      </Stack>
+      )}
     </Card>
   );
 }
 
-/** Signed variance with a colour + reconciliation icon; green when within tolerance. */
+/** Signed variance with a colour cue; green when within tolerance. */
 function VarianceText({
   value,
   unit,
   small,
+  large,
   tolerance = 0,
 }: {
   value: number;
   unit: string;
   small?: boolean;
+  large?: boolean;
   tolerance?: number;
 }) {
   const ok = Math.abs(value) <= tolerance;
   const sign = value > 0 ? "+" : "";
   const color = ok ? "teal" : Math.abs(value) > 0 ? "orange" : "gray";
+  const fz = large ? "xl" : small ? "xs" : "sm";
   return (
-    <Text fw={600} fz={small ? "xs" : "sm"} c={color}>
+    <Text fw={700} fz={fz} c={color}>
       {ok ? "✓ balanced" : `${sign}${value.toLocaleString()} ${unit}`}
     </Text>
   );
