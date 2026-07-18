@@ -16,13 +16,13 @@ import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { DataTable, type Column } from "@ui/data";
 import { useCan } from "@auth/useCan";
-import { FUEL_MANAGE } from "@auth/permissions";
+import { FUEL_MANAGE, FUEL_VIEW } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { FuelTank, FuelTankReading, FuelTankRefill } from "@core/types";
 import { listReadings, listRefills, listTanks } from "../../api";
 import { EditTankModal } from "../../components/edit-tank-modal";
 import { RecordReadingModal } from "../../components/record-reading-modal";
-import { RecordRefillModal } from "../../components/record-refill-modal";
+import { RecordFuelDeliveryModal } from "../../components/record-fuel-delivery-modal";
 
 const PURPOSE_LABEL: Record<string, string> = {
   INTERNAL: "Internal work",
@@ -86,9 +86,10 @@ function RefillsTable({ tankId }: { tankId: string }) {
 export function FuelTanksPage() {
   const can = useCan();
   const canManage = can(FUEL_MANAGE);
+  const canRecord = can(FUEL_VIEW);
   const tanks = useQuery({ queryKey: qk.fuelTanks(), queryFn: listTanks });
 
-  const [refillTank, setRefillTank] = useState<FuelTank | undefined>();
+  const [recordingDelivery, setRecordingDelivery] = useState(false);
   const [readingTank, setReadingTank] = useState<FuelTank | undefined>();
   const [editTank, setEditTank] = useState<FuelTank | undefined>();
 
@@ -96,7 +97,16 @@ export function FuelTanksPage() {
 
   return (
     <div>
-      <PageHeader title="Fuel tanks" />
+      <PageHeader
+        title="Fuel tanks"
+        actions={
+          canRecord ? (
+            <Button leftSection={<IconDroplet size={16} />} onClick={() => setRecordingDelivery(true)}>
+              Record fuel delivery
+            </Button>
+          ) : undefined
+        }
+      />
 
       <SimpleGrid cols={{ base: 1, md: 2 }} mb="xl">
         {list.map((tank) => (
@@ -133,22 +143,12 @@ export function FuelTanksPage() {
               <Button
                 size="xs"
                 variant="light"
-                leftSection={<IconDroplet size={14} />}
-                onClick={() => setRefillTank(tank)}
+                color="grape"
+                leftSection={<IconRuler2 size={14} />}
+                onClick={() => setReadingTank(tank)}
               >
-                Record refill
+                Record reading
               </Button>
-              {tank.purpose === "INTERNAL" && (
-                <Button
-                  size="xs"
-                  variant="light"
-                  color="grape"
-                  leftSection={<IconRuler2 size={14} />}
-                  onClick={() => setReadingTank(tank)}
-                >
-                  Record reading
-                </Button>
-              )}
             </Group>
           </Card>
         ))}
@@ -163,13 +163,9 @@ export function FuelTanksPage() {
                 {tank.name}
               </Group>
             </Title>
-            {tank.purpose === "INTERNAL" && (
-              <>
-                <Text fw={600} fz="xs" tt="uppercase" c="dimmed" mb="xs">Readings</Text>
-                <ReadingsTable tankId={tank.id} />
-              </>
-            )}
-            <Text fw={600} fz="xs" tt="uppercase" c="dimmed" mb="xs" mt={tank.purpose === "INTERNAL" ? "md" : 0}>
+            <Text fw={600} fz="xs" tt="uppercase" c="dimmed" mb="xs">Readings</Text>
+            <ReadingsTable tankId={tank.id} />
+            <Text fw={600} fz="xs" tt="uppercase" c="dimmed" mb="xs" mt="md">
               Refills
             </Text>
             <RefillsTable tankId={tank.id} />
@@ -177,9 +173,9 @@ export function FuelTanksPage() {
         ))}
       </Stack>
 
-      <RecordRefillModal opened={!!refillTank} onClose={() => setRefillTank(undefined)} tank={refillTank} />
       <RecordReadingModal opened={!!readingTank} onClose={() => setReadingTank(undefined)} tank={readingTank} />
       <EditTankModal opened={!!editTank} onClose={() => setEditTank(undefined)} tank={editTank} />
+      <RecordFuelDeliveryModal opened={recordingDelivery} onClose={() => setRecordingDelivery(false)} />
     </div>
   );
 }
