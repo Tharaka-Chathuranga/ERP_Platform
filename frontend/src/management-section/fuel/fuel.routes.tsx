@@ -6,6 +6,7 @@ import {
   FuelEfficiencyReportPage,
   FuelPricesPage,
   FuelTanksPage,
+  NewFuelDeliveryPage,
   NewVehicleIssuePage,
   VehicleEfficiencyPage,
   VehicleIssuesPage,
@@ -21,6 +22,7 @@ export const fuelRoutes = (
       <Route path="fuel/vehicles" element={<VehiclesPage />} />
       <Route path="fuel/tanks" element={<FuelTanksPage />} />
       <Route path="fuel/deliveries" element={<FuelDeliveriesPage />} />
+      <Route path="fuel/deliveries/new" element={<NewFuelDeliveryPage />} />
       <Route path="fuel/prices" element={<FuelPricesPage />} />
     </Route>
     <Route element={<RequirePermission perform={DASHBOARD_ADMIN} />}>

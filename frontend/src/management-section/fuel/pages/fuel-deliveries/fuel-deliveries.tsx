@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Button, Card, Divider, Group, Modal, Stack, Text } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { EmptyState } from "@ui/feedback/EmptyState";
@@ -12,7 +13,6 @@ import { FUEL_VIEW } from "@auth/permissions";
 import { qk } from "@core/queryKeys";
 import type { FuelDelivery } from "@core/types";
 import { listFuelDeliveries, listTanks } from "../../api";
-import { RecordFuelDeliveryModal } from "../../components/record-fuel-delivery-modal";
 
 /** Signed litres variance, coloured; green when balanced within tolerance. */
 function Variance({ value, tolerance = 0 }: { value: number; tolerance?: number }) {
@@ -27,11 +27,11 @@ function Variance({ value, tolerance = 0 }: { value: number; tolerance?: number 
 
 export function FuelDeliveriesPage() {
   const can = useCan();
+  const navigate = useNavigate();
   const canCreate = can(FUEL_VIEW);
 
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
-  const [recording, setRecording] = useState(false);
   const [detail, setDetail] = useState<FuelDelivery | undefined>();
 
   const deliveries = useQuery({
@@ -88,7 +88,7 @@ export function FuelDeliveriesPage() {
         filters={[{ type: "daterange", label: "Date", value: dateRange, onChange: setDateRange }]}
         actions={
           canCreate ? (
-            <Button leftSection={<IconPlus size={16} />} onClick={() => setRecording(true)}>
+            <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/fuel/deliveries/new")}>
               New delivery
             </Button>
           ) : undefined
@@ -105,7 +105,6 @@ export function FuelDeliveriesPage() {
         empty={<EmptyState title="No fuel deliveries" description="No deliveries match the current filter." />}
       />
 
-      <RecordFuelDeliveryModal opened={recording} onClose={() => setRecording(false)} />
       <DeliveryDetailModal delivery={detail} tankName={tankName} userName={userName} onClose={() => setDetail(undefined)} />
     </div>
   );
