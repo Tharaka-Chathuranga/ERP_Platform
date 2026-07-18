@@ -1,6 +1,6 @@
 import { qk } from "@core/queryKeys";
 import { STOCK_VIEW } from "@auth/permissions";
-import { getLowStockItems } from "@store/inventory/items.api";
+import { getLowStockItems } from "@store/inventory";
 import type { LowStockItem } from "@core/types";
 import type { CommandContext, CommandDef } from "@voice/index";
 

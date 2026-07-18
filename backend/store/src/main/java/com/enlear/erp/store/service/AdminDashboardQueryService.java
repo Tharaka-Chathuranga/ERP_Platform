@@ -1,8 +1,8 @@
 package com.enlear.erp.store.service;
 
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DashboardSummaryResponse;
-import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DeviationItemRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.ItemStockRowResponse;
+import com.enlear.erp.store.controller.dto.AdminDashboardResponses.NonconformityItemRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.MovementTrendPointResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.StockHealthResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayIssueLineResponse;
@@ -10,19 +10,19 @@ import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayIssueRow
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayReceivalRowResponse;
 import com.enlear.erp.store.model.BorrowRequestStatus;
 import com.enlear.erp.store.model.CountAdjustmentStatus;
-import com.enlear.erp.store.model.DeviationStage;
-import com.enlear.erp.store.model.DeviationStatus;
+import com.enlear.erp.store.model.DetectionStage;
 import com.enlear.erp.store.model.Issue;
 import com.enlear.erp.store.model.IssueLine;
 import com.enlear.erp.store.model.IssueStatus;
 import com.enlear.erp.store.model.Item;
 import com.enlear.erp.store.model.ItemStatus;
+import com.enlear.erp.store.model.NonconformityStatus;
 import com.enlear.erp.store.model.Receival;
 import com.enlear.erp.store.model.ReceivalItem;
 import com.enlear.erp.store.repository.BorrowRequestRepository;
-import com.enlear.erp.store.repository.DeviationRequestRepository;
 import com.enlear.erp.store.repository.IssueRepository;
 import com.enlear.erp.store.repository.ItemRepository;
+import com.enlear.erp.store.repository.NonconformityReportRepository;
 import com.enlear.erp.store.repository.ReceivalRepository;
 import com.enlear.erp.store.repository.StockCountAdjustmentRequestRepository;
 import com.enlear.erp.store.repository.StockMovementRepository;
@@ -55,7 +55,7 @@ public class AdminDashboardQueryService {
     private final ItemRepository items;
     private final SupplierRepository suppliers;
     private final IssueRepository issues;
-    private final DeviationRequestRepository deviations;
+    private final NonconformityReportRepository nonconformities;
     private final BorrowRequestRepository borrowRequests;
     private final StockCountAdjustmentRequestRepository countRequests;
     private final ReceivalRepository receivals;
@@ -64,7 +64,7 @@ public class AdminDashboardQueryService {
     private final ZoneId zone;
 
     public AdminDashboardQueryService(ItemRepository items, SupplierRepository suppliers,
-                                      IssueRepository issues, DeviationRequestRepository deviations,
+                                      IssueRepository issues, NonconformityReportRepository nonconformities,
                                       BorrowRequestRepository borrowRequests,
                                       StockCountAdjustmentRequestRepository countRequests,
                                       ReceivalRepository receivals, StockMovementRepository movements,
@@ -72,7 +72,7 @@ public class AdminDashboardQueryService {
         this.items = items;
         this.suppliers = suppliers;
         this.issues = issues;
-        this.deviations = deviations;
+        this.nonconformities = nonconformities;
         this.borrowRequests = borrowRequests;
         this.countRequests = countRequests;
         this.receivals = receivals;
@@ -92,7 +92,8 @@ public class AdminDashboardQueryService {
                 lowStockCritical,
                 lowStock - lowStockCritical,
                 issues.countByStatus(IssueStatus.PENDING_APPROVAL),
-                deviations.countByStatus(DeviationStatus.PENDING),
+                nonconformities.countByStatus(NonconformityStatus.RAISED)
+                        + nonconformities.countByStatus(NonconformityStatus.UNDER_REVIEW),
                 borrowRequests.countByStatus(BorrowRequestStatus.PENDING),
                 countRequests.countByStatus(CountAdjustmentStatus.PENDING),
                 receivals.count(),
@@ -107,13 +108,13 @@ public class AdminDashboardQueryService {
                 .toList();
     }
 
-    public List<DeviationItemRowResponse> deviationItems(DeviationStage stage) {
-        var rows = stage == null
-                ? deviations.findAllItemLines()
-                : deviations.findItemLinesByStage(stage);
+    public List<NonconformityItemRowResponse> nonconformityItems(DetectionStage detectionStage) {
+        var rows = detectionStage == null
+                ? nonconformities.findAllItemLines()
+                : nonconformities.findItemLinesByDetectionStage(detectionStage);
         return rows.stream()
-                .map(r -> new DeviationItemRowResponse(r.getRequestId(), r.getItemId(), r.getQuantity(),
-                        r.getStatus(), r.getStage(), r.getReason(), r.getRequestedAt()))
+                .map(r -> new NonconformityItemRowResponse(r.getReportId(), r.getItemId(), r.getQuantity(),
+                        r.getStatus(), r.getDetectionStage(), r.getDescription(), r.getReportedAt()))
                 .toList();
     }
 

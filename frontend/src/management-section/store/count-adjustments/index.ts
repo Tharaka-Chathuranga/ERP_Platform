@@ -1,2 +1,3 @@
-export * from "./CountRequestsPage";
-export * from "./count-requests.api";
+export * from "./api";
+export * from "./pages/CountRequestsPage";
+export * from "./components/CountRequestModal";

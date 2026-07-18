@@ -1,8 +1,8 @@
 import { Route } from "react-router-dom";
 import { RequirePermission } from "@auth/RequirePermission";
 import { USER_MANAGE } from "@auth/permissions";
-import { UserDetailPage } from "./UserDetailPage";
-import { UserListPage } from "./UserListPage";
+import { UserDetailPage } from "./pages/UserDetailPage";
+import { UserListPage } from "./pages/UserListPage";
 
 /** User-management routes, guarded by the `user:manage` permission. */
 export const usersRoutes = (

@@ -1,5 +1,7 @@
 package com.enlear.erp.fuel.controller.dto;
 
+import com.enlear.erp.fuel.model.FuelDelivery;
+import com.enlear.erp.fuel.model.FuelDeliveryLine;
 import com.enlear.erp.fuel.model.FuelPrice;
 import com.enlear.erp.fuel.model.FuelTank;
 import com.enlear.erp.fuel.model.FuelTankPurpose;
@@ -45,6 +47,37 @@ public final class FuelResponses {
         public static RefillResponse from(FuelTankRefill r) {
             return new RefillResponse(r.getId(), r.getTankId(), r.getLitres(),
                     r.getRefilledAt(), r.getRecordedByUserId(), r.getNote());
+        }
+    }
+
+    // ── Fuel deliveries ─────────────────────────────────────────────
+
+    public record DeliveryLineResponse(
+            UUID id, UUID tankId, BigDecimal litresDelivered,
+            BigDecimal dipBeforeLitres, BigDecimal dipAfterLitres,
+            BigDecimal dipReconciliationVariance) {
+
+        public static DeliveryLineResponse from(FuelDeliveryLine line) {
+            return new DeliveryLineResponse(line.getId(), line.getTankId(), line.getLitresDelivered(),
+                    line.getDipBeforeLitres(), line.getDipAfterLitres(),
+                    line.dipReconciliationVariance());
+        }
+    }
+
+    public record DeliveryResponse(
+            UUID id, String deliveryReference, String supplierName,
+            BigDecimal orderedLitres, BigDecimal deliveredLitres, BigDecimal orderedVsDeliveredVariance,
+            LocalDate deliveredOn, Instant dischargeStartedAt, Instant dischargeFinishedAt,
+            UUID recordedByUserId, String note, List<DeliveryLineResponse> lines) {
+
+        public static DeliveryResponse from(FuelDelivery d) {
+            List<DeliveryLineResponse> lines = d.getLines().stream()
+                    .map(DeliveryLineResponse::from)
+                    .toList();
+            return new DeliveryResponse(d.getId(), d.getDeliveryReference(), d.getSupplierName(),
+                    d.getOrderedLitres(), d.getDeliveredLitres(), d.orderedVsDeliveredVariance(),
+                    d.getDeliveredOn(), d.getDischargeStartedAt(), d.getDischargeFinishedAt(),
+                    d.getRecordedByUserId(), d.getNote(), lines);
         }
     }
 

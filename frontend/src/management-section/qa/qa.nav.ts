@@ -1,14 +1,14 @@
 import { IconClipboardList } from "@tabler/icons-react";
 import type { NavItem } from "@store/store.nav";
-import { DEFECT_APPROVE } from "@auth/permissions";
+import { NCR_REVIEW } from "@auth/permissions";
 
 export const NAV: NavItem[] = [
   {
-    to: "/qa/defects",
-    label: "Defect Review",
+    to: "/qa/nonconformities",
+    label: "Nonconformity Review",
     icon: IconClipboardList,
     color: "grape",
-    description: "Review & approve pending defect reports",
-    requiredPermission: DEFECT_APPROVE,
+    description: "Review, disposition & close nonconformity reports",
+    requiredPermission: NCR_REVIEW,
   },
 ];

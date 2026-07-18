@@ -1,8 +1,8 @@
 package com.enlear.erp.store.controller.dto;
 
-import com.enlear.erp.store.model.DeviationStage;
-import com.enlear.erp.store.model.DeviationStatus;
+import com.enlear.erp.store.model.DetectionStage;
 import com.enlear.erp.store.model.IssueStatus;
+import com.enlear.erp.store.model.NonconformityStatus;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -22,7 +22,7 @@ public final class AdminDashboardResponses {
             long lowStockCriticalItemCount,
             long lowStockNormalItemCount,
             long pendingIssueApprovalCount,
-            long pendingDeviationCount,
+            long openNonconformityCount,
             long pendingBorrowRequestCount,
             long pendingCountAdjustmentCount,
             long receivalCount,
@@ -32,9 +32,9 @@ public final class AdminDashboardResponses {
     public record MovementTrendPointResponse(Instant day, BigDecimal received, BigDecimal issued) {
     }
 
-    public record DeviationItemRowResponse(
-            UUID requestId, UUID itemId, BigDecimal quantity, DeviationStatus status,
-            DeviationStage stage, String reason, Instant requestedAt) {
+    public record NonconformityItemRowResponse(
+            UUID reportId, UUID itemId, BigDecimal quantity, NonconformityStatus status,
+            DetectionStage detectionStage, String description, Instant reportedAt) {
     }
 
     public record TodayReceivalRowResponse(

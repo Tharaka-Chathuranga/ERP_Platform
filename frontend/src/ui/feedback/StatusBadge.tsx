@@ -11,9 +11,14 @@ const COLORS: Record<string, string> = {
   ISSUED: "green",
   REJECTED: "red",
   RETURNED: "teal",
-  // Deviation / Borrow
+  // Borrow
   PENDING: "yellow",
-  // Deviation stages
+  // Nonconformity (NCR) lifecycle
+  RAISED: "yellow",
+  UNDER_REVIEW: "blue",
+  DISPOSITIONED: "green",
+  CLOSED: "teal",
+  // Detection stages
   INCOMING: "gray",
   IN_PROGRESS: "blue",
   FINAL: "green",

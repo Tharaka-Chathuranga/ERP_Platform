@@ -27,6 +27,7 @@ export interface Location {
   row: string;
   column: string;
   primary?: boolean;
+  general?: boolean;
   quantity?: number;
 }
 
@@ -175,30 +176,49 @@ export interface Issue {
   lines: IssueLine[];
 }
 
-export type DeviationStage = "INCOMING" | "IN_PROGRESS" | "FINAL";
-export type DeviationStatus = "PENDING" | "APPROVED" | "REJECTED";
+// ── Nonconformity reports (NCR) — ISO 9001:2015 clause 8.7 "Control of nonconforming outputs" ──
+export type DetectionStage = "INCOMING" | "IN_PROGRESS" | "FINAL";
+export type NonconformityStatus =
+  | "RAISED"
+  | "UNDER_REVIEW"
+  | "DISPOSITIONED"
+  | "REJECTED"
+  | "CLOSED";
+export type DispositionType =
+  | "USE_AS_IS"
+  | "REWORK"
+  | "SCRAP"
+  | "RETURN_TO_SUPPLIER"
+  | "REGRADE";
 
-export interface DeviationItem {
+export interface NonconformityItem {
   itemId: string;
   quantity: number;
 }
 
-export interface DeviationRequest {
+export interface NonconformityReport {
   id: string;
-  items: DeviationItem[];
-  status: DeviationStatus;
-  stage: DeviationStage;
-  reason?: string;
-  requestedByUserId: string;
-  requestedAt: string;
-  approvedByUserId?: string;
-  approvedAt?: string;
+  items: NonconformityItem[];
+  status: NonconformityStatus;
+  detectionStage: DetectionStage;
+  description?: string;
+  reportedByUserId: string;
+  reportedAt: string;
+  reviewedByUserId?: string;
+  reviewedAt?: string;
+  reviewNote?: string;
+  dispositionType?: DispositionType;
+  closedByUserId?: string;
+  closedAt?: string;
+  verificationNote?: string;
 }
 
-export interface QaDefectSummary {
-  pendingCount: number;
-  approvedCount: number;
+export interface QaNonconformitySummary {
+  raisedCount: number;
+  underReviewCount: number;
+  dispositionedCount: number;
   rejectedCount: number;
+  closedCount: number;
   incomingCount: number;
   inProgressCount: number;
   finalCount: number;
@@ -252,7 +272,7 @@ export interface DashboardSummary {
   lowStockCriticalItemCount: number;
   lowStockNormalItemCount: number;
   pendingIssueApprovalCount: number;
-  pendingDeviationCount: number;
+  openNonconformityCount: number;
   pendingBorrowRequestCount: number;
   pendingCountAdjustmentCount: number;
   receivalCount: number;
@@ -275,14 +295,14 @@ export interface MovementTrendPoint {
   issued: number;
 }
 
-export interface DeviationItemRow {
-  requestId: string;
+export interface NonconformityItemRow {
+  reportId: string;
   itemId: string;
   quantity: number;
-  status: DeviationStatus;
-  stage: DeviationStage;
-  reason?: string;
-  requestedAt: string;
+  status: NonconformityStatus;
+  detectionStage: DetectionStage;
+  description?: string;
+  reportedAt: string;
 }
 
 export interface TodayReceivalRow {
@@ -375,6 +395,32 @@ export interface FuelTankReading {
   recordedByUserId: string;
   note?: string;
   consumptionSincePrevious?: number;
+}
+
+export interface FuelDeliveryLine {
+  id: string;
+  tankId: string;
+  litresDelivered: number;
+  dipBeforeLitres?: number;
+  dipAfterLitres?: number;
+  /** dipAfter − dipBefore − litresDelivered; ~0 when the dip readings reconcile. */
+  dipReconciliationVariance?: number;
+}
+
+export interface FuelDelivery {
+  id: string;
+  deliveryReference: string;
+  supplierName?: string;
+  orderedLitres: number;
+  deliveredLitres: number;
+  /** deliveredLitres − orderedLitres; positive = over-delivered, negative = short. */
+  orderedVsDeliveredVariance: number;
+  deliveredOn: string;
+  dischargeStartedAt?: string;
+  dischargeFinishedAt?: string;
+  recordedByUserId: string;
+  note?: string;
+  lines: FuelDeliveryLine[];
 }
 
 export interface Vehicle {

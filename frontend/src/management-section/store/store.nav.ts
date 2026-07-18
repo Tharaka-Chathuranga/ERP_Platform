@@ -12,7 +12,7 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import type { Permission } from "@auth/permissions";
-import { STOCK_VIEW, COUNT_REQUEST, DEFECT_VIEW, DASHBOARD_ADMIN } from "@auth/permissions";
+import { STOCK_VIEW, COUNT_REQUEST, NCR_VIEW, DASHBOARD_ADMIN } from "@auth/permissions";
 
 /** Single source of truth for the main navigation — shared by the sidebar and
  *  the dashboard tiles so they can never drift apart. */
@@ -41,8 +41,8 @@ export const NAV: NavItem[] = [
   { to: "/store/suppliers", label: "Suppliers", icon: IconTruck, color: "brand", description: "Supplier master data", group: "Inventory", requiredPermission: STOCK_VIEW },
   { to: "/warnings", label: "Low Stock", icon: IconAlertHexagon, color: "red", description: "Items below reorder level", group: "Inventory", requiredPermission: STOCK_VIEW },
 
-  // ── Compliance: adjustments & defects ──
+  // ── Compliance: adjustments & nonconformities ──
   { to: "/count-requests", label: "Count Requests", icon: IconClipboardCheck, color: "indigo", description: "Stock count adjustments", group: "Compliance", requiredPermission: COUNT_REQUEST },
-  { to: "/defects", label: "Defects", icon: IconAlertTriangle, color: "orange", description: "Report & triage deviations", group: "Compliance", requiredPermission: DEFECT_VIEW },
-  { to: "/defects/items", label: "Defect Items", icon: IconListDetails, color: "orange", description: "Every defective item line", group: "Compliance", requiredPermission: DASHBOARD_ADMIN },
+  { to: "/nonconformities", label: "Nonconformities", icon: IconAlertTriangle, color: "orange", description: "Report & triage nonconformities", group: "Compliance", requiredPermission: NCR_VIEW },
+  { to: "/nonconformities/items", label: "Nonconforming Items", icon: IconListDetails, color: "orange", description: "Every nonconforming item line", group: "Compliance", requiredPermission: DASHBOARD_ADMIN },
 ];

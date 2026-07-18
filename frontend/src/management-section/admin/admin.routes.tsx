@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-import { OverviewPage } from "./OverviewPage";
+import { OverviewPage } from "./pages/OverviewPage";
 
 /** Overview route — accessible to all authenticated users; renders role-specific content. */
 export const adminRoutes = (

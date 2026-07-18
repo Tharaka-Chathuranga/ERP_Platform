@@ -2,6 +2,7 @@ import { Route } from "react-router-dom";
 import { RequirePermission } from "@auth/RequirePermission";
 import { DASHBOARD_ADMIN, FUEL_VIEW } from "@auth/permissions";
 import {
+  FuelDeliveriesPage,
   FuelEfficiencyReportPage,
   FuelPricesPage,
   FuelTanksPage,
@@ -19,6 +20,7 @@ export const fuelRoutes = (
       <Route path="fuel/issues/new" element={<NewVehicleIssuePage />} />
       <Route path="fuel/vehicles" element={<VehiclesPage />} />
       <Route path="fuel/tanks" element={<FuelTanksPage />} />
+      <Route path="fuel/deliveries" element={<FuelDeliveriesPage />} />
       <Route path="fuel/prices" element={<FuelPricesPage />} />
     </Route>
     <Route element={<RequirePermission perform={DASHBOARD_ADMIN} />}>

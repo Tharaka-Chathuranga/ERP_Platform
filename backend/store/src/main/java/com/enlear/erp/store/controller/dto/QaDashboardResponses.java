@@ -5,10 +5,12 @@ public final class QaDashboardResponses {
     private QaDashboardResponses() {
     }
 
-    public record QaDefectSummaryResponse(
-            long pendingCount,
-            long approvedCount,
+    public record QaNonconformitySummaryResponse(
+            long raisedCount,
+            long underReviewCount,
+            long dispositionedCount,
             long rejectedCount,
+            long closedCount,
             long incomingCount,
             long inProgressCount,
             long finalCount,
