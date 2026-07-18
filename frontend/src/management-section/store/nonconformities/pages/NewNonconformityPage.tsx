@@ -9,75 +9,76 @@ import { StepHeading } from "@ui/layout/StepHeading";
 import { LineItemsEditor, newLine, type EditableLine } from "@ui/primitives/LineItemsEditor";
 import { UserSelect } from "@ui/primitives/UserSelect";
 import { useAuth } from "@auth/AuthContext";
-import { createDeviation } from "../api";
+import { qk } from "@core/queryKeys";
+import { createNonconformity } from "../api";
 import { notifyError, notifySuccess } from "@core/notify";
-import type { DeviationStage } from "@core/types";
+import type { DetectionStage } from "@core/types";
 
-const STAGE_OPTIONS: { label: string; value: DeviationStage; icon: React.ReactNode }[] = [
+const STAGE_OPTIONS: { label: string; value: DetectionStage; icon: React.ReactNode }[] = [
   { label: "Incoming", value: "INCOMING", icon: <IconPackageImport size={28} /> },
   { label: "In progress", value: "IN_PROGRESS", icon: <IconProgress size={28} /> },
   { label: "Final", value: "FINAL", icon: <IconCircleCheck size={28} /> },
 ];
 
-export function NewDeviationPage() {
+export function NewNonconformityPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { userId } = useAuth();
 
-  const [stage, setStage] = useState<DeviationStage>("INCOMING");
+  const [detectionStage, setDetectionStage] = useState<DetectionStage>("INCOMING");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [reason, setReason] = useState("");
+  const [description, setDescription] = useState("");
   const [lines, setLines] = useState<EditableLine[]>([newLine()]);
 
-  const isFinal = stage === "FINAL";
-  const requestedByUserId = isFinal ? selectedUserId : userId;
+  const isFinal = detectionStage === "FINAL";
+  const reportedByUserId = isFinal ? selectedUserId : userId;
 
   const validLines = lines.filter((l) => l.itemId && l.quantity !== "" && Number(l.quantity) > 0);
-  const canSubmit = !!requestedByUserId && validLines.length > 0;
+  const canSubmit = !!reportedByUserId && validLines.length > 0;
 
   const mutation = useMutation({
     mutationFn: () => {
       const payload = {
-        stage,
-        reason: reason || undefined,
-        requestedByUserId: requestedByUserId!,
+        detectionStage,
+        description: description || undefined,
+        reportedByUserId: reportedByUserId!,
         items: validLines.map((l) => ({ itemId: l.itemId!, quantity: Number(l.quantity) })),
       };
-      return createDeviation(payload);
+      return createNonconformity(payload);
     },
     onSuccess: (d) => {
-      notifySuccess("Defect report created");
-      qc.invalidateQueries({ queryKey: ["deviations"] });
-      navigate(`/defects/${d.id}`);
+      notifySuccess("Nonconformity report raised");
+      qc.invalidateQueries({ queryKey: qk.nonconformities() });
+      navigate(`/nonconformities/${d.id}`);
     },
     onError: notifyError,
   });
 
   return (
     <div>
-      <PageHeader title="Report defect" />
+      <PageHeader title="Report nonconformity" />
 
       <Group mb="md">
-        <Button variant="default" leftSection={<IconChevronLeft size={16} />} onClick={() => navigate("/defects")}>
+        <Button variant="default" leftSection={<IconChevronLeft size={16} />} onClick={() => navigate("/nonconformities")}>
           Back
         </Button>
       </Group>
 
       <Card withBorder radius="md" padding={0}>
 
-        {/* Step 1 — Stage */}
+        {/* Step 1 — Detection stage */}
         <Box p="xl">
-          <StepHeading number={1} title="What stage is this defect report?" />
+          <StepHeading number={1} title="Where was this nonconformity detected?" />
           <SimpleGrid cols={3}>
             {STAGE_OPTIONS.map((o) => {
-              const selected = stage === o.value;
+              const selected = detectionStage === o.value;
               return (
                 <Paper
                   key={o.value}
                   withBorder
                   radius="lg"
                   p="xl"
-                  onClick={() => { setStage(o.value); setSelectedUserId(null); }}
+                  onClick={() => { setDetectionStage(o.value); setSelectedUserId(null); }}
                   style={{
                     cursor: "pointer",
                     position: "relative",
@@ -96,12 +97,7 @@ export function NewDeviationPage() {
                     </Box>
                   )}
                   <Stack align="center" gap="sm">
-                    <ThemeIcon
-                      size={64}
-                      radius="xl"
-                      variant={selected ? "light" : "light"}
-                      color={selected ? "green" : "gray"}
-                    >
+                    <ThemeIcon size={64} radius="xl" variant="light" color={selected ? "green" : "gray"}>
                       {o.icon}
                     </ThemeIcon>
                     <Text size="sm" fw={600} c={selected ? "green" : "dimmed"}>
@@ -119,9 +115,9 @@ export function NewDeviationPage() {
           <>
             <Divider />
             <Box p="xl">
-              <StepHeading number={2} title="Who raised this defect?" />
+              <StepHeading number={2} title="Who raised this nonconformity?" />
               <UserSelect
-                placeholder="Select the user who raised this defect"
+                placeholder="Select the user who raised this nonconformity"
                 value={selectedUserId}
                 onChange={setSelectedUserId}
               />
@@ -136,16 +132,16 @@ export function NewDeviationPage() {
           <LineItemsEditor lines={lines} onChange={setLines} />
         </Box>
 
-        {/* Step 4 — Reason */}
+        {/* Step 4 — Description */}
         <Divider />
         <Box p="xl">
-          <StepHeading number={isFinal ? 4 : 3} title="What is the reason for this defect?" />
+          <StepHeading number={isFinal ? 4 : 3} title="Describe the nonconformity" />
           <Textarea
             placeholder="e.g. Items arrived damaged, wrong batch, incorrect quantity…"
             autosize
             minRows={3}
-            value={reason}
-            onChange={(e) => setReason(e.currentTarget.value)}
+            value={description}
+            onChange={(e) => setDescription(e.currentTarget.value)}
           />
         </Box>
 
@@ -159,7 +155,7 @@ export function NewDeviationPage() {
               loading={mutation.isPending}
               disabled={!canSubmit}
             >
-              Submit report
+              Raise report
             </Button>
           </Group>
         </Box>

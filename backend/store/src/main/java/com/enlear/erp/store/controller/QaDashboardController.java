@@ -1,6 +1,6 @@
 package com.enlear.erp.store.controller;
 
-import com.enlear.erp.store.controller.dto.QaDashboardResponses.QaDefectSummaryResponse;
+import com.enlear.erp.store.controller.dto.QaDashboardResponses.QaNonconformitySummaryResponse;
 import com.enlear.erp.store.service.QaDashboardQueryService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,7 @@ public class QaDashboardController {
     }
 
     @GetMapping("/summary")
-    public QaDefectSummaryResponse summary() {
-        return dashboard.defectSummary();
+    public QaNonconformitySummaryResponse summary() {
+        return dashboard.nonconformitySummary();
     }
 }

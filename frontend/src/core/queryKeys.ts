@@ -54,19 +54,19 @@ export const qk = {
   borrowRequests: (status?: string) => filtered("borrow-requests", status),
   borrowRequest: (id: string) => ["borrow-request", id] as const,
 
-  // ── Deviation (defect) requests ──
-  deviations: (stage?: string) => filtered("deviations", stage),
-  deviationsByStatus: (status: string) => ["deviations", "status", status] as const,
-  deviation: (id: string) => ["deviation", id] as const,
+  // ── Nonconformity reports (NCR) ──
+  nonconformities: (detectionStage?: string) => filtered("nonconformities", detectionStage),
+  nonconformitiesByStatus: (status: string) => ["nonconformities", "status", status] as const,
+  nonconformity: (id: string) => ["nonconformity", id] as const,
 
-  // ── QA: defect review ──
-  qaDefectSummary: () => ["qa", "defect-summary"] as const,
+  // ── QA: nonconformity review ──
+  qaNonconformitySummary: () => ["qa", "nonconformity-summary"] as const,
 
   // ── Admin: dashboard ──
   adminSummary: () => ["admin", "summary"] as const,
   lowStock: () => ["admin", "low-stock"] as const,
   movementTrend: (days: number) => ["admin", "movement-trend", days] as const,
-  defectItems: (stage?: string) => filtered("admin-defect-items", stage),
+  nonconformityItems: (detectionStage?: string) => filtered("admin-nonconformity-items", detectionStage),
   todayReceivals: () => ["admin", "today-receivals"] as const,
   todayIssues: () => ["admin", "today-issues"] as const,
   stockHealth: () => ["admin", "stock-health"] as const,

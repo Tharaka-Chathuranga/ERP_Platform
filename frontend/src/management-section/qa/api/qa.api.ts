@@ -1,18 +1,18 @@
 import { api } from "@core/http/client";
-import type { DeviationRequest, DeviationStatus, QaDefectSummary } from "@core/types";
+import type { NonconformityReport, NonconformityStatus, QaNonconformitySummary } from "@core/types";
 
-// ── Quality-assurance read-side. Mirrors /api/store/qa/* and the defect-request
+// ── Quality-assurance read-side. Mirrors /api/store/qa/* and the nonconformity
 //    by-status listing, both gated to QA + admins on the backend. ──
 
-export async function getQaDefectSummary(): Promise<QaDefectSummary> {
-  const { data } = await api.get<QaDefectSummary>("/store/qa/dashboard/summary");
+export async function getQaNonconformitySummary(): Promise<QaNonconformitySummary> {
+  const { data } = await api.get<QaNonconformitySummary>("/store/qa/dashboard/summary");
   return data;
 }
 
-export async function listDeviationsByStatus(
-  status?: DeviationStatus,
-): Promise<DeviationRequest[]> {
-  const { data } = await api.get<DeviationRequest[]>("/store/deviation-requests/by-status", {
+export async function listNonconformitiesByStatus(
+  status?: NonconformityStatus,
+): Promise<NonconformityReport[]> {
+  const { data } = await api.get<NonconformityReport[]>("/store/nonconformities/by-status", {
     params: status ? { status } : undefined,
   });
   return data;

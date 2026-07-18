@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Card, Group, Loader, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
-import { IconCircleCheck, IconPackageImport, IconPlus, IconProgress } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -7,57 +7,53 @@ import dayjs from "dayjs";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { TableToolbar } from "@ui/data/TableToolbar";
-import { listDeviations } from "../api";
-import type { DeviationRequest, DeviationStage, DeviationStatus } from "@core/types";
-
-const STAGE_META: Record<DeviationStage, { title: string; color: string; icon: React.ReactNode }> = {
-  INCOMING:    { title: "Incoming",    color: "indigo", icon: <IconPackageImport size={16} /> },
-  IN_PROGRESS: { title: "In progress", color: "grape",  icon: <IconProgress size={16} /> },
-  FINAL:       { title: "Final",       color: "cyan",   icon: <IconCircleCheck size={16} /> },
-};
-
-const STAGES: DeviationStage[] = ["INCOMING", "IN_PROGRESS", "FINAL"];
+import { qk } from "@core/queryKeys";
+import { listNonconformities } from "../api";
+import { DETECTION_STAGE_META, DETECTION_STAGES } from "../components";
+import type { DetectionStage, NonconformityReport, NonconformityStatus } from "@core/types";
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: "", label: "All statuses" },
-  { value: "PENDING", label: "Pending" },
-  { value: "APPROVED", label: "Approved" },
+  { value: "RAISED", label: "Raised" },
+  { value: "UNDER_REVIEW", label: "Under review" },
+  { value: "DISPOSITIONED", label: "Dispositioned" },
   { value: "REJECTED", label: "Rejected" },
+  { value: "CLOSED", label: "Closed" },
 ];
 
 type DateRange = [Date | null, Date | null];
 
-interface DeviationFilters {
+interface BoardFilters {
   status: string;
   dateRange: DateRange;
 }
 
-const EMPTY_FILTERS: DeviationFilters = { status: "", dateRange: [null, null] };
+const EMPTY_FILTERS: BoardFilters = { status: "", dateRange: [null, null] };
 
-/** Apply the board-level status/date filters to a stage's deviations. */
-function applyFilters(items: DeviationRequest[], filters: DeviationFilters): DeviationRequest[] {
+/** Apply the board-level status/date filters to a stage's reports. */
+function applyFilters(items: NonconformityReport[], filters: BoardFilters): NonconformityReport[] {
   const [from, to] = filters.dateRange;
 
   return items.filter((d) => {
-    if (filters.status && d.status !== (filters.status as DeviationStatus)) return false;
-    if (from && dayjs(d.requestedAt).isBefore(dayjs(from), "day")) return false;
-    if (to && dayjs(d.requestedAt).isAfter(dayjs(to), "day")) return false;
+    if (filters.status && d.status !== (filters.status as NonconformityStatus)) return false;
+    if (from && dayjs(d.reportedAt).isBefore(dayjs(from), "day")) return false;
+    if (to && dayjs(d.reportedAt).isAfter(dayjs(to), "day")) return false;
     return true;
   });
 }
 
-export function DeviationBoardPage() {
+export function NonconformityBoardPage() {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState<DeviationFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<BoardFilters>(EMPTY_FILTERS);
 
   return (
     <div>
-      <PageHeader title="Defects" />
+      <PageHeader title="Nonconformity reports" />
 
       <TableToolbar
         actions={
-          <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/defects/new")}>
-            Report defect
+          <Button leftSection={<IconPlus size={16} />} onClick={() => navigate("/nonconformities/new")}>
+            Report nonconformity
           </Button>
         }
         filters={[
@@ -69,7 +65,7 @@ export function DeviationBoardPage() {
           },
           {
             type: "daterange",
-            label: "Requested between",
+            label: "Raised between",
             value: filters.dateRange,
             onChange: (value) => setFilters((f) => ({ ...f, dateRange: value })),
           },
@@ -77,7 +73,7 @@ export function DeviationBoardPage() {
       />
 
       <SimpleGrid cols={{ base: 1, md: 3 }}>
-        {STAGES.map((stage) => (
+        {DETECTION_STAGES.map((stage) => (
           <StageColumn key={stage} stage={stage} filters={filters} />
         ))}
       </SimpleGrid>
@@ -85,23 +81,21 @@ export function DeviationBoardPage() {
   );
 }
 
-function StageColumn({ stage, filters }: { stage: DeviationStage; filters: DeviationFilters }) {
+function StageColumn({ stage, filters }: { stage: DetectionStage; filters: BoardFilters }) {
   const navigate = useNavigate();
-  const meta = STAGE_META[stage];
+  const meta = DETECTION_STAGE_META[stage];
 
   const { data, isLoading } = useQuery({
-    queryKey: ["deviations", stage],
-    queryFn: () => listDeviations(stage),
+    queryKey: qk.nonconformities(stage),
+    queryFn: () => listNonconformities(stage),
   });
 
   const filtered = useMemo(() => applyFilters(data ?? [], filters), [data, filters]);
 
   return (
     <Card withBorder radius="md" padding={0} style={{ overflow: "hidden" }}>
-      {/* Coloured top accent */}
       <Box h={4} bg={`var(--mantine-color-${meta.color}-5)`} />
 
-      {/* Column header */}
       <Group justify="space-between" px="md" py="sm" bg="var(--mantine-color-default-hover)">
         <Group gap="xs">
           <ThemeIcon size="sm" variant="light" color={meta.color} radius="xl">
@@ -114,7 +108,6 @@ function StageColumn({ stage, filters }: { stage: DeviationStage; filters: Devia
         </Badge>
       </Group>
 
-      {/* Cards */}
       <Stack gap="xs" p="sm">
         {isLoading && (
           <Group justify="center" py="md">
@@ -123,18 +116,18 @@ function StageColumn({ stage, filters }: { stage: DeviationStage; filters: Devia
         )}
         {!isLoading && filtered.length === 0 && (
           <Text c="dimmed" size="sm" ta="center" py="md">
-            No defects here
+            Nothing here
           </Text>
         )}
         {filtered.map((d) => (
-          <DeviationCard key={d.id} d={d} stageColor={meta.color} onClick={() => navigate(`/defects/${d.id}`)} />
+          <ReportCard key={d.id} d={d} stageColor={meta.color} onClick={() => navigate(`/nonconformities/${d.id}`)} />
         ))}
       </Stack>
     </Card>
   );
 }
 
-function DeviationCard({ d, stageColor, onClick }: { d: DeviationRequest; stageColor: string; onClick: () => void }) {
+function ReportCard({ d, stageColor, onClick }: { d: NonconformityReport; stageColor: string; onClick: () => void }) {
   return (
     <Card
       withBorder
@@ -151,11 +144,11 @@ function DeviationCard({ d, stageColor, onClick }: { d: DeviationRequest; stageC
       <Stack gap={6}>
         <Group justify="space-between" wrap="nowrap">
           <StatusBadge status={d.status} />
-          <Text size="xs" c="dimmed">{dayjs(d.requestedAt).format("MMM D")}</Text>
+          <Text size="xs" c="dimmed">{dayjs(d.reportedAt).format("MMM D")}</Text>
         </Group>
 
-        <Text size="sm" c={d.reason ? undefined : "dimmed"} lineClamp={2} style={{ fontStyle: d.reason ? undefined : "italic" }}>
-          {d.reason || "No reason provided"}
+        <Text size="sm" c={d.description ? undefined : "dimmed"} lineClamp={2} style={{ fontStyle: d.description ? undefined : "italic" }}>
+          {d.description || "No description provided"}
         </Text>
 
         <Text size="xs" c="dimmed">

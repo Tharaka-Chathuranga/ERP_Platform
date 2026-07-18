@@ -1,12 +1,12 @@
 package com.enlear.erp.store.controller;
 
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DashboardSummaryResponse;
-import com.enlear.erp.store.controller.dto.AdminDashboardResponses.DeviationItemRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.MovementTrendPointResponse;
+import com.enlear.erp.store.controller.dto.AdminDashboardResponses.NonconformityItemRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.StockHealthResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayIssueRowResponse;
 import com.enlear.erp.store.controller.dto.AdminDashboardResponses.TodayReceivalRowResponse;
-import com.enlear.erp.store.model.DeviationStage;
+import com.enlear.erp.store.model.DetectionStage;
 import com.enlear.erp.store.service.AdminDashboardQueryService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,10 +40,10 @@ public class AdminDashboardController {
         return dashboard.movementTrend(days);
     }
 
-    @GetMapping("/defect-items")
-    public List<DeviationItemRowResponse> defectItems(
-            @RequestParam(required = false) DeviationStage stage) {
-        return dashboard.deviationItems(stage);
+    @GetMapping("/nonconformity-items")
+    public List<NonconformityItemRowResponse> nonconformityItems(
+            @RequestParam(required = false) DetectionStage detectionStage) {
+        return dashboard.nonconformityItems(detectionStage);
     }
 
     @GetMapping("/today-receivals")

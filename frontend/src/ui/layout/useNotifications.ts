@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@auth/AuthContext";
 import { qk } from "@core/queryKeys";
 import { getLowStockItems } from "@store/inventory";
-import { listDeviations } from "@store/defects";
+import { listNonconformities } from "@store/nonconformities";
 import { listCountRequests } from "@store/count-adjustments";
 import { getDashboardSummary } from "@admin";
-import { getQaDefectSummary } from "@qa";
+import { getQaNonconformitySummary } from "@qa";
 
 export interface AppNotification {
   id: string;
@@ -43,15 +43,15 @@ export function useNotifications(): AppNotification[] {
     enabled: isStoreKeeper,
   });
 
-  const incomingDeviations = useQuery({
-    queryKey: qk.deviations("INCOMING"),
-    queryFn: () => listDeviations("INCOMING"),
+  const incomingNonconformities = useQuery({
+    queryKey: qk.nonconformities("INCOMING"),
+    queryFn: () => listNonconformities("INCOMING"),
     enabled: isStoreKeeper,
   });
 
   const qaSummary = useQuery({
-    queryKey: qk.qaDefectSummary(),
-    queryFn: getQaDefectSummary,
+    queryKey: qk.qaNonconformitySummary(),
+    queryFn: getQaNonconformitySummary,
     enabled: isQA,
   });
 
@@ -78,13 +78,13 @@ export function useNotifications(): AppNotification[] {
           href: "/issuing",
         });
       }
-      if (s.pendingDeviationCount > 0) {
+      if (s.openNonconformityCount > 0) {
         notifications.push({
-          id: "pending-deviations",
-          title: `${plural(s.pendingDeviationCount, "defect report")} pending`,
-          description: "Defect requests are awaiting quality review.",
+          id: "open-nonconformities",
+          title: `${plural(s.openNonconformityCount, "nonconformity report")} open`,
+          description: "Nonconformity reports are awaiting quality review.",
           severity: "warning",
-          href: "/defects",
+          href: "/nonconformities",
         });
       }
       if (s.pendingCountAdjustmentCount > 0) {
@@ -119,26 +119,27 @@ export function useNotifications(): AppNotification[] {
         href: "/count-requests",
       });
     }
-    if (incomingDeviations.data && incomingDeviations.data.length > 0) {
+    if (incomingNonconformities.data && incomingNonconformities.data.length > 0) {
       notifications.push({
-        id: "incoming-deviations",
-        title: `${plural(incomingDeviations.data.length, "open defect report")}`,
-        description: "Defect requests have been submitted and need attention.",
+        id: "incoming-nonconformities",
+        title: `${plural(incomingNonconformities.data.length, "open nonconformity report")}`,
+        description: "Nonconformity reports have been raised and need attention.",
         severity: "warning",
-        href: "/defects",
+        href: "/nonconformities",
       });
     }
   }
 
   if (isQA) {
     const s = qaSummary.data;
-    if (s && s.pendingCount > 0) {
+    const awaiting = s ? s.raisedCount + s.underReviewCount : 0;
+    if (awaiting > 0) {
       notifications.push({
-        id: "qa-pending",
-        title: `${plural(s.pendingCount, "defect report")} awaiting review`,
-        description: "Review and make decisions on incoming defect reports.",
+        id: "qa-awaiting-review",
+        title: `${plural(awaiting, "nonconformity report")} awaiting review`,
+        description: "Review, disposition or close open nonconformity reports.",
         severity: "warning",
-        href: "/qa/defects",
+        href: "/qa/nonconformities",
       });
     }
   }

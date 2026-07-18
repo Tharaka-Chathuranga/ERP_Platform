@@ -1,9 +1,9 @@
 package com.enlear.erp.store.service;
 
-import com.enlear.erp.store.controller.dto.QaDashboardResponses.QaDefectSummaryResponse;
-import com.enlear.erp.store.model.DeviationStage;
-import com.enlear.erp.store.model.DeviationStatus;
-import com.enlear.erp.store.repository.DeviationRequestRepository;
+import com.enlear.erp.store.controller.dto.QaDashboardResponses.QaNonconformitySummaryResponse;
+import com.enlear.erp.store.model.DetectionStage;
+import com.enlear.erp.store.model.NonconformityStatus;
+import com.enlear.erp.store.repository.NonconformityReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,23 +11,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class QaDashboardQueryService {
 
-    private final DeviationRequestRepository deviations;
+    private final NonconformityReportRepository reports;
 
-    public QaDashboardQueryService(DeviationRequestRepository deviations) {
-        this.deviations = deviations;
+    public QaDashboardQueryService(NonconformityReportRepository reports) {
+        this.reports = reports;
     }
 
-    public QaDefectSummaryResponse defectSummary() {
-        long pending = deviations.countByStatus(DeviationStatus.PENDING);
-        long approved = deviations.countByStatus(DeviationStatus.APPROVED);
-        long rejected = deviations.countByStatus(DeviationStatus.REJECTED);
-        return new QaDefectSummaryResponse(
-                pending,
-                approved,
+    public QaNonconformitySummaryResponse nonconformitySummary() {
+        long raised = reports.countByStatus(NonconformityStatus.RAISED);
+        long underReview = reports.countByStatus(NonconformityStatus.UNDER_REVIEW);
+        long dispositioned = reports.countByStatus(NonconformityStatus.DISPOSITIONED);
+        long rejected = reports.countByStatus(NonconformityStatus.REJECTED);
+        long closed = reports.countByStatus(NonconformityStatus.CLOSED);
+        return new QaNonconformitySummaryResponse(
+                raised,
+                underReview,
+                dispositioned,
                 rejected,
-                deviations.countByStage(DeviationStage.INCOMING),
-                deviations.countByStage(DeviationStage.IN_PROGRESS),
-                deviations.countByStage(DeviationStage.FINAL),
-                pending + approved + rejected);
+                closed,
+                reports.countByDetectionStage(DetectionStage.INCOMING),
+                reports.countByDetectionStage(DetectionStage.IN_PROGRESS),
+                reports.countByDetectionStage(DetectionStage.FINAL),
+                raised + underReview + dispositioned + rejected + closed);
     }
 }

@@ -17,15 +17,15 @@ export type Permission =
   | "supplier:manage" // create / activate / deactivate suppliers
   | "user:manage" // manage users, roles & access
   | "dashboard:admin" // admin overview & cross-cutting analytics
-  | "defect:view" // see the defect (deviation) board, reports & detail
-  | "defect:approve" // review & approve / reject defect (deviation) reports
+  | "ncr:view" // see the nonconformity board, reports & detail
+  | "ncr:review" // review, disposition / reject & close nonconformity reports
   | "dashboard:qa" // quality-assurance overview
   | "fuel:view" // view fuel tanks, vehicle issues, refills, readings & prices
   | "fuel:manage"; // manage vehicle master data & add fuel prices
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  STORE_KEEPER: ["stock:view", "count:request", "defect:view", "fuel:view"],
-  QUALITY_ASSURANCE: ["defect:view", "defect:approve", "dashboard:qa"],
+  STORE_KEEPER: ["stock:view", "count:request", "ncr:view", "fuel:view"],
+  QUALITY_ASSURANCE: ["ncr:view", "ncr:review", "dashboard:qa"],
   ADMIN: [
     "stock:view",
     "item:edit",
@@ -34,8 +34,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "supplier:manage",
     "user:manage",
     "dashboard:admin",
-    "defect:view",
-    "defect:approve",
+    "ncr:view",
+    "ncr:review",
     "dashboard:qa",
     "fuel:view",
     "fuel:manage",
@@ -55,8 +55,8 @@ export const COUNT_APPROVE: Permission = "count:approve";
 export const SUPPLIER_MANAGE: Permission = "supplier:manage";
 export const USER_MANAGE: Permission = "user:manage";
 export const DASHBOARD_ADMIN: Permission = "dashboard:admin";
-export const DEFECT_VIEW: Permission = "defect:view";
-export const DEFECT_APPROVE: Permission = "defect:approve";
+export const NCR_VIEW: Permission = "ncr:view";
+export const NCR_REVIEW: Permission = "ncr:review";
 export const DASHBOARD_QA: Permission = "dashboard:qa";
 export const FUEL_VIEW: Permission = "fuel:view";
 export const FUEL_MANAGE: Permission = "fuel:manage";

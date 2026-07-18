@@ -7,21 +7,21 @@ import { qk } from "@core/queryKeys";
 import { DataTable, TableToolbar } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
-import type { DeviationItemRow, DeviationStage } from "@core/types";
-import { getDefectItems } from "../api";
+import type { DetectionStage, NonconformityItemRow } from "@core/types";
+import { getNonconformityItems } from "../api";
 
 const FILTERS = ["ALL", "INCOMING", "IN_PROGRESS", "FINAL"] as const;
 
-/** Flattened view of every defective item line across all deviation requests. */
-export function DefectItemsPage() {
+/** Flattened view of every nonconforming item line across all reports. */
+export function NonconformityItemsPage() {
   const itemLabel = useItemLabels();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>("ALL");
   const [search, setSearch] = useState("");
 
-  const stage = filter === "ALL" ? undefined : (filter as DeviationStage);
+  const detectionStage = filter === "ALL" ? undefined : (filter as DetectionStage);
   const { data, isLoading, error } = useQuery({
-    queryKey: qk.defectItems(filter),
-    queryFn: () => getDefectItems(stage),
+    queryKey: qk.nonconformityItems(filter),
+    queryFn: () => getNonconformityItems(detectionStage),
   });
 
   const term = search.trim().toLowerCase();
@@ -29,12 +29,12 @@ export function DefectItemsPage() {
     (r) =>
       !term ||
       itemLabel(r.itemId).toLowerCase().includes(term) ||
-      (r.reason ?? "").toLowerCase().includes(term),
+      (r.description ?? "").toLowerCase().includes(term),
   );
 
   return (
     <div>
-      <PageHeader title="Defect items" />
+      <PageHeader title="Nonconforming items" />
       <TableToolbar
         filters={[{
           label: "Stage",
@@ -42,21 +42,21 @@ export function DefectItemsPage() {
           onChange: (v) => setFilter(v as (typeof FILTERS)[number]),
           options: FILTERS.map((f) => ({ value: f, label: f.replace(/_/g, " ") })),
         }]}
-        search={{ value: search, onChange: setSearch, placeholder: "Search item or reason…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Search item or description…" }}
       />
 
-      <DataTable<DeviationItemRow>
+      <DataTable<NonconformityItemRow>
         data={filtered}
         loading={isLoading}
         error={error}
-        rowKey={(r) => `${r.requestId}:${r.itemId}`}
-        empty={<Text c="dimmed" p="md">No defective items.</Text>}
+        rowKey={(r) => `${r.reportId}:${r.itemId}`}
+        empty={<Text c="dimmed" p="md">No nonconforming items.</Text>}
         columns={[
           { header: "Item", render: (r) => itemLabel(r.itemId), emphasis: true },
           { header: "Qty", render: (r) => r.quantity, align: "right" },
-          { header: "Reason", render: (r) => r.reason ?? "—" },
-          { header: "Raised", render: (r) => dayjs(r.requestedAt).format("MMM D, HH:mm") },
-          { header: "Stage", render: (r) => <StatusBadge status={r.stage} /> },
+          { header: "Description", render: (r) => r.description ?? "—" },
+          { header: "Raised", render: (r) => dayjs(r.reportedAt).format("MMM D, HH:mm") },
+          { header: "Stage", render: (r) => <StatusBadge status={r.detectionStage} /> },
           { header: "Status", render: (r) => <StatusBadge status={r.status} /> },
         ]}
       />

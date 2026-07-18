@@ -20,10 +20,10 @@ import { qk } from "@core/queryKeys";
 import { useItemCodes } from "@core/hooks/useLookups";
 import { getLowStockItems } from "@store/inventory";
 import { getMovementSummary } from "@store/stock-movements";
-import { listDeviations } from "@store/defects";
+import { listNonconformities } from "@store/nonconformities";
 import { listCountRequests } from "@store/count-adjustments";
 import { listReceivals } from "@store/goods-receiving";
-import { getQaDefectSummary } from "@qa";
+import { getQaNonconformitySummary } from "@qa";
 import { DataTable } from "@ui/data/DataTable";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { StatCard } from "@ui/feedback/StatCard";
@@ -70,7 +70,7 @@ function AdminOverview() {
         <StatCard label="Low stock · normal" value={s?.lowStockNormalItemCount ?? 0} icon={<IconAlertTriangle size={22} />} color="orange" to="/warnings" hint="Below reorder level" />
         <StatCard label="Inventory value" value={s ? currency.format(s.totalInventoryValue) : "—"} icon={<IconCoin size={22} />} color="teal" />
         <StatCard label="Pending approvals" value={s?.pendingIssueApprovalCount ?? 0} icon={<IconThumbUp size={22} />} color="yellow" />
-        <StatCard label="Open defects" value={s?.pendingDeviationCount ?? 0} icon={<IconBug size={22} />} color="grape" to="/defects" />
+        <StatCard label="Open nonconformities" value={s?.openNonconformityCount ?? 0} icon={<IconBug size={22} />} color="grape" to="/nonconformities" />
         <StatCard label="Count requests" value={s?.pendingCountAdjustmentCount ?? 0} icon={<IconClipboardCheck size={22} />} color="indigo" to="/count-requests" hint="Awaiting approval" />
       </SimpleGrid>
 
@@ -144,7 +144,7 @@ function StorekeeperOverview() {
   const navigate = useNavigate();
   const { username } = useAuth();
   const lowStock = useQuery({ queryKey: qk.lowStock(), queryFn: getLowStockItems });
-  const openDefects = useQuery({ queryKey: qk.deviations("INCOMING"), queryFn: () => listDeviations("INCOMING") });
+  const openNonconformities = useQuery({ queryKey: qk.nonconformities("INCOMING"), queryFn: () => listNonconformities("INCOMING") });
   const recentReceivals = useQuery({ queryKey: qk.receivals(), queryFn: () => listReceivals() });
   const pendingCounts = useQuery({ queryKey: qk.countRequests("PENDING"), queryFn: () => listCountRequests("PENDING") });
 
@@ -156,14 +156,14 @@ function StorekeeperOverview() {
           👋 Welcome back, {username}
         </Title>
         <Text c="dimmed" fz="sm">
-          Manage stock, receivals, and defect reports from here.
+          Manage stock, receivals, and nonconformity reports from here.
         </Text>
       </Paper>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }}>
         <StatCard label="Low stock items" value={lowStock.data?.length ?? 0} icon={<IconAlertHexagon size={22} />} color="red" to="/warnings" hint="Below reorder level" />
         <StatCard label="Pending count requests" value={pendingCounts.data?.length ?? 0} icon={<IconClipboardCheck size={22} />} color="indigo" to="/count-requests" />
-        <StatCard label="Open defects" value={openDefects.data?.length ?? 0} icon={<IconAlertTriangle size={22} />} color="orange" to="/defects" />
+        <StatCard label="Open nonconformities" value={openNonconformities.data?.length ?? 0} icon={<IconAlertTriangle size={22} />} color="orange" to="/nonconformities" />
         <StatCard label="Total receivals" value={recentReceivals.data?.totalElements ?? 0} icon={<IconPackageImport size={22} />} color="teal" to="/receiving" />
       </SimpleGrid>
 
@@ -178,8 +178,8 @@ function StorekeeperOverview() {
           <Button leftSection={<IconPackageExport size={16} />} variant="light" onClick={() => navigate("/issuing/new")}>
             Issue goods
           </Button>
-          <Button leftSection={<IconAlertTriangle size={16} />} variant="light" color="red" onClick={() => navigate("/defects/new")}>
-            Report defect
+          <Button leftSection={<IconAlertTriangle size={16} />} variant="light" color="red" onClick={() => navigate("/nonconformities/new")}>
+            Report nonconformity
           </Button>
         </Group>
       </Paper>
@@ -218,7 +218,7 @@ function StorekeeperOverview() {
 function QualityAssuranceOverview() {
   const navigate = useNavigate();
   const { username } = useAuth();
-  const summary = useQuery({ queryKey: qk.qaDefectSummary(), queryFn: getQaDefectSummary });
+  const summary = useQuery({ queryKey: qk.qaNonconformitySummary(), queryFn: getQaNonconformitySummary });
   const s = summary.data;
 
   return (
@@ -231,10 +231,10 @@ function QualityAssuranceOverview() {
               👋 Welcome back, {username}
             </Title>
             <Text c="dimmed" fz="sm">
-              Review and action incoming defect reports.
+              Review and action open nonconformity reports.
             </Text>
           </div>
-          <Button onClick={() => navigate("/qa/defects")}>Review defects</Button>
+          <Button onClick={() => navigate("/qa/nonconformities")}>Review nonconformities</Button>
         </Group>
       </Paper>
 
@@ -248,10 +248,11 @@ function QualityAssuranceOverview() {
           labelPosition="left"
           mb="md"
         />
-        <SimpleGrid cols={{ base: 1, sm: 3 }}>
-          <StatCard label="Pending review" value={s?.pendingCount ?? 0} icon={<IconAlertTriangle size={22} />} color="yellow" to="/qa/defects" hint="Awaiting your decision" />
-          <StatCard label="Approved" value={s?.approvedCount ?? 0} icon={<IconCheck size={22} />} color="green" />
+        <SimpleGrid cols={{ base: 1, sm: 4 }}>
+          <StatCard label="Awaiting review" value={(s?.raisedCount ?? 0) + (s?.underReviewCount ?? 0)} icon={<IconAlertTriangle size={22} />} color="yellow" to="/qa/nonconformities" hint="Awaiting your decision" />
+          <StatCard label="Dispositioned" value={s?.dispositionedCount ?? 0} icon={<IconCheck size={22} />} color="green" />
           <StatCard label="Rejected" value={s?.rejectedCount ?? 0} icon={<IconX size={22} />} color="red" />
+          <StatCard label="Closed" value={s?.closedCount ?? 0} icon={<IconThumbUp size={22} />} color="teal" />
         </SimpleGrid>
       </div>
 

@@ -7,20 +7,20 @@ import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
-import type { DeviationRequest } from "@core/types";
-import { listDeviationsByStatus } from "../api";
+import type { NonconformityReport, NonconformityStatus } from "@core/types";
+import { listNonconformitiesByStatus } from "../api";
 
-export function QualityAssuranceDefectReviewPage() {
+export function QualityAssuranceNonconformityReviewPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState("ALL");
-  const [statusFilter, setStatusFilter] = useState("PENDING");
+  const [statusFilter, setStatusFilter] = useState("RAISED");
   const userLabel = useUserLabels();
 
-  const status = statusFilter === "ALL" ? undefined : statusFilter as "PENDING" | "APPROVED" | "REJECTED";
+  const status = statusFilter === "ALL" ? undefined : (statusFilter as NonconformityStatus);
   const { data, isLoading, error } = useQuery({
-    queryKey: qk.deviationsByStatus(statusFilter),
-    queryFn: () => listDeviationsByStatus(status),
+    queryKey: qk.nonconformitiesByStatus(statusFilter),
+    queryFn: () => listNonconformitiesByStatus(status),
   });
 
   const STAGE_OPTIONS = [
@@ -32,51 +32,50 @@ export function QualityAssuranceDefectReviewPage() {
 
   const STATUS_OPTIONS = [
     { label: "All statuses", value: "ALL" },
-    { label: "Pending", value: "PENDING" },
-    { label: "Approved", value: "APPROVED" },
+    { label: "Raised", value: "RAISED" },
+    { label: "Under review", value: "UNDER_REVIEW" },
+    { label: "Dispositioned", value: "DISPOSITIONED" },
     { label: "Rejected", value: "REJECTED" },
+    { label: "Closed", value: "CLOSED" },
   ];
 
   const term = search.trim().toLowerCase();
   const rows = (data ?? []).filter((d) => {
-    if (stageFilter !== "ALL" && d.stage !== stageFilter) return false;
-    if (term && !userLabel(d.requestedByUserId).toLowerCase().includes(term) && !(d.reason ?? "").toLowerCase().includes(term)) return false;
+    if (stageFilter !== "ALL" && d.detectionStage !== stageFilter) return false;
+    if (term && !userLabel(d.reportedByUserId).toLowerCase().includes(term) && !(d.description ?? "").toLowerCase().includes(term)) return false;
     return true;
   });
 
-  const columns: Column<DeviationRequest>[] = [
-    { header: "Reported by", emphasis: true, render: (d) => userLabel(d.requestedByUserId) },
-    { header: "Reason", render: (d) => d.reason || "—" },
+  const columns: Column<NonconformityReport>[] = [
+    { header: "Reported by", emphasis: true, render: (d) => userLabel(d.reportedByUserId) },
+    { header: "Description", render: (d) => d.description || "—" },
     { header: "Items", align: "right", render: (d) => d.items.length },
-    {
-      header: "Raised",
-      render: (d) => new Date(d.requestedAt).toLocaleDateString(),
-    },
-    { header: "Stage", render: (d) => <StatusBadge status={d.stage} /> },
+    { header: "Raised", render: (d) => new Date(d.reportedAt).toLocaleDateString() },
+    { header: "Stage", render: (d) => <StatusBadge status={d.detectionStage} /> },
     { header: "Status", render: (d) => <StatusBadge status={d.status} /> },
   ];
 
   return (
     <div>
-      <PageHeader title="Defect review" />
+      <PageHeader title="Nonconformity review" />
 
       <TableToolbar
         filters={[
           { label: "Status", value: statusFilter, onChange: setStatusFilter, options: STATUS_OPTIONS },
           { label: "Stage", value: stageFilter, onChange: setStageFilter, options: STAGE_OPTIONS },
         ]}
-        search={{ value: search, onChange: setSearch, placeholder: "Search reporter or reason…" }}
+        search={{ value: search, onChange: setSearch, placeholder: "Search reporter or description…" }}
       />
 
-      <DataTable<DeviationRequest>
+      <DataTable<NonconformityReport>
         data={rows}
         loading={isLoading}
         error={error}
         rowKey={(d) => d.id}
-        onRowClick={(d) => navigate(`/defects/${d.id}`)}
+        onRowClick={(d) => navigate(`/nonconformities/${d.id}`)}
         empty={
           <Text c="dimmed" p="md">
-            No defect reports awaiting review.
+            No nonconformity reports match this filter.
           </Text>
         }
         columns={columns}

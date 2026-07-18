@@ -1,10 +1,10 @@
 import { Route } from "react-router-dom";
 import { RequirePermission } from "@auth/RequirePermission";
-import { STOCK_VIEW, DEFECT_VIEW, DASHBOARD_ADMIN, COUNT_REQUEST } from "@auth/permissions";
+import { STOCK_VIEW, NCR_VIEW, DASHBOARD_ADMIN, COUNT_REQUEST } from "@auth/permissions";
 import { ReceivingListPage, NewReceivalPage, ReceivalDetailPage } from "./goods-receiving";
 import { IssueListPage, NewIssuePage, IssueDetailPage } from "./goods-issuing";
 import { ItemsPage, ItemDetailPage, SuppliersPage, WarningsPage } from "./inventory";
-import { DeviationBoardPage, NewDeviationPage, DeviationDetailPage, DefectItemsPage } from "./defects";
+import { NonconformityBoardPage, NewNonconformityPage, NonconformityDetailPage, NonconformityItemsPage } from "./nonconformities";
 import { RequestListPage, RequestDetailPage } from "./borrow-requests";
 import { StockMovementsPage, StockMovementDetailPage } from "./stock-movements";
 import { CountRequestsPage } from "./count-adjustments";
@@ -35,14 +35,14 @@ export const storeRoutes = (
       <Route path="requests/:id" element={<RequestDetailPage />} />
     </Route>
 
-    {/* Defects — reported by store keepers, reviewed by QA; both need the board. */}
-    <Route element={<RequirePermission perform={DEFECT_VIEW} />}>
-      <Route path="defects" element={<DeviationBoardPage />} />
-      <Route path="defects/new" element={<NewDeviationPage />} />
-      <Route path="defects/:id" element={<DeviationDetailPage />} />
+    {/* Nonconformities — raised by store keepers, reviewed by QA; both need the board. */}
+    <Route element={<RequirePermission perform={NCR_VIEW} />}>
+      <Route path="nonconformities" element={<NonconformityBoardPage />} />
+      <Route path="nonconformities/new" element={<NewNonconformityPage />} />
+      <Route path="nonconformities/:id" element={<NonconformityDetailPage />} />
     </Route>
     <Route element={<RequirePermission perform={DASHBOARD_ADMIN} />}>
-      <Route path="defects/items" element={<DefectItemsPage />} />
+      <Route path="nonconformities/items" element={<NonconformityItemsPage />} />
     </Route>
 
     <Route element={<RequirePermission perform={COUNT_REQUEST} />}>
