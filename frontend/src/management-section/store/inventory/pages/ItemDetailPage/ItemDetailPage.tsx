@@ -1,28 +1,16 @@
-import { useState } from "react";
-import { Button, Card, Text } from "@mantine/core";
+import { Button, Text } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { TableToolbar } from "@ui/data";
-import { useCan } from "@auth/useCan";
-import { ITEM_EDIT } from "@auth/permissions";
-import { getItem } from "../api";
-import { ItemEditModal } from "../components/ItemEditModal";
-import { StockPanel } from "../components/StockPanel";
+import { useItemDetail } from "./hooks/use-item-detail";
+import { ItemDetailCard } from "./item-detail-card";
+import { ItemEditModal } from "../../components/ItemEditModal";
 
 export function ItemDetailPage() {
-  const { id = "" } = useParams();
   const navigate = useNavigate();
-  const can = useCan();
-  const canEdit = can(ITEM_EDIT);
-  const [editing, setEditing] = useState(false);
-
-  const { data: item, isLoading, error } = useQuery({
-    queryKey: ["item", id],
-    queryFn: () => getItem(id),
-  });
+  const { canEdit, editing, setEditing, item, isLoading, error } = useItemDetail();
 
   return (
     <div>
@@ -44,11 +32,7 @@ export function ItemDetailPage() {
       />
 
       <QueryBoundary loading={isLoading} error={error} isEmpty={!item} empty={<Text>Not found.</Text>}>
-        {item && (
-          <Card withBorder radius="md" padding="lg">
-            <StockPanel item={item} />
-          </Card>
-        )}
+        {item && <ItemDetailCard item={item} />}
       </QueryBoundary>
 
       <ItemEditModal item={editing ? item ?? null : null} onClose={() => setEditing(false)} />
