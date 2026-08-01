@@ -14,6 +14,7 @@ export default defineConfig({
       "@users": r("./src/management-section/users"),
       "@admin": r("./src/management-section/admin"),
       "@qa": r("./src/management-section/qa"),
+      "@oilmart": r("./src/oil-mart-section/oil-mart"),
       "@dashboard": r("./src/dashboard"),
       "@ui": r("./src/ui"),
       "@core": r("./src/core"),

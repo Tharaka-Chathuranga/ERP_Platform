@@ -486,3 +486,181 @@ export interface FuelOverview {
     consumptionSincePrevious?: number;
   };
 }
+
+export type OilType = "ENGINE" | "HYDRAULIC" | "GEAR" | "BRAKE" | "COOLANT" | "GREASE" | "TRANSMISSION";
+export type OilMartItemStatus = "ACTIVE" | "INACTIVE";
+export type OilMartSupplierStatus = "ACTIVE" | "INACTIVE";
+export type OilMartClientStatus = "ACTIVE" | "INACTIVE";
+
+export type OilMartMovementType = "RECEIPT" | "SALE" | "ADJUSTMENT";
+export type OilMartMovementReferenceType = "RECEIPT" | "SALE" | "MANUAL";
+
+export type OilMartSaleStatus =
+  | "QUOTATION"
+  | "ORDERED"
+  | "APPROVED"
+  | "REJECTED"
+  | "DISPATCHED"
+  | "INVOICED"
+  | "CANCELLED";
+
+export type OilMartPaymentMethod = "CASH" | "CARD" | "BANK_TRANSFER";
+
+export interface OilMartItem {
+  id: string;
+  code: string;
+  name: string;
+  oilType: OilType;
+  brand?: string;
+  grade?: string;
+  description?: string;
+  reorderLevelLitres: number;
+  status: OilMartItemStatus;
+}
+
+export interface OilMartItemPrice {
+  id: string;
+  itemId: string;
+  buyPrice: number;
+  sellPrice: number;
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  recordedByUserId: string;
+  note?: string;
+}
+
+export interface OilMartSupplier {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  status: OilMartSupplierStatus;
+}
+
+export interface OilMartClient {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  status: OilMartClientStatus;
+}
+
+export interface OilMartStockBalance {
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  oilType: OilType;
+  quantityOnHand: number;
+  reorderLevelLitres: number;
+  buyPrice?: number;
+  sellPrice?: number;
+  stockValue: number;
+  lastMovementAt?: string;
+}
+
+export interface OilMartStockMovement {
+  id: string;
+  itemId: string;
+  movementType: OilMartMovementType;
+  quantityDelta: number;
+  balanceAfter: number;
+  referenceType: OilMartMovementReferenceType;
+  referenceId?: string;
+  referenceNo?: string;
+  movedAt: string;
+  movedByUserId: string;
+  note?: string;
+}
+
+export interface OilMartReceiptLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  quantityLitres: number;
+  buyUnitPrice: number;
+  lineTotal: number;
+}
+
+export interface OilMartReceipt {
+  id: string;
+  receiptNo: string;
+  supplierId: string;
+  supplierName: string;
+  referenceNo?: string;
+  receivedAt: string;
+  receivedByUserId: string;
+  totalCost: number;
+  note?: string;
+  lines: OilMartReceiptLine[];
+}
+
+export interface OilMartSaleLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  quantityLitres: number;
+  listUnitPrice: number;
+  unitPrice: number;
+  isPriceOverride: boolean;
+  discountPercent: number;
+  lineTotal: number;
+}
+
+export interface OilMartSale {
+  id: string;
+  saleNo: string;
+  clientId: string;
+  clientName: string;
+  status: OilMartSaleStatus;
+  createdByUserId: string;
+  quotedAt: string;
+  validUntil?: string;
+  orderedAt?: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+  dispatchedAt?: string;
+  dispatchedByUserId?: string;
+  vehicleNo?: string;
+  driverName?: string;
+  invoiceNo?: string;
+  invoicedAt?: string;
+  invoicedByUserId?: string;
+  paymentMethod?: OilMartPaymentMethod;
+  cancellationReason?: string;
+  subtotal: number;
+  discountAmount: number;
+  total: number;
+  note?: string;
+  lines: OilMartSaleLine[];
+}
+
+export interface OilMartSalesTrendPoint {
+  date: string;
+  total: number;
+}
+
+export interface OilMartRevenueByMethod {
+  paymentMethod: OilMartPaymentMethod;
+  total: number;
+}
+
+export interface OilMartOverview {
+  stockValue: number;
+  salesThisPeriod: number;
+  saleCountThisPeriod: number;
+  awaitingApproval: number;
+  lowStockCount: number;
+  salesTrend: OilMartSalesTrendPoint[];
+  revenueByMethod: OilMartRevenueByMethod[];
+  lowStock: OilMartStockBalance[];
+  pendingApprovals: OilMartSale[];
+}

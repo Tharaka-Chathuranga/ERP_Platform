@@ -7,7 +7,12 @@
  * single new permission. The backend `@PreAuthorize` rules are the real
  * enforcement — this only drives the UX so users don't see what they can't do.
  */
-export type Role = "ADMIN" | "STORE_KEEPER" | "QUALITY_ASSURANCE";
+export type Role =
+  | "ADMIN"
+  | "STORE_KEEPER"
+  | "QUALITY_ASSURANCE"
+  | "OIL_MART_ASSISTANT"
+  | "STORES_MANAGER";
 
 export type Permission =
   | "stock:view" // view stock levels, movements, low-stock warnings
@@ -21,11 +26,43 @@ export type Permission =
   | "ncr:review" // review, disposition / reject & close nonconformity reports
   | "dashboard:qa" // quality-assurance overview
   | "fuel:view" // view fuel tanks, vehicle issues, refills, readings & prices
-  | "fuel:manage"; // manage vehicle master data & add fuel prices
+  | "fuel:manage" // manage vehicle master data & add fuel prices
+  | "oilmart:view"
+  | "oilmart:receive"
+  | "oilmart:client:manage"
+  | "oilmart:sale:create"
+  | "oilmart:sale:approve"
+  | "oilmart:item:manage"
+  | "oilmart:price:manage"
+  | "oilmart:report";
+
+const OIL_MART_ALL: Permission[] = [
+  "oilmart:view",
+  "oilmart:receive",
+  "oilmart:client:manage",
+  "oilmart:sale:create",
+  "oilmart:sale:approve",
+  "oilmart:item:manage",
+  "oilmart:price:manage",
+  "oilmart:report",
+];
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   STORE_KEEPER: ["stock:view", "count:request", "ncr:view", "fuel:view"],
   QUALITY_ASSURANCE: ["ncr:view", "ncr:review", "dashboard:qa"],
+  OIL_MART_ASSISTANT: [
+    "oilmart:view",
+    "oilmart:receive",
+    "oilmart:client:manage",
+    "oilmart:sale:create",
+  ],
+  STORES_MANAGER: [
+    "oilmart:view",
+    "oilmart:sale:approve",
+    "oilmart:item:manage",
+    "oilmart:price:manage",
+    "oilmart:report",
+  ],
   ADMIN: [
     "stock:view",
     "item:edit",
@@ -39,6 +76,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "dashboard:qa",
     "fuel:view",
     "fuel:manage",
+    ...OIL_MART_ALL,
   ],
 };
 
@@ -60,3 +98,11 @@ export const NCR_REVIEW: Permission = "ncr:review";
 export const DASHBOARD_QA: Permission = "dashboard:qa";
 export const FUEL_VIEW: Permission = "fuel:view";
 export const FUEL_MANAGE: Permission = "fuel:manage";
+export const OILMART_VIEW: Permission = "oilmart:view";
+export const OILMART_RECEIVE: Permission = "oilmart:receive";
+export const OILMART_CLIENT_MANAGE: Permission = "oilmart:client:manage";
+export const OILMART_SALE_CREATE: Permission = "oilmart:sale:create";
+export const OILMART_SALE_APPROVE: Permission = "oilmart:sale:approve";
+export const OILMART_ITEM_MANAGE: Permission = "oilmart:item:manage";
+export const OILMART_PRICE_MANAGE: Permission = "oilmart:price:manage";
+export const OILMART_REPORT: Permission = "oilmart:report";

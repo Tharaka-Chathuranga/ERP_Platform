@@ -21,6 +21,8 @@
       "@admin/*": ["src/management-section/admin/*"],
       "@qa": ["src/management-section/qa/index.ts"],
       "@qa/*": ["src/management-section/qa/*"],
+      "@oilmart": ["src/oil-mart-section/oil-mart/index.ts"],
+      "@oilmart/*": ["src/oil-mart-section/oil-mart/*"],
       "@dashboard": ["src/dashboard/index.ts"],
       "@dashboard/*": ["src/dashboard/*"],
       "@ui/*": ["src/ui/*"],
