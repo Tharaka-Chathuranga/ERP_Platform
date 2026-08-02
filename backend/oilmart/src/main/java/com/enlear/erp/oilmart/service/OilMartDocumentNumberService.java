@@ -19,9 +19,11 @@ public class OilMartDocumentNumberService {
 
     @Transactional(propagation = Propagation.MANDATORY)
     public String next(OilMartDocumentType docType) {
-        int year = LocalDate.now().getYear();
-        OilMartDocumentCounter counter = counters.findForUpdate(docType, year)
-                .orElseGet(() -> counters.save(new OilMartDocumentCounter(docType, year)));
+        LocalDate today = LocalDate.now();
+        int year = today.getYear();
+        int month = today.getMonthValue();
+        OilMartDocumentCounter counter = counters.findForUpdate(docType, year, month)
+                .orElseGet(() -> counters.save(new OilMartDocumentCounter(docType, year, month)));
         String number = counter.allocate();
         counters.save(counter);
         return number;

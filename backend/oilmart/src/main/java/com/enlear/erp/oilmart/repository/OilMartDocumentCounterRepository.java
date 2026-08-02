@@ -13,7 +13,11 @@ public interface OilMartDocumentCounterRepository
         extends JpaRepository<OilMartDocumentCounter, OilMartDocumentCounter.Key> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select c from OilMartDocumentCounter c where c.docType = :docType and c.year = :year")
+    @Query("""
+            select c from OilMartDocumentCounter c
+            where c.docType = :docType and c.year = :year and c.month = :month
+            """)
     Optional<OilMartDocumentCounter> findForUpdate(@Param("docType") OilMartDocumentType docType,
-                                                   @Param("year") Integer year);
+                                                   @Param("year") Integer year,
+                                                   @Param("month") Integer month);
 }
