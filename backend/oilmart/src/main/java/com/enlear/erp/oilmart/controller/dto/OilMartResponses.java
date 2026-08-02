@@ -147,7 +147,8 @@ public final class OilMartResponses {
 
     public record OilMartSaleResponse(
             UUID id, String saleNo, UUID clientId, String clientName, OilMartSaleStatus status,
-            UUID createdByUserId, Instant quotedAt, LocalDate validUntil, Instant orderedAt,
+            UUID createdByUserId, Instant quotedAt, LocalDate validUntil,
+            UUID quotationApprovedByUserId, Instant quotationApprovedAt, Instant orderedAt,
             UUID approvedByUserId, Instant approvedAt, String rejectionReason,
             Instant dispatchedAt, UUID dispatchedByUserId, String vehicleNo, String driverName,
             String invoiceNo, Instant invoicedAt, UUID invoicedByUserId,
@@ -159,7 +160,8 @@ public final class OilMartResponses {
                                                Map<UUID, OilMartItem> itemsById) {
             return new OilMartSaleResponse(sale.getId(), sale.getSaleNo(), sale.getClientId(),
                     clientName, sale.getStatus(), sale.getCreatedByUserId(), sale.getQuotedAt(),
-                    sale.getValidUntil(), sale.getOrderedAt(), sale.getApprovedByUserId(),
+                    sale.getValidUntil(), sale.getQuotationApprovedByUserId(),
+                    sale.getQuotationApprovedAt(), sale.getOrderedAt(), sale.getApprovedByUserId(),
                     sale.getApprovedAt(), sale.getRejectionReason(), sale.getDispatchedAt(),
                     sale.getDispatchedByUserId(), sale.getVehicleNo(), sale.getDriverName(),
                     sale.getInvoiceNo(), sale.getInvoicedAt(), sale.getInvoicedByUserId(),

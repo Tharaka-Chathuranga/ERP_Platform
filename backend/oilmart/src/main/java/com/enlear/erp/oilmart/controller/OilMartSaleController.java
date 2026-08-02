@@ -47,7 +47,7 @@ public class OilMartSaleController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public ResponseEntity<OilMartSaleResponse> create(
             @Valid @RequestBody CreateOilMartSaleRequest request) {
         var sale = sales.createQuotation(request.toCommand());
@@ -56,10 +56,23 @@ public class OilMartSaleController {
                 .body(assembler.toResponse(sale));
     }
 
-    @PostMapping("/{saleId}/confirm")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT')")
-    public OilMartSaleResponse confirmOrder(@PathVariable UUID saleId) {
-        return assembler.toResponse(sales.confirmOrder(saleId));
+    @PostMapping("/{saleId}/submit")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    public OilMartSaleResponse submitForApproval(@PathVariable UUID saleId) {
+        return assembler.toResponse(sales.submitForApproval(saleId));
+    }
+
+    @PostMapping("/{saleId}/approve-quotation")
+    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    public OilMartSaleResponse approveQuotation(@PathVariable UUID saleId) {
+        return assembler.toResponse(sales.approveQuotation(saleId));
+    }
+
+    @PostMapping("/{saleId}/reject-quotation")
+    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    public OilMartSaleResponse rejectQuotation(@PathVariable UUID saleId,
+                                               @Valid @RequestBody RejectOilMartSaleRequest request) {
+        return assembler.toResponse(sales.rejectQuotation(saleId, request.reason()));
     }
 
     @PostMapping("/{saleId}/approve")
@@ -76,21 +89,21 @@ public class OilMartSaleController {
     }
 
     @PostMapping("/{saleId}/dispatch")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartSaleResponse dispatch(@PathVariable UUID saleId,
                                         @Valid @RequestBody DispatchOilMartSaleRequest request) {
         return assembler.toResponse(sales.dispatch(saleId, request.toCommand()));
     }
 
     @PostMapping("/{saleId}/invoice")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartSaleResponse invoice(@PathVariable UUID saleId,
                                        @Valid @RequestBody InvoiceOilMartSaleRequest request) {
         return assembler.toResponse(sales.raiseInvoice(saleId, request.paymentMethod()));
     }
 
     @PostMapping("/{saleId}/cancel")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartSaleResponse cancel(@PathVariable UUID saleId,
                                       @Valid @RequestBody CancelOilMartSaleRequest request) {
         return assembler.toResponse(sales.cancel(saleId, request.reason()));

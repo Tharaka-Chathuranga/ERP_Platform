@@ -44,6 +44,12 @@ public class OilMartSale extends BaseEntity {
     @Column(name = "valid_until")
     private LocalDate validUntil;
 
+    @Column(name = "quotation_approved_by_user_id")
+    private UUID quotationApprovedByUserId;
+
+    @Column(name = "quotation_approved_at")
+    private Instant quotationApprovedAt;
+
     @Column(name = "ordered_at")
     private Instant orderedAt;
 
@@ -118,20 +124,34 @@ public class OilMartSale extends BaseEntity {
         recalculateTotals();
     }
 
-    public void confirmOrder(String orderNo) {
-        requireStatus(OilMartSaleStatus.QUOTATION, "confirmed as an order");
-        if (validUntil != null && validUntil.isBefore(LocalDate.now())) {
-            throw new BusinessRuleException("OILMART_SALE_QUOTATION_EXPIRED",
-                    "This quotation expired on %s and must be re-quoted".formatted(validUntil));
-        }
+    public void submitForApproval() {
+        requireStatus(OilMartSaleStatus.QUOTATION, "submitted for quotation approval");
+        requireNotExpired();
+        this.status = OilMartSaleStatus.QUOTATION_APPROVAL;
+    }
+
+    public void approveQuotation(UUID approverId, String orderNo) {
+        requireStatus(OilMartSaleStatus.QUOTATION_APPROVAL, "approved as a quotation");
+        requireNotExpired();
+        this.quotationApprovedByUserId = approverId;
+        this.quotationApprovedAt = Instant.now();
         this.saleNo = orderNo;
         this.status = OilMartSaleStatus.ORDERED;
         this.orderedAt = Instant.now();
+        this.rejectionReason = null;
+    }
+
+    public void rejectQuotation(UUID approverId, String reason) {
+        requireStatus(OilMartSaleStatus.QUOTATION_APPROVAL, "rejected at quotation approval");
+        requireReason(reason, "rejection");
+        this.status = OilMartSaleStatus.REJECTED;
+        this.quotationApprovedByUserId = approverId;
+        this.quotationApprovedAt = Instant.now();
+        this.rejectionReason = reason;
     }
 
     public void approve(UUID approverId) {
         requireStatus(OilMartSaleStatus.ORDERED, "approved");
-        requireDifferentApprover(approverId);
         this.status = OilMartSaleStatus.APPROVED;
         this.approvedByUserId = approverId;
         this.approvedAt = Instant.now();
@@ -140,7 +160,6 @@ public class OilMartSale extends BaseEntity {
 
     public void reject(UUID approverId, String reason) {
         requireStatus(OilMartSaleStatus.ORDERED, "rejected");
-        requireDifferentApprover(approverId);
         requireReason(reason, "rejection");
         this.status = OilMartSaleStatus.REJECTED;
         this.approvedByUserId = approverId;
@@ -171,9 +190,12 @@ public class OilMartSale extends BaseEntity {
     }
 
     public void cancel(String reason) {
-        if (status != OilMartSaleStatus.QUOTATION && status != OilMartSaleStatus.ORDERED) {
+        if (status != OilMartSaleStatus.QUOTATION
+                && status != OilMartSaleStatus.QUOTATION_APPROVAL
+                && status != OilMartSaleStatus.ORDERED) {
             throw new BusinessRuleException("OILMART_SALE_ILLEGAL_TRANSITION",
-                    "Only a QUOTATION or ORDERED sale can be cancelled (current: %s)".formatted(status));
+                    "Only a QUOTATION, QUOTATION_APPROVAL or ORDERED sale can be cancelled (current: %s)"
+                            .formatted(status));
         }
         this.status = OilMartSaleStatus.CANCELLED;
         this.cancellationReason = reason;
@@ -192,17 +214,17 @@ public class OilMartSale extends BaseEntity {
         this.total = net;
     }
 
+    private void requireNotExpired() {
+        if (validUntil != null && validUntil.isBefore(LocalDate.now())) {
+            throw new BusinessRuleException("OILMART_SALE_QUOTATION_EXPIRED",
+                    "This quotation expired on %s and must be re-quoted".formatted(validUntil));
+        }
+    }
+
     private void requireStatus(OilMartSaleStatus expected, String action) {
         if (status != expected) {
             throw new BusinessRuleException("OILMART_SALE_ILLEGAL_TRANSITION",
                     "Only a %s sale can be %s (current: %s)".formatted(expected, action, status));
-        }
-    }
-
-    private void requireDifferentApprover(UUID approverId) {
-        if (approverId != null && approverId.equals(createdByUserId)) {
-            throw new BusinessRuleException("OILMART_SALE_SELF_APPROVAL",
-                    "The approver must differ from the person who raised the sale");
         }
     }
 

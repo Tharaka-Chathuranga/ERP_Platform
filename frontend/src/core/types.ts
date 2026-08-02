@@ -497,6 +497,7 @@ export type OilMartMovementReferenceType = "RECEIPT" | "SALE" | "MANUAL";
 
 export type OilMartSaleStatus =
   | "QUOTATION"
+  | "QUOTATION_APPROVAL"
   | "ORDERED"
   | "APPROVED"
   | "REJECTED"
@@ -623,6 +624,8 @@ export interface OilMartSale {
   createdByUserId: string;
   quotedAt: string;
   validUntil?: string;
+  quotationApprovedByUserId?: string;
+  quotationApprovedAt?: string;
   orderedAt?: string;
   approvedByUserId?: string;
   approvedAt?: string;

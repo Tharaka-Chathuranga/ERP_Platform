@@ -80,15 +80,52 @@ export const saleHandlers = [
     return HttpResponse.json(created, { status: 201 });
   }),
 
-  http.post("/api/oilmart/sales/:saleId/confirm", async ({ params }) => {
+  http.post("/api/oilmart/sales/:saleId/submit", async ({ params }) => {
+    await delay(220);
+    const sale = findSale(String(params.saleId));
+    if (!sale) return notFound();
+    if (sale.status !== "QUOTATION") {
+      return illegal(sale, "QUOTATION", "submitted for quotation approval");
+    }
+
+    sale.status = "QUOTATION_APPROVAL";
+    return HttpResponse.json(sale);
+  }),
+
+  http.post("/api/oilmart/sales/:saleId/approve-quotation", async ({ params }) => {
     await delay(260);
     const sale = findSale(String(params.saleId));
     if (!sale) return notFound();
-    if (sale.status !== "QUOTATION") return illegal(sale, "QUOTATION", "confirmed as an order");
+    if (sale.status !== "QUOTATION_APPROVAL") {
+      return illegal(sale, "QUOTATION_APPROVAL", "approved as a quotation");
+    }
 
+    sale.quotationApprovedByUserId = currentUserId();
+    sale.quotationApprovedAt = new Date().toISOString();
     sale.status = "ORDERED";
     sale.saleNo = nextDocumentNo("SO");
     sale.orderedAt = new Date().toISOString();
+    sale.rejectionReason = undefined;
+    return HttpResponse.json(sale);
+  }),
+
+  http.post("/api/oilmart/sales/:saleId/reject-quotation", async ({ params, request }) => {
+    await delay(260);
+    const sale = findSale(String(params.saleId));
+    if (!sale) return notFound();
+    if (sale.status !== "QUOTATION_APPROVAL") {
+      return illegal(sale, "QUOTATION_APPROVAL", "rejected at quotation approval");
+    }
+
+    const { reason } = (await request.json()) as { reason: string };
+    if (!reason?.trim()) {
+      return HttpResponse.json({ detail: "A rejection reason is required" }, { status: 400 });
+    }
+
+    sale.status = "REJECTED";
+    sale.quotationApprovedByUserId = currentUserId();
+    sale.quotationApprovedAt = new Date().toISOString();
+    sale.rejectionReason = reason;
     return HttpResponse.json(sale);
   }),
 
@@ -98,19 +135,8 @@ export const saleHandlers = [
     if (!sale) return notFound();
     if (sale.status !== "ORDERED") return illegal(sale, "ORDERED", "approved");
 
-    const approver = currentUserId();
-    if (approver === sale.createdByUserId) {
-      return HttpResponse.json(
-        {
-          title: "Self approval",
-          detail: "The approver must differ from the person who raised the sale",
-        },
-        { status: 409 },
-      );
-    }
-
     sale.status = "APPROVED";
-    sale.approvedByUserId = approver;
+    sale.approvedByUserId = currentUserId();
     sale.approvedAt = new Date().toISOString();
     sale.rejectionReason = undefined;
     return HttpResponse.json(sale);
@@ -187,11 +213,15 @@ export const saleHandlers = [
     await delay(240);
     const sale = findSale(String(params.saleId));
     if (!sale) return notFound();
-    if (sale.status !== "QUOTATION" && sale.status !== "ORDERED") {
+    if (
+      sale.status !== "QUOTATION" &&
+      sale.status !== "QUOTATION_APPROVAL" &&
+      sale.status !== "ORDERED"
+    ) {
       return HttpResponse.json(
         {
           title: "Illegal transition",
-          detail: `Only a QUOTATION or ORDERED sale can be cancelled (current: ${sale.status})`,
+          detail: `Only a QUOTATION, QUOTATION_APPROVAL or ORDERED sale can be cancelled (current: ${sale.status})`,
         },
         { status: 409 },
       );

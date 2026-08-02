@@ -8,15 +8,25 @@ import { listOilMartStock } from "../../../../../stock/api";
 import {
   approveOilMartSale,
   cancelOilMartSale,
-  confirmOilMartSaleOrder,
+  approveOilMartQuotation,
   dispatchOilMartSale,
   getOilMartSale,
   invoiceOilMartSale,
+  rejectOilMartQuotation,
   rejectOilMartSale,
+  submitOilMartSaleForApproval,
   type DispatchOilMartSaleInput,
 } from "../../../../api";
 
-type ModalKind = "approve" | "reject" | "dispatch" | "invoice" | "cancel" | null;
+type ModalKind =
+  | "approveQuotation"
+  | "rejectQuotation"
+  | "approve"
+  | "reject"
+  | "dispatch"
+  | "invoice"
+  | "cancel"
+  | null;
 
 export function useOilMartSaleDetail() {
   const { saleId = "" } = useParams();
@@ -44,9 +54,21 @@ export function useOilMartSaleDetail() {
     setModal(null);
   }
 
-  const confirmOrder = useMutation({
-    mutationFn: () => confirmOilMartSaleOrder(saleId),
-    onSuccess: (sale) => afterTransition(sale, `${sale.saleNo} confirmed as an order`),
+  const submitForApproval = useMutation({
+    mutationFn: () => submitOilMartSaleForApproval(saleId),
+    onSuccess: (sale) => afterTransition(sale, `${sale.saleNo} sent for quotation approval`),
+    onError: notifyError,
+  });
+
+  const approveQuotation = useMutation({
+    mutationFn: () => approveOilMartQuotation(saleId),
+    onSuccess: (sale) => afterTransition(sale, `Quotation approved — order ${sale.saleNo} raised`),
+    onError: notifyError,
+  });
+
+  const rejectQuotation = useMutation({
+    mutationFn: (reason: string) => rejectOilMartQuotation(saleId, reason),
+    onSuccess: (sale) => afterTransition(sale, `${sale.saleNo} rejected at quotation approval`),
     onError: notifyError,
   });
 
@@ -82,7 +104,9 @@ export function useOilMartSaleDetail() {
   });
 
   const busy =
-    confirmOrder.isPending ||
+    submitForApproval.isPending ||
+    approveQuotation.isPending ||
+    rejectQuotation.isPending ||
     approve.isPending ||
     reject.isPending ||
     dispatch.isPending ||
@@ -96,7 +120,9 @@ export function useOilMartSaleDetail() {
     modal,
     setModal,
     busy,
-    confirmOrder,
+    submitForApproval,
+    approveQuotation,
+    rejectQuotation,
     approve,
     reject,
     dispatch,

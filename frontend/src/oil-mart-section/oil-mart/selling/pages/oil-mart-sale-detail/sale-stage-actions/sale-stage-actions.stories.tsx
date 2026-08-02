@@ -7,6 +7,7 @@ import { SaleStageActions } from "./sale-stage-actions";
 
 const ALL_STATUSES: OilMartSaleStatus[] = [
   "QUOTATION",
+  "QUOTATION_APPROVAL",
   "ORDERED",
   "APPROVED",
   "DISPATCHED",
@@ -20,7 +21,9 @@ const meta: Meta<typeof SaleStageActions> = {
   component: SaleStageActions,
   args: {
     sale: oilMartSaleByStatus("ORDERED"),
-    onConfirmOrder: fn(),
+    onSubmitForApproval: fn(),
+    onApproveQuotation: fn(),
+    onRejectQuotation: fn(),
     onApprove: fn(),
     onReject: fn(),
     onDispatch: fn(),
@@ -34,6 +37,16 @@ type Story = StoryObj<typeof SaleStageActions>;
 
 export const QuotationAsAssistant: Story = {
   args: { sale: oilMartSaleByStatus("QUOTATION") },
+  parameters: { role: "OIL_MART_ASSISTANT" },
+};
+
+export const QuotationApprovalAsManager: Story = {
+  args: { sale: oilMartSaleByStatus("QUOTATION_APPROVAL") },
+  parameters: { role: "STORES_MANAGER" },
+};
+
+export const QuotationApprovalAsAssistant: Story = {
+  args: { sale: oilMartSaleByStatus("QUOTATION_APPROVAL") },
   parameters: { role: "OIL_MART_ASSISTANT" },
 };
 

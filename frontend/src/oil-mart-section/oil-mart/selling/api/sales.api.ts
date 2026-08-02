@@ -42,8 +42,23 @@ export async function createOilMartSale(input: CreateOilMartSaleInput): Promise<
   return data;
 }
 
-export async function confirmOilMartSaleOrder(saleId: string): Promise<OilMartSale> {
-  const { data } = await api.post<OilMartSale>(`/oilmart/sales/${saleId}/confirm`);
+export async function submitOilMartSaleForApproval(saleId: string): Promise<OilMartSale> {
+  const { data } = await api.post<OilMartSale>(`/oilmart/sales/${saleId}/submit`);
+  return data;
+}
+
+export async function approveOilMartQuotation(saleId: string): Promise<OilMartSale> {
+  const { data } = await api.post<OilMartSale>(`/oilmart/sales/${saleId}/approve-quotation`);
+  return data;
+}
+
+export async function rejectOilMartQuotation(
+  saleId: string,
+  reason: string,
+): Promise<OilMartSale> {
+  const { data } = await api.post<OilMartSale>(`/oilmart/sales/${saleId}/reject-quotation`, {
+    reason,
+  });
   return data;
 }
 

@@ -59,6 +59,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   ],
   STORES_MANAGER: [
     "oilmart:view",
+    "oilmart:sale:create",
     "oilmart:sale:approve",
     "oilmart:item:manage",
     "oilmart:price:manage",

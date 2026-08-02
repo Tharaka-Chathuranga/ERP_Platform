@@ -109,9 +109,21 @@ public class OilMartSaleService {
         return sales.save(sale);
     }
 
-    public OilMartSale confirmOrder(UUID id) {
+    public OilMartSale submitForApproval(UUID id) {
         OilMartSale sale = get(id);
-        sale.confirmOrder(documentNumbers.next(OilMartDocumentType.SO));
+        sale.submitForApproval();
+        return sales.save(sale);
+    }
+
+    public OilMartSale approveQuotation(UUID id) {
+        OilMartSale sale = get(id);
+        sale.approveQuotation(currentUser.requireId(), documentNumbers.next(OilMartDocumentType.SO));
+        return sales.save(sale);
+    }
+
+    public OilMartSale rejectQuotation(UUID id, String reason) {
+        OilMartSale sale = get(id);
+        sale.rejectQuotation(currentUser.requireId(), reason);
         return sales.save(sale);
     }
 

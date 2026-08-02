@@ -29,6 +29,22 @@ export const Quotation: Story = {};
 
 export const EmptyColumn: Story = { args: { status: "APPROVED", sales: [] } };
 
+export const DispatchedWithInvoiceAction: Story = {
+  args: {
+    status: "DISPATCHED",
+    sales: oilMartSales.filter((sale) => sale.status === "DISPATCHED"),
+    onInvoice: fn(),
+  },
+};
+
+export const EmptyQuotationColumnWithStart: Story = {
+  args: { status: "QUOTATION", sales: [], onStartSale: fn() },
+};
+
+export const EmptyQuotationColumnReadOnly: Story = {
+  args: { status: "QUOTATION", sales: [], onStartSale: undefined },
+};
+
 export const EveryColumn: Story = {
   render: () => (
     <Group align="stretch" gap="md" wrap="nowrap" h="100%">

@@ -2,7 +2,8 @@ import { Alert, Button, Card, Group, Stack, Text } from "@mantine/core";
 import {
   IconBan,
   IconCircleCheck,
-  IconClipboardCheck,
+  IconFileCheck,
+  IconSend,
   IconGavel,
   IconInfoCircle,
   IconReceipt,
@@ -17,7 +18,9 @@ import type { OilMartSale } from "@core/types";
 interface SaleStageActionsProps {
   sale: OilMartSale;
   busy?: boolean;
-  onConfirmOrder: () => void;
+  onSubmitForApproval: () => void;
+  onApproveQuotation: () => void;
+  onRejectQuotation: () => void;
   onApprove: () => void;
   onReject: () => void;
   onDispatch: () => void;
@@ -28,7 +31,9 @@ interface SaleStageActionsProps {
 export function SaleStageActions({
   sale,
   busy,
-  onConfirmOrder,
+  onSubmitForApproval,
+  onApproveQuotation,
+  onRejectQuotation,
   onApprove,
   onReject,
   onDispatch,
@@ -69,7 +74,11 @@ export function SaleStageActions({
         <Stack gap={2}>
           <Text fw={600}>Next step</Text>
           <Text size="sm" c="dimmed">
-            {sale.status === "QUOTATION" && "Confirm the quotation to raise a sales order."}
+            {sale.status === "QUOTATION" && "Send this quotation to the stores manager for approval."}
+            {sale.status === "QUOTATION_APPROVAL" &&
+              (canApprove
+                ? "Review the quoted pricing, then approve or reject this quotation."
+                : "Waiting for a stores manager to approve this quotation.")}
             {sale.status === "ORDERED" &&
               (canApprove
                 ? "Review the pricing, then approve or reject this order."
@@ -85,8 +94,26 @@ export function SaleStageActions({
               <Button variant="default" leftSection={<IconBan size={16} />} onClick={onCancel} disabled={busy}>
                 Cancel sale
               </Button>
-              <Button leftSection={<IconClipboardCheck size={16} />} onClick={onConfirmOrder} loading={busy}>
-                Confirm order
+              <Button leftSection={<IconSend size={16} />} onClick={onSubmitForApproval} loading={busy}>
+                Send for approval
+              </Button>
+            </Can>
+          )}
+
+          {sale.status === "QUOTATION_APPROVAL" && (
+            <Can
+              perform={OILMART_SALE_APPROVE}
+              fallback={
+                <Alert color="orange" variant="light" icon={<IconInfoCircle size={16} />} py={6}>
+                  Awaiting quotation approval
+                </Alert>
+              }
+            >
+              <Button color="red" variant="light" leftSection={<IconX size={16} />} onClick={onRejectQuotation} disabled={busy}>
+                Reject
+              </Button>
+              <Button color="orange" leftSection={<IconFileCheck size={16} />} onClick={onApproveQuotation} loading={busy}>
+                Approve quotation
               </Button>
             </Can>
           )}

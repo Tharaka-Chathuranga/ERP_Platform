@@ -4,6 +4,7 @@ import {
   IconBan,
   IconCheck,
   IconClipboardList,
+  IconFileCheck,
   IconFileDescription,
   IconGavel,
   IconReceipt,
@@ -14,13 +15,16 @@ import type { OilMartSaleStatus } from "@core/types";
 
 const ACTIVE_STEP: Record<OilMartSaleStatus, number> = {
   QUOTATION: 0,
-  ORDERED: 1,
-  APPROVED: 2,
-  REJECTED: 2,
-  DISPATCHED: 3,
-  INVOICED: 4,
+  QUOTATION_APPROVAL: 1,
+  ORDERED: 2,
+  APPROVED: 3,
+  REJECTED: 3,
+  DISPATCHED: 4,
+  INVOICED: 5,
   CANCELLED: 1,
 };
+
+const QUOTATION_APPROVAL_STEP = 1;
 
 interface Step {
   label: string;
@@ -28,38 +32,54 @@ interface Step {
   danger?: boolean;
 }
 
+interface OilMartSaleProgressProps {
+  status: OilMartSaleStatus;
+  orderedAt?: string;
+}
+
 export function OilMartSaleProgress({
   status,
+  orderedAt,
   ...rest
-}: { status: OilMartSaleStatus } & Record<string, unknown>) {
-  const active = ACTIVE_STEP[status];
+}: OilMartSaleProgressProps & Record<string, unknown>) {
   const rejected = status === "REJECTED";
   const cancelled = status === "CANCELLED";
+  const rejectedAtQuotation = rejected && !orderedAt;
+
+  const active = rejectedAtQuotation ? QUOTATION_APPROVAL_STEP : ACTIVE_STEP[status];
 
   const steps: Step[] = [
     { label: "Quotation", icon: <IconFileDescription size={16} /> },
     {
-      label: cancelled ? "Cancelled" : "Ordered",
-      icon: cancelled ? <IconBan size={16} /> : <IconClipboardList size={16} />,
-      danger: cancelled,
+      label: rejectedAtQuotation ? "Rejected" : cancelled ? "Cancelled" : "Quotation approval",
+      icon: rejectedAtQuotation ? (
+        <IconX size={16} />
+      ) : cancelled ? (
+        <IconBan size={16} />
+      ) : (
+        <IconFileCheck size={16} />
+      ),
+      danger: rejectedAtQuotation || cancelled,
     },
+    { label: "Ordered", icon: <IconClipboardList size={16} /> },
     {
-      label: rejected ? "Rejected" : "Approved",
-      icon: rejected ? <IconX size={16} /> : <IconGavel size={16} />,
-      danger: rejected,
+      label: rejected && !rejectedAtQuotation ? "Rejected" : "Approved",
+      icon: rejected && !rejectedAtQuotation ? <IconX size={16} /> : <IconGavel size={16} />,
+      danger: rejected && !rejectedAtQuotation,
     },
     { label: "Dispatched", icon: <IconTruckDelivery size={16} /> },
     { label: "Invoiced", icon: <IconReceipt size={16} /> },
   ];
 
   const current = Math.min(active, steps.length - 1);
+  const halted = cancelled || rejectedAtQuotation;
 
   return (
     <Group gap={0} wrap="nowrap" style={{ overflowX: "auto" }} {...rest}>
       {steps.map((step, i) => {
         const reached = i <= active;
         const completed = !step.danger && i < active;
-        const dimmed = cancelled && i > active;
+        const dimmed = halted && i > active;
         const filled = step.danger || (reached && !dimmed);
         const bg = step.danger
           ? cancelled
@@ -70,7 +90,7 @@ export function OilMartSaleProgress({
             : "var(--mantine-color-gray-1)";
 
         return (
-          <Fragment key={step.label}>
+          <Fragment key={`${step.label}-${i}`}>
             <Box
               style={{
                 position: "relative",
@@ -125,7 +145,7 @@ export function OilMartSaleProgress({
                   height: 2,
                   minWidth: 16,
                   backgroundColor:
-                    i < active && !cancelled
+                    i < active && !halted
                       ? "var(--mantine-color-green-4)"
                       : "var(--mantine-color-gray-3)",
                 }}

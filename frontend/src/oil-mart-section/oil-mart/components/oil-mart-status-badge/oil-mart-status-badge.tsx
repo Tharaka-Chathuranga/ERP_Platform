@@ -3,6 +3,7 @@ import type { OilMartSaleStatus } from "@core/types";
 
 const SALE_COLORS: Record<OilMartSaleStatus, string> = {
   QUOTATION: "gray",
+  QUOTATION_APPROVAL: "orange",
   ORDERED: "yellow",
   APPROVED: "blue",
   REJECTED: "red",
@@ -13,6 +14,7 @@ const SALE_COLORS: Record<OilMartSaleStatus, string> = {
 
 const SALE_LABELS: Record<OilMartSaleStatus, string> = {
   QUOTATION: "Quotation",
+  QUOTATION_APPROVAL: "Quotation approval",
   ORDERED: "Ordered",
   APPROVED: "Approved",
   REJECTED: "Rejected",
@@ -38,6 +40,7 @@ export function OilMartStatusBadge({ status, ...rest }: OilMartStatusBadgeProps)
 
 export const OIL_MART_SALE_STATUSES: OilMartSaleStatus[] = [
   "QUOTATION",
+  "QUOTATION_APPROVAL",
   "ORDERED",
   "APPROVED",
   "REJECTED",

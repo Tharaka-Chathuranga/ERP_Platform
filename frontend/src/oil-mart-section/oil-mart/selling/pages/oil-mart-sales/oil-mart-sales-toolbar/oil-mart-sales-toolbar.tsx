@@ -58,7 +58,7 @@ export function OilMartSalesToolbar({
           />
           {canCreate && (
             <Button leftSection={<IconPlus size={16} />} onClick={onNew}>
-              New sale
+              Start a sale
             </Button>
           )}
         </Group>

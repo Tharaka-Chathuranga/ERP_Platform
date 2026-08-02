@@ -6,10 +6,10 @@ import { OilMartSaleProgress } from "../../components/oil-mart-sale-progress";
 import { useOilMartSaleDetail } from "./hooks/use-oil-mart-sale-detail";
 import { OilMartSaleDetailCard } from "./oil-mart-sale-detail-card";
 import { SaleStageActions } from "./sale-stage-actions";
-import { ApproveSaleModal } from "./approve-sale-modal";
-import { RejectSaleModal } from "./reject-sale-modal";
-import { DispatchModal } from "./dispatch-modal";
-import { InvoiceModal } from "./invoice-modal";
+import { ApproveSaleModal } from "../../components/approve-sale-modal";
+import { RejectSaleModal } from "../../components/reject-sale-modal";
+import { DispatchModal } from "../../components/dispatch-modal";
+import { InvoiceModal } from "../../components/invoice-modal";
 
 export function OilMartSaleDetailPage() {
   const {
@@ -18,7 +18,9 @@ export function OilMartSaleDetailPage() {
     modal,
     setModal,
     busy,
-    confirmOrder,
+    submitForApproval,
+    approveQuotation,
+    rejectQuotation,
     approve,
     reject,
     dispatch,
@@ -45,13 +47,15 @@ export function OilMartSaleDetailPage() {
         {sale && (
           <>
             <Card withBorder radius="md" padding="lg" mb="lg">
-              <OilMartSaleProgress status={sale.status} />
+              <OilMartSaleProgress status={sale.status} orderedAt={sale.orderedAt} />
             </Card>
 
             <SaleStageActions
               sale={sale}
               busy={busy}
-              onConfirmOrder={() => confirmOrder.mutate()}
+              onSubmitForApproval={() => submitForApproval.mutate()}
+              onApproveQuotation={() => setModal("approveQuotation")}
+              onRejectQuotation={() => setModal("rejectQuotation")}
               onApprove={() => setModal("approve")}
               onReject={() => setModal("reject")}
               onDispatch={() => setModal("dispatch")}
@@ -60,6 +64,25 @@ export function OilMartSaleDetailPage() {
             />
 
             <OilMartSaleDetailCard sale={sale} />
+
+            <ApproveSaleModal
+              opened={modal === "approveQuotation"}
+              sale={sale}
+              title="Approve quotation"
+              description="Approving raises a sales order and allocates its order number."
+              confirmLabel="Approve quotation"
+              submitting={approveQuotation.isPending}
+              onClose={() => setModal(null)}
+              onSubmit={() => approveQuotation.mutate()}
+            />
+
+            <RejectSaleModal
+              opened={modal === "rejectQuotation"}
+              saleNo={sale.saleNo}
+              submitting={rejectQuotation.isPending}
+              onClose={() => setModal(null)}
+              onSubmit={(reason) => rejectQuotation.mutate(reason)}
+            />
 
             <ApproveSaleModal
               opened={modal === "approve"}

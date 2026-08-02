@@ -1,11 +1,14 @@
 import { Alert, Button, Group, Modal, Stack, Table, Text } from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons-react";
 import type { OilMartSale } from "@core/types";
-import { MoneyText } from "../../../../components/money-text";
+import { MoneyText } from "../../../components/money-text";
 
 interface ApproveSaleModalProps {
   opened: boolean;
   sale?: OilMartSale;
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
   submitting?: boolean;
   onClose: () => void;
   onSubmit: () => void;
@@ -14,6 +17,9 @@ interface ApproveSaleModalProps {
 export function ApproveSaleModal({
   opened,
   sale,
+  title = "Approve sale",
+  description,
+  confirmLabel = "Approve",
   submitting,
   onClose,
   onSubmit,
@@ -21,11 +27,11 @@ export function ApproveSaleModal({
   const overrides = sale?.lines.filter((line) => line.isPriceOverride) ?? [];
 
   return (
-    <Modal opened={opened} onClose={onClose} title="Approve sale" centered size="lg">
+    <Modal opened={opened} onClose={onClose} title={title} centered size="lg">
       <Stack gap="md">
         <Text size="sm" c="dimmed">
-          {sale?.saleNo} for {sale?.clientName} will move to Approved and become ready for
-          dispatch.
+          {description ??
+            `${sale?.saleNo} for ${sale?.clientName} will move to Approved and become ready for dispatch.`}
         </Text>
 
         {overrides.length > 0 && (
@@ -72,7 +78,7 @@ export function ApproveSaleModal({
             Cancel
           </Button>
           <Button color="blue" loading={submitting} onClick={onSubmit}>
-            Approve
+            {confirmLabel}
           </Button>
         </Group>
       </Stack>

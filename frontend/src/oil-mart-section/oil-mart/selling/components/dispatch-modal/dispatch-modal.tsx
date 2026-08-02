@@ -3,7 +3,7 @@ import { IconAlertTriangle } from "@tabler/icons-react";
 import { useForm } from "@mantine/form";
 import { useEffect } from "react";
 import type { OilMartSale, OilMartStockBalance } from "@core/types";
-import type { DispatchOilMartSaleInput } from "../../../api";
+import type { DispatchOilMartSaleInput } from "../../api";
 
 interface DispatchModalProps {
   opened: boolean;

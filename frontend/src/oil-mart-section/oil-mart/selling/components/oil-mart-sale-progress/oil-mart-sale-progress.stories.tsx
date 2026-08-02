@@ -5,6 +5,7 @@ import { OilMartSaleProgress } from "./oil-mart-sale-progress";
 
 const ALL_STATUSES: OilMartSaleStatus[] = [
   "QUOTATION",
+  "QUOTATION_APPROVAL",
   "ORDERED",
   "APPROVED",
   "DISPATCHED",
@@ -24,11 +25,15 @@ export default meta;
 type Story = StoryObj<typeof OilMartSaleProgress>;
 
 export const Quotation: Story = { args: { status: "QUOTATION" } };
+export const QuotationApproval: Story = { args: { status: "QUOTATION_APPROVAL" } };
 export const Ordered: Story = { args: { status: "ORDERED" } };
 export const Approved: Story = { args: { status: "APPROVED" } };
 export const Dispatched: Story = { args: { status: "DISPATCHED" } };
 export const Invoiced: Story = { args: { status: "INVOICED" } };
-export const Rejected: Story = { args: { status: "REJECTED" } };
+export const RejectedAtQuotationApproval: Story = { args: { status: "REJECTED" } };
+export const RejectedAtOrderApproval: Story = {
+  args: { status: "REJECTED", orderedAt: "2026-07-29T11:30:00Z" },
+};
 export const Cancelled: Story = { args: { status: "CANCELLED" } };
 
 export const EveryStage: Story = {

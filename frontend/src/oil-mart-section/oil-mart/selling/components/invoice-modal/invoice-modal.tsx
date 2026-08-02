@@ -1,8 +1,8 @@
 import { Button, Group, Modal, Radio, Stack, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import type { OilMartPaymentMethod, OilMartSale } from "@core/types";
-import { PAYMENT_METHOD_OPTIONS } from "../../../components/oil-mart-sale-meta";
-import { MoneyText } from "../../../../components/money-text";
+import { PAYMENT_METHOD_OPTIONS } from "../oil-mart-sale-meta";
+import { MoneyText } from "../../../components/money-text";
 
 interface InvoiceModalProps {
   opened: boolean;

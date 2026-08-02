@@ -15,6 +15,33 @@ export const AsOilMartAssistant: Story = { parameters: { role: "OIL_MART_ASSISTA
 
 export const AsStoresManager: Story = { parameters: { role: "STORES_MANAGER" } };
 
-export const NoSales: Story = {
-  parameters: { msw: { handlers: [http.get("/api/oilmart/sales", () => HttpResponse.json([]))] } },
+export const DriveFlowAsAssistant: Story = {
+  parameters: { role: "OIL_MART_ASSISTANT" },
+};
+
+export const ApproveFromBoardAsManager: Story = {
+  parameters: { role: "STORES_MANAGER" },
+};
+
+export const EmptyBoardAsAssistant: Story = {
+  parameters: {
+    role: "OIL_MART_ASSISTANT",
+    msw: { handlers: [http.get("/api/oilmart/sales", () => HttpResponse.json([]))] },
+  },
+};
+
+export const InvoiceRejectedByBackend: Story = {
+  parameters: {
+    role: "OIL_MART_ASSISTANT",
+    msw: {
+      handlers: [
+        http.post("/api/oilmart/sales/:saleId/invoice", () =>
+          HttpResponse.json(
+            { detail: "Only a DISPATCHED sale can be invoiced (current: INVOICED)" },
+            { status: 409 },
+          ),
+        ),
+      ],
+    },
+  },
 };

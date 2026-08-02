@@ -9,10 +9,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Stream;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +40,13 @@ public class OilMartOverviewService {
         Instant since = from.atStartOfDay(ZoneOffset.UTC).toInstant();
 
         List<OilMartSale> invoiced = sales.findInvoicedSince(OilMartSaleStatus.INVOICED, since);
-        List<OilMartSale> pendingApprovals = sales.findByStatusOrderByQuotedAtDesc(OilMartSaleStatus.ORDERED);
+        List<OilMartSale> pendingApprovals = Stream
+                .concat(
+                        sales.findByStatusOrderByQuotedAtDesc(OilMartSaleStatus.QUOTATION_APPROVAL).stream(),
+                        sales.findByStatusOrderByQuotedAtDesc(OilMartSaleStatus.ORDERED).stream())
+                .sorted(Comparator.comparing(OilMartSale::getQuotedAt).reversed())
+                .toList();
+        pendingApprovals.forEach(sale -> Hibernate.initialize(sale.getLines()));
         List<OilMartStockView> lowStock = stockQueries.lowStock();
 
         BigDecimal salesThisPeriod = invoiced.stream()
