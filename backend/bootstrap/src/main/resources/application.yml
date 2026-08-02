@@ -57,6 +57,19 @@ erp:
     # Snapshotted onto each quotation and invoice, so a later rate change
     # never rewrites the totals of documents already issued.
     gst-rate-percent: ${ERP_OILMART_GST_RATE_PERCENT:10.00}
+    currency-code: ${ERP_OILMART_CURRENCY_CODE:LKR}
+    # Letterhead on the quotation and invoice PDFs sent to clients.
+    company:
+      name: ${ERP_OILMART_COMPANY_NAME:Enlear Oil Mart (Pvt) Ltd}
+      # Pipes (or newlines) separate the printed address lines on the letterhead.
+      address: ${ERP_OILMART_COMPANY_ADDRESS:No. 42, Nawala Road|Colombo 05|Sri Lanka}
+      phone: ${ERP_OILMART_COMPANY_PHONE:+94 11 234 5678}
+      fax: ${ERP_OILMART_COMPANY_FAX:+94 11 234 5679}
+      email: ${ERP_OILMART_COMPANY_EMAIL:sales@enlear.com}
+      registration-number: ${ERP_OILMART_COMPANY_REGISTRATION_NUMBER:PV 123456}
+      tax-number: ${ERP_OILMART_COMPANY_TAX_NUMBER:100123456}
+      # Optional letterhead logo; absolute file path or blank for none.
+      logo-path: ${ERP_OILMART_COMPANY_LOGO_PATH:}
     # Printed on invoices; snapshotted at invoice creation.
     bank:
       account-name: ${ERP_OILMART_BANK_ACCOUNT_NAME:Enlear Oil Mart (Pvt) Ltd}

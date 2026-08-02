@@ -7,11 +7,13 @@ import com.enlear.erp.oilmart.controller.dto.OilMartRequests.ReviseOilMartQuotat
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.SaveOilMartQuotationRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
 import com.enlear.erp.oilmart.model.OilMartQuotationStatus;
+import com.enlear.erp.oilmart.service.pdf.OilMartDocumentPdfService;
 import com.enlear.erp.oilmart.service.selling.OilMartQuotationService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,11 +31,14 @@ public class OilMartQuotationController {
 
     private final OilMartQuotationService quotations;
     private final OilMartResponseAssembler assembler;
+    private final OilMartDocumentPdfService pdfs;
 
     public OilMartQuotationController(OilMartQuotationService quotations,
-                                      OilMartResponseAssembler assembler) {
+                                      OilMartResponseAssembler assembler,
+                                      OilMartDocumentPdfService pdfs) {
         this.quotations = quotations;
         this.assembler = assembler;
+        this.pdfs = pdfs;
     }
 
     @GetMapping
@@ -47,6 +52,13 @@ public class OilMartQuotationController {
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartQuotationResponse get(@PathVariable UUID quotationId) {
         return assembler.toResponse(quotations.get(quotationId));
+    }
+
+    @GetMapping(value = "/{quotationId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    public ResponseEntity<byte[]> pdf(@PathVariable UUID quotationId) {
+        var quotation = quotations.get(quotationId);
+        return OilMartPdfResponse.inline(pdfs.renderQuotation(quotation), quotation.getQuotationNo());
     }
 
     @PostMapping

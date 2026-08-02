@@ -8,11 +8,13 @@ import com.enlear.erp.oilmart.controller.dto.OilMartRequests.ReselectOilMartQuot
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartInvoiceResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
 import com.enlear.erp.oilmart.model.OilMartInvoiceStatus;
+import com.enlear.erp.oilmart.service.pdf.OilMartDocumentPdfService;
 import com.enlear.erp.oilmart.service.selling.OilMartInvoiceService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,11 +32,14 @@ public class OilMartInvoiceController {
 
     private final OilMartInvoiceService invoices;
     private final OilMartResponseAssembler assembler;
+    private final OilMartDocumentPdfService pdfs;
 
     public OilMartInvoiceController(OilMartInvoiceService invoices,
-                                    OilMartResponseAssembler assembler) {
+                                    OilMartResponseAssembler assembler,
+                                    OilMartDocumentPdfService pdfs) {
         this.invoices = invoices;
         this.assembler = assembler;
+        this.pdfs = pdfs;
     }
 
     @GetMapping
@@ -54,6 +59,13 @@ public class OilMartInvoiceController {
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartInvoiceResponse get(@PathVariable UUID invoiceId) {
         return assembler.toResponse(invoices.get(invoiceId));
+    }
+
+    @GetMapping(value = "/{invoiceId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    public ResponseEntity<byte[]> pdf(@PathVariable UUID invoiceId) {
+        var invoice = invoices.get(invoiceId);
+        return OilMartPdfResponse.inline(pdfs.renderInvoice(invoice), invoice.getInvoiceNo());
     }
 
     @PostMapping
