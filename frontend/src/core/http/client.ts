@@ -1,28 +1,15 @@
 import axios from "axios";
+import { getAccessToken, setAccessToken } from "./access-token";
 
-/**
- * Single axios instance for the whole app. A request interceptor attaches the
- * stored JWT; a response interceptor clears the session and redirects to login
- * on a 401, so expired tokens fail gracefully.
- */
 export const api = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
 });
 
-const TOKEN_KEY = "erp.token";
-
-export function setToken(token: string | null) {
-  if (token) localStorage.setItem(TOKEN_KEY, token);
-  else localStorage.removeItem(TOKEN_KEY);
-}
-
-export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
+export { getAccessToken as getToken, setAccessToken as setToken };
 
 api.interceptors.request.use((config) => {
-  const token = getToken();
+  const token = getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -31,7 +18,7 @@ api.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      setToken(null);
+      setAccessToken(null);
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";
       }
