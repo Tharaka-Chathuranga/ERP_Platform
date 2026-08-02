@@ -12,24 +12,20 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import type { Permission } from "@auth/permissions";
-import { STOCK_VIEW, COUNT_REQUEST, NCR_VIEW, DASHBOARD_ADMIN } from "@auth/permissions";
+import { STOCK_VIEW, COUNT_REQUEST, NCR_VIEW, DASHBOARD_ADMIN, DASHBOARD_OVERVIEW } from "@auth/permissions";
 
-/** Single source of truth for the main navigation — shared by the sidebar and
- *  the dashboard tiles so they can never drift apart. */
 export interface NavItem {
   to: string;
   label: string;
   icon: Icon;
   color: string;
   description: string;
-  /** When set, the entry is only shown to users holding this permission. */
   requiredPermission?: Permission;
-  /** When set, the entry is nested under a collapsible group of this name in the sidebar. */
   group?: string;
 }
 
 export const NAV: NavItem[] = [
-  { to: "/overview", label: "Overview", icon: IconLayoutDashboard, color: "indigo", description: "Your role overview & KPIs" },
+  { to: "/overview", label: "Overview", icon: IconLayoutDashboard, color: "indigo", description: "Your role overview & KPIs", requiredPermission: DASHBOARD_OVERVIEW },
 
   // ── Operations: day-to-day goods movement ──
   { to: "/receiving", label: "Receiving", icon: IconPackageImport, color: "teal", description: "Record goods receipts", group: "Operations", requiredPermission: STOCK_VIEW },

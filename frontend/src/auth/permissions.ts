@@ -21,6 +21,7 @@ export type Permission =
   | "count:approve" // approve / reject count-adjustment requests
   | "supplier:manage" // create / activate / deactivate suppliers
   | "user:manage" // manage users, roles & access
+  | "dashboard:overview" // the shared role overview (store / fuel / compliance KPIs)
   | "dashboard:admin" // admin overview & cross-cutting analytics
   | "ncr:view" // see the nonconformity board, reports & detail
   | "ncr:review" // review, disposition / reject & close nonconformity reports
@@ -48,8 +49,8 @@ const OIL_MART_ALL: Permission[] = [
 ];
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
-  STORE_KEEPER: ["stock:view", "count:request", "ncr:view", "fuel:view"],
-  QUALITY_ASSURANCE: ["ncr:view", "ncr:review", "dashboard:qa"],
+  STORE_KEEPER: ["dashboard:overview", "stock:view", "count:request", "ncr:view", "fuel:view"],
+  QUALITY_ASSURANCE: ["dashboard:overview", "ncr:view", "ncr:review", "dashboard:qa"],
   OIL_MART_ASSISTANT: [
     "oilmart:view",
     "oilmart:receive",
@@ -64,6 +65,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "oilmart:report",
   ],
   ADMIN: [
+    "dashboard:overview",
     "stock:view",
     "item:edit",
     "count:request",
@@ -92,6 +94,7 @@ export const COUNT_REQUEST: Permission = "count:request";
 export const COUNT_APPROVE: Permission = "count:approve";
 export const SUPPLIER_MANAGE: Permission = "supplier:manage";
 export const USER_MANAGE: Permission = "user:manage";
+export const DASHBOARD_OVERVIEW: Permission = "dashboard:overview";
 export const DASHBOARD_ADMIN: Permission = "dashboard:admin";
 export const NCR_VIEW: Permission = "ncr:view";
 export const NCR_REVIEW: Permission = "ncr:review";
