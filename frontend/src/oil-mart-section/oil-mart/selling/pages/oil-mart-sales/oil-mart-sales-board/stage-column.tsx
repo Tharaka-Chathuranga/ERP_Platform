@@ -17,9 +17,17 @@ export function StageColumn({ status, sales, onSelect }: StageColumnProps) {
       withBorder
       radius="md"
       padding="sm"
-      style={{ backgroundColor: meta.bg, borderColor: meta.border, minWidth: 260, flex: 1 }}
+      style={{
+        backgroundColor: meta.bg,
+        borderColor: meta.border,
+        minWidth: 260,
+        flex: 1,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
     >
-      <Group justify="space-between" mb="sm" wrap="nowrap">
+      <Group justify="space-between" mb="sm" wrap="nowrap" style={{ flexShrink: 0 }}>
         <Group gap={6} wrap="nowrap">
           <Text fw={700} size="sm">
             {meta.label}
@@ -30,7 +38,7 @@ export function StageColumn({ status, sales, onSelect }: StageColumnProps) {
         </Badge>
       </Group>
 
-      <ScrollArea.Autosize mah={560}>
+      <ScrollArea type="auto" offsetScrollbars style={{ flex: 1, minHeight: 0 }}>
         <Stack gap="sm">
           {sales.length === 0 ? (
             <Text size="xs" c="dimmed" ta="center" py="lg">
@@ -42,7 +50,7 @@ export function StageColumn({ status, sales, onSelect }: StageColumnProps) {
             ))
           )}
         </Stack>
-      </ScrollArea.Autosize>
+      </ScrollArea>
     </Card>
   );
 }

@@ -7,6 +7,13 @@ const meta: Meta<typeof OilMartSalesBoard> = {
   title: "Oil Mart/Selling/OilMartSalesBoard",
   component: OilMartSalesBoard,
   args: { sales: oilMartSales, onSelect: fn() },
+  decorators: [
+    (Story) => (
+      <div style={{ display: "flex", flexDirection: "column", height: "80vh" }}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;

@@ -1,4 +1,4 @@
-import { Group, ScrollArea, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack, Text } from "@mantine/core";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import type { OilMartSale } from "@core/types";
@@ -37,36 +37,40 @@ export function OilMartSalesBoard({
         />
       }
     >
-      <ScrollArea type="auto" offsetScrollbars>
-        <Group align="stretch" gap="md" wrap="nowrap">
-          {OIL_MART_BOARD_STATUSES.map((status) => (
-            <StageColumn
-              key={status}
-              status={status}
-              sales={sales.filter((sale) => sale.status === status)}
-              onSelect={onSelect}
-            />
-          ))}
-        </Group>
-      </ScrollArea>
-
-      {showTerminal && terminal.length > 0 && (
-        <Stack gap="sm" mt="lg">
-          <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-            Rejected & cancelled
-          </Text>
-          <Group align="stretch" gap="md" wrap="nowrap">
-            {OIL_MART_TERMINAL_STATUSES.map((status) => (
+      <Stack gap="lg" style={{ flex: 1, minHeight: 0 }}>
+        <Box style={{ flex: 2, minHeight: 0, overflowX: "auto", overflowY: "hidden" }}>
+          <Group align="stretch" gap="md" wrap="nowrap" h="100%">
+            {OIL_MART_BOARD_STATUSES.map((status) => (
               <StageColumn
                 key={status}
                 status={status}
-                sales={terminal.filter((sale) => sale.status === status)}
+                sales={sales.filter((sale) => sale.status === status)}
                 onSelect={onSelect}
               />
             ))}
           </Group>
-        </Stack>
-      )}
+        </Box>
+
+        {showTerminal && terminal.length > 0 && (
+          <Stack gap="sm" style={{ flex: 1, minHeight: 0 }}>
+            <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+              Rejected & cancelled
+            </Text>
+            <Box style={{ flex: 1, minHeight: 0, overflowX: "auto", overflowY: "hidden" }}>
+              <Group align="stretch" gap="md" wrap="nowrap" h="100%">
+                {OIL_MART_TERMINAL_STATUSES.map((status) => (
+                  <StageColumn
+                    key={status}
+                    status={status}
+                    sales={terminal.filter((sale) => sale.status === status)}
+                    onSelect={onSelect}
+                  />
+                ))}
+              </Group>
+            </Box>
+          </Stack>
+        )}
+      </Stack>
     </QueryBoundary>
   );
 }

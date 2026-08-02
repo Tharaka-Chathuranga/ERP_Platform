@@ -13,6 +13,13 @@ const meta: Meta<typeof StageColumn> = {
     sales: oilMartSales.filter((sale) => sale.status === "QUOTATION"),
     onSelect: fn(),
   },
+  decorators: [
+    (Story) => (
+      <div style={{ height: "70vh" }}>
+        <Story />
+      </div>
+    ),
+  ],
 };
 
 export default meta;
@@ -24,7 +31,7 @@ export const EmptyColumn: Story = { args: { status: "APPROVED", sales: [] } };
 
 export const EveryColumn: Story = {
   render: () => (
-    <Group align="stretch" gap="md" wrap="nowrap">
+    <Group align="stretch" gap="md" wrap="nowrap" h="100%">
       {OIL_MART_BOARD_STATUSES.map((status) => (
         <StageColumn
           key={status}

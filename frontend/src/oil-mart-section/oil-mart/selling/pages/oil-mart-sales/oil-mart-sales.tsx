@@ -25,21 +25,30 @@ export function OilMartSalesPage() {
   } = useOilMartSales();
 
   return (
-    <div>
-      <PageHeader title="Sales" />
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height:
+          "calc(100vh - var(--app-shell-header-height, 0px) - var(--mantine-spacing-lg))",
+      }}
+    >
+      <div style={{ flexShrink: 0 }}>
+        <PageHeader title="Sales Board" />
 
-      <OilMartSalesToolbar
-        clients={clientsQuery.data ?? []}
-        clientId={clientId}
-        onClientChange={setClientId}
-        dateRange={dateRange}
-        onDateRangeChange={setDateRange}
-        showTerminal={showTerminal}
-        onShowTerminalChange={setShowTerminal}
-        awaitingApproval={awaitingApproval}
-        canCreate={canCreate}
-        onNew={openNew}
-      />
+        <OilMartSalesToolbar
+          clients={clientsQuery.data ?? []}
+          clientId={clientId}
+          onClientChange={setClientId}
+          dateRange={dateRange}
+          onDateRangeChange={setDateRange}
+          showTerminal={showTerminal}
+          onShowTerminalChange={setShowTerminal}
+          awaitingApproval={awaitingApproval}
+          canCreate={canCreate}
+          onNew={openNew}
+        />
+      </div>
 
       <OilMartSalesBoard
         sales={sales}
