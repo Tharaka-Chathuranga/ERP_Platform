@@ -524,7 +524,7 @@ export interface OilMartItemPrice {
   buyPrice: number;
   sellPrice: number;
   effectiveFrom: string;
-  effectiveTo: string | null;
+  effectiveTo?: string | null;
   recordedByUserId: string;
   note?: string;
 }

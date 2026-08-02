@@ -5,6 +5,7 @@ include(
     ":user",
     ":store",
     ":fuel",
+    ":oilmart",
     ":notification",
     ":bootstrap",
 )

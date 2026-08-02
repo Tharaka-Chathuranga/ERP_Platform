@@ -7,8 +7,10 @@ import jakarta.validation.constraints.Size;
 
 public record UpdateUserRequest(
         @Size(max = 150) String displayName,
-        @NotBlank @Pattern(regexp = "ADMIN|STORE_KEEPER|QUALITY_ASSURANCE",
-                message = "role must be ADMIN, STORE_KEEPER or QUALITY_ASSURANCE") String role,
+        @NotBlank @Pattern(
+                regexp = "ADMIN|STORE_KEEPER|QUALITY_ASSURANCE|OIL_MART_ASSISTANT|STORES_MANAGER",
+                message = "role must be ADMIN, STORE_KEEPER, QUALITY_ASSURANCE, "
+                        + "OIL_MART_ASSISTANT or STORES_MANAGER") String role,
         @Size(max = 100) String department) {
 
     public UpdateUserCommand toCommand() {
