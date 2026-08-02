@@ -1,12 +1,12 @@
 package com.enlear.erp.oilmart.controller;
 
+import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartInvoiceResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartReceiptResponse;
-import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartSaleResponse;
+import com.enlear.erp.oilmart.model.OilMartInvoice;
 import com.enlear.erp.oilmart.model.OilMartItem;
 import com.enlear.erp.oilmart.model.OilMartQuotation;
 import com.enlear.erp.oilmart.model.OilMartReceipt;
-import com.enlear.erp.oilmart.model.OilMartSale;
 import com.enlear.erp.oilmart.repository.OilMartClientRepository;
 import com.enlear.erp.oilmart.repository.OilMartItemRepository;
 import com.enlear.erp.oilmart.repository.OilMartSupplierRepository;
@@ -37,15 +37,18 @@ public class OilMartResponseAssembler {
         this.profitVisibility = profitVisibility;
     }
 
-    public OilMartSaleResponse toResponse(OilMartSale sale) {
-        return OilMartSaleResponse.from(sale, clientName(sale.getClientId()), itemsById());
+    public OilMartInvoiceResponse toResponse(OilMartInvoice invoice) {
+        return OilMartInvoiceResponse.from(invoice, clientName(invoice.getClientId()),
+                itemsById(), profitVisibility.isVisible());
     }
 
-    public List<OilMartSaleResponse> toSaleResponses(List<OilMartSale> sales) {
+    public List<OilMartInvoiceResponse> toInvoiceResponses(List<OilMartInvoice> invoices) {
         Map<UUID, OilMartItem> itemsById = itemsById();
         Map<UUID, String> clientNames = clientNames();
-        return sales.stream()
-                .map(sale -> OilMartSaleResponse.from(sale, clientNames.get(sale.getClientId()), itemsById))
+        boolean withProfit = profitVisibility.isVisible();
+        return invoices.stream()
+                .map(invoice -> OilMartInvoiceResponse.from(
+                        invoice, clientNames.get(invoice.getClientId()), itemsById, withProfit))
                 .toList();
     }
 

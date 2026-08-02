@@ -1,7 +1,9 @@
 package com.enlear.erp.oilmart.controller;
 
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.CancelOilMartDocumentRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.OilMartDocumentTokenRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.RejectOilMartDocumentRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.ReviseOilMartQuotationRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.SaveOilMartQuotationRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
 import com.enlear.erp.oilmart.model.OilMartQuotationStatus;
@@ -60,33 +62,40 @@ public class OilMartQuotationController {
     @PutMapping("/{quotationId}")
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartQuotationResponse revise(@PathVariable UUID quotationId,
-                                           @Valid @RequestBody SaveOilMartQuotationRequest request) {
-        return assembler.toResponse(quotations.revise(quotationId, request.toCommand()));
+                                           @Valid @RequestBody ReviseOilMartQuotationRequest request) {
+        return assembler.toResponse(quotations.revise(
+                quotationId, request.toCommand(), request.expectedUpdatedAt()));
     }
 
     @PostMapping("/{quotationId}/submit")
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
-    public OilMartQuotationResponse submitForApproval(@PathVariable UUID quotationId) {
-        return assembler.toResponse(quotations.submitForApproval(quotationId));
+    public OilMartQuotationResponse submitForApproval(
+            @PathVariable UUID quotationId,
+            @Valid @RequestBody OilMartDocumentTokenRequest request) {
+        return assembler.toResponse(
+                quotations.submitForApproval(quotationId, request.expectedUpdatedAt()));
     }
 
     @PostMapping("/{quotationId}/approve")
     @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
-    public OilMartQuotationResponse approve(@PathVariable UUID quotationId) {
-        return assembler.toResponse(quotations.approve(quotationId));
+    public OilMartQuotationResponse approve(@PathVariable UUID quotationId,
+                                            @Valid @RequestBody OilMartDocumentTokenRequest request) {
+        return assembler.toResponse(quotations.approve(quotationId, request.expectedUpdatedAt()));
     }
 
     @PostMapping("/{quotationId}/reject")
     @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
     public OilMartQuotationResponse reject(@PathVariable UUID quotationId,
                                            @Valid @RequestBody RejectOilMartDocumentRequest request) {
-        return assembler.toResponse(quotations.reject(quotationId, request.reason()));
+        return assembler.toResponse(quotations.reject(
+                quotationId, request.reason(), request.expectedUpdatedAt()));
     }
 
     @PostMapping("/{quotationId}/cancel")
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public OilMartQuotationResponse cancel(@PathVariable UUID quotationId,
                                            @Valid @RequestBody CancelOilMartDocumentRequest request) {
-        return assembler.toResponse(quotations.cancel(quotationId, request.reason()));
+        return assembler.toResponse(quotations.cancel(
+                quotationId, request.reason(), request.expectedUpdatedAt()));
     }
 }

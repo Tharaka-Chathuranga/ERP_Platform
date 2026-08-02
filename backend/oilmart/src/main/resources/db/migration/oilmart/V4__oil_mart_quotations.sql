@@ -1,6 +1,5 @@
 CREATE TABLE oilmart.oil_mart_quotations (
     id                  UUID PRIMARY KEY,
-    version             BIGINT        NOT NULL DEFAULT 0,
     quotation_no        VARCHAR(32)   NOT NULL UNIQUE,
     client_id           UUID          NOT NULL REFERENCES oilmart.oil_mart_clients(id),
     status              VARCHAR(24)   NOT NULL DEFAULT 'DRAFT',
@@ -56,13 +55,12 @@ CREATE TABLE oilmart.oil_mart_quotation_lines (
 CREATE INDEX idx_oil_mart_quotation_lines_quotation ON oilmart.oil_mart_quotation_lines(quotation_id);
 
 INSERT INTO oilmart.oil_mart_quotations (
-    id, version, quotation_no, client_id, status, created_by_user_id,
+    id, quotation_no, client_id, status, created_by_user_id,
     issued_date, valid_until, submitted_at,
     approved_by_user_id, approved_at, rejection_reason, cancellation_reason,
     subtotal, gst_rate_percent, gst_amount, grand_total, total_cost, total_profit,
     note, created_at, created_by, updated_at, updated_by)
 SELECT s.id,
-       0,
        s.sale_no,
        s.client_id,
        CASE s.status

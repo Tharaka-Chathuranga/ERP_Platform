@@ -1,7 +1,7 @@
 package com.enlear.erp.oilmart.model;
 
 import com.enlear.erp.shared.error.BusinessRuleException;
-import com.enlear.erp.shared.model.BaseEntity;
+import com.enlear.erp.shared.model.AuditedEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "oil_mart_quotations", schema = "oilmart")
 @Getter
 @NoArgsConstructor
-public class OilMartQuotation extends BaseEntity {
+public class OilMartQuotation extends AuditedEntity {
 
     private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
     private static final int MONEY_SCALE = 4;
@@ -199,6 +199,14 @@ public class OilMartQuotation extends BaseEntity {
         this.totalProfit = lines.stream()
                 .map(OilMartQuotationLine::getLineProfit)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public void requireUnchangedSince(Instant expectedUpdatedAt) {
+        if (expectedUpdatedAt == null || !expectedUpdatedAt.equals(getUpdatedAt())) {
+            throw new BusinessRuleException("OILMART_QUOTATION_MODIFIED",
+                    "%s was changed by someone else since you loaded it — reload and try again"
+                            .formatted(quotationNo));
+        }
     }
 
     private void requireEditable() {

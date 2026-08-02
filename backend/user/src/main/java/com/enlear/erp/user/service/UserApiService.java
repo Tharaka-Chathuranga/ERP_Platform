@@ -5,6 +5,7 @@ import com.enlear.erp.user.exposed.dto.CurrentUser;
 import com.enlear.erp.user.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,11 @@ public class UserApiService implements UserApi {
     @Override
     public Optional<CurrentUser> findByUsername(String username) {
         return users.findByUsername(username).map(UserApiService::toView);
+    }
+
+    @Override
+    public Optional<CurrentUser> findById(UUID id) {
+        return users.findById(id).map(UserApiService::toView);
     }
 
     @Override

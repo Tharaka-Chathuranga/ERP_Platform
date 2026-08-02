@@ -18,6 +18,7 @@ import com.enlear.erp.oilmart.service.stock.OilMartStockService;
 import com.enlear.erp.shared.error.BusinessRuleException;
 import com.enlear.erp.shared.error.ResourceNotFoundException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -75,8 +76,9 @@ public class OilMartQuotationService {
         return quotations.save(quotation);
     }
 
-    public OilMartQuotation revise(UUID id, SaveOilMartQuotationCommand cmd) {
-        OilMartQuotation quotation = get(id);
+    public OilMartQuotation revise(UUID id, SaveOilMartQuotationCommand cmd,
+                                   Instant expectedUpdatedAt) {
+        OilMartQuotation quotation = lockForUpdate(id, expectedUpdatedAt);
         requireActiveClient(cmd.clientId());
         requireLines(cmd);
 
@@ -89,28 +91,36 @@ public class OilMartQuotationService {
         return quotations.save(quotation);
     }
 
-    public OilMartQuotation submitForApproval(UUID id) {
-        OilMartQuotation quotation = get(id);
+    public OilMartQuotation submitForApproval(UUID id, Instant expectedUpdatedAt) {
+        OilMartQuotation quotation = lockForUpdate(id, expectedUpdatedAt);
         quotation.submitForApproval();
         return quotations.save(quotation);
     }
 
-    public OilMartQuotation approve(UUID id) {
-        OilMartQuotation quotation = get(id);
+    public OilMartQuotation approve(UUID id, Instant expectedUpdatedAt) {
+        OilMartQuotation quotation = lockForUpdate(id, expectedUpdatedAt);
         quotation.approve(currentUser.requireId());
         return quotations.save(quotation);
     }
 
-    public OilMartQuotation reject(UUID id, String reason) {
-        OilMartQuotation quotation = get(id);
+    public OilMartQuotation reject(UUID id, String reason, Instant expectedUpdatedAt) {
+        OilMartQuotation quotation = lockForUpdate(id, expectedUpdatedAt);
         quotation.reject(currentUser.requireId(), reason);
         return quotations.save(quotation);
     }
 
-    public OilMartQuotation cancel(UUID id, String reason) {
-        OilMartQuotation quotation = get(id);
+    public OilMartQuotation cancel(UUID id, String reason, Instant expectedUpdatedAt) {
+        OilMartQuotation quotation = lockForUpdate(id, expectedUpdatedAt);
         quotation.cancel(reason);
         return quotations.save(quotation);
+    }
+
+    private OilMartQuotation lockForUpdate(UUID id, Instant expectedUpdatedAt) {
+        OilMartQuotation quotation = quotations.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResourceNotFoundException("OilMartQuotation", id));
+        quotation.requireUnchangedSince(expectedUpdatedAt);
+        Hibernate.initialize(quotation.getLines());
+        return quotation;
     }
 
     @Transactional(readOnly = true)

@@ -2,12 +2,10 @@ package com.enlear.erp.oilmart.controller.dto;
 
 import com.enlear.erp.oilmart.model.OilMartClientStatus;
 import com.enlear.erp.oilmart.model.OilMartItemStatus;
-import com.enlear.erp.oilmart.model.OilMartPaymentMethod;
 import com.enlear.erp.oilmart.model.OilMartSupplierStatus;
 import com.enlear.erp.oilmart.model.OilType;
 import com.enlear.erp.oilmart.service.command.AddOilMartItemPriceCommand;
-import com.enlear.erp.oilmart.service.command.CreateOilMartSaleCommand;
-import com.enlear.erp.oilmart.service.command.DispatchOilMartSaleCommand;
+import com.enlear.erp.oilmart.service.command.CreateOilMartInvoiceCommand;
 import com.enlear.erp.oilmart.service.command.RecordOilMartReceiptCommand;
 import com.enlear.erp.oilmart.service.command.SaveOilMartClientCommand;
 import com.enlear.erp.oilmart.service.command.SaveOilMartItemCommand;
@@ -116,53 +114,6 @@ public final class OilMartRequests {
         }
     }
 
-    public record OilMartSaleLineRequest(
-            @NotNull UUID itemId,
-            @NotNull @Positive BigDecimal quantityLitres,
-            @PositiveOrZero BigDecimal listUnitPrice,
-            @PositiveOrZero BigDecimal unitPrice,
-            @DecimalMin("0.00") BigDecimal discountPercent) {
-    }
-
-    public record CreateOilMartSaleRequest(
-            @NotNull UUID clientId,
-            @NotNull Instant quotedAt,
-            LocalDate validUntil,
-            @PositiveOrZero BigDecimal discountAmount,
-            @Size(max = 1000) String note,
-            @NotEmpty @Valid List<OilMartSaleLineRequest> lines) {
-
-        public CreateOilMartSaleCommand toCommand() {
-            return new CreateOilMartSaleCommand(clientId, quotedAt, validUntil,
-                    discountAmount != null ? discountAmount : BigDecimal.ZERO, note,
-                    lines.stream()
-                            .map(line -> new CreateOilMartSaleCommand.Line(
-                                    line.itemId(), line.quantityLitres(), line.listUnitPrice(),
-                                    line.unitPrice(),
-                                    line.discountPercent() != null ? line.discountPercent() : BigDecimal.ZERO))
-                            .toList());
-        }
-    }
-
-    public record RejectOilMartSaleRequest(@NotBlank @Size(max = 1000) String reason) {
-    }
-
-    public record CancelOilMartSaleRequest(@Size(max = 1000) String reason) {
-    }
-
-    public record DispatchOilMartSaleRequest(
-            @NotBlank @Size(max = 50) String vehicleNo,
-            @NotBlank @Size(max = 150) String driverName,
-            @Size(max = 1000) String note) {
-
-        public DispatchOilMartSaleCommand toCommand() {
-            return new DispatchOilMartSaleCommand(vehicleNo, driverName, note);
-        }
-    }
-
-    public record InvoiceOilMartSaleRequest(@NotNull OilMartPaymentMethod paymentMethod) {
-    }
-
     public record QuickAddOilMartClientRequest(@NotBlank @Size(max = 200) String name) {
     }
 
@@ -194,9 +145,46 @@ public final class OilMartRequests {
         }
     }
 
-    public record RejectOilMartDocumentRequest(@NotBlank @Size(max = 1000) String reason) {
+    public record ReviseOilMartQuotationRequest(
+            @NotNull UUID clientId,
+            @NotNull LocalDate issuedDate,
+            @NotNull LocalDate validUntil,
+            @Size(max = 1000) String note,
+            @NotNull Instant expectedUpdatedAt,
+            @NotEmpty @Valid List<OilMartQuotationLineRequest> lines) {
+
+        public SaveOilMartQuotationCommand toCommand() {
+            return new SaveOilMartQuotationRequest(clientId, issuedDate, validUntil, note, lines)
+                    .toCommand();
+        }
     }
 
-    public record CancelOilMartDocumentRequest(@Size(max = 1000) String reason) {
+    public record OilMartDocumentTokenRequest(@NotNull Instant expectedUpdatedAt) {
     }
+
+    public record RejectOilMartDocumentRequest(
+            @NotBlank @Size(max = 1000) String reason,
+            @NotNull Instant expectedUpdatedAt) {
+    }
+
+    public record CancelOilMartDocumentRequest(
+            @Size(max = 1000) String reason,
+            @NotNull Instant expectedUpdatedAt) {
+    }
+
+    public record CreateOilMartInvoiceRequest(
+            @NotNull UUID quotationId,
+            LocalDate invoiceDate,
+            @Size(max = 1000) String note) {
+
+        public CreateOilMartInvoiceCommand toCommand() {
+            return new CreateOilMartInvoiceCommand(quotationId, invoiceDate, note);
+        }
+    }
+
+    public record ReselectOilMartQuotationRequest(
+            @NotNull UUID quotationId,
+            @NotNull Instant expectedUpdatedAt) {
+    }
+
 }

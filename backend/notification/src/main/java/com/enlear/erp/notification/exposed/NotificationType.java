@@ -10,6 +10,9 @@ public enum NotificationType {
     /** Stock for an item has fallen to or below its reorder level. */
     REORDER_ALERT,
 
+    /** A document was rejected at approval and needs its author to act. */
+    DOCUMENT_REJECTED,
+
     /** A generic, uncategorised message. Prefer a specific type where one fits. */
     GENERAL
 }

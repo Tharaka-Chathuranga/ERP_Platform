@@ -5,18 +5,15 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "oil_mart_sale_lines", schema = "oilmart")
+@Table(name = "oil_mart_invoice_lines", schema = "oilmart")
 @Getter
 @NoArgsConstructor
-public class OilMartSaleLine extends BaseEntity {
-
-    private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
+public class OilMartInvoiceLine extends BaseEntity {
 
     @Column(name = "item_id", nullable = false)
     private UUID itemId;
@@ -39,18 +36,25 @@ public class OilMartSaleLine extends BaseEntity {
     @Column(name = "line_total", nullable = false, precision = 19, scale = 4)
     private BigDecimal lineTotal = BigDecimal.ZERO;
 
-    public OilMartSaleLine(UUID itemId, BigDecimal quantityLitres, BigDecimal listUnitPrice,
-                           BigDecimal unitPrice, BigDecimal discountPercent) {
-        this.itemId = itemId;
-        this.quantityLitres = quantityLitres;
-        this.listUnitPrice = listUnitPrice != null ? listUnitPrice : BigDecimal.ZERO;
-        this.unitPrice = unitPrice;
-        this.discountPercent = discountPercent != null ? discountPercent : BigDecimal.ZERO;
-        this.priceOverride = this.listUnitPrice.compareTo(BigDecimal.ZERO) > 0
-                && this.listUnitPrice.compareTo(unitPrice) != 0;
-        this.lineTotal = quantityLitres
-                .multiply(unitPrice)
-                .multiply(HUNDRED.subtract(this.discountPercent))
-                .divide(HUNDRED, 4, RoundingMode.HALF_UP);
+    @Column(name = "unit_cost", nullable = false, precision = 19, scale = 4)
+    private BigDecimal unitCost = BigDecimal.ZERO;
+
+    @Column(name = "line_cost", nullable = false, precision = 19, scale = 4)
+    private BigDecimal lineCost = BigDecimal.ZERO;
+
+    @Column(name = "line_profit", nullable = false, precision = 19, scale = 4)
+    private BigDecimal lineProfit = BigDecimal.ZERO;
+
+    OilMartInvoiceLine(OilMartQuotationLine source) {
+        this.itemId = source.getItemId();
+        this.quantityLitres = source.getQuantityLitres();
+        this.listUnitPrice = source.getListUnitPrice();
+        this.unitPrice = source.getUnitPrice();
+        this.priceOverride = source.isPriceOverride();
+        this.discountPercent = source.getDiscountPercent();
+        this.lineTotal = source.getLineTotal();
+        this.unitCost = source.getUnitCost();
+        this.lineCost = source.getLineCost();
+        this.lineProfit = source.getLineProfit();
     }
 }

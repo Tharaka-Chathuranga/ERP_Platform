@@ -1,7 +1,6 @@
 package com.enlear.erp.oilmart.service.overview;
 
-import com.enlear.erp.oilmart.model.OilMartPaymentMethod;
-import com.enlear.erp.oilmart.model.OilMartSale;
+import com.enlear.erp.oilmart.model.OilMartQuotation;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -13,13 +12,9 @@ public record OilMartOverviewSnapshot(
         long awaitingApproval,
         long lowStockCount,
         List<TrendPoint> salesTrend,
-        List<RevenueByMethod> revenueByMethod,
         List<OilMartStockView> lowStock,
-        List<OilMartSale> pendingApprovals) {
+        List<OilMartQuotation> pendingApprovals) {
 
     public record TrendPoint(LocalDate date, BigDecimal total) {
-    }
-
-    public record RevenueByMethod(OilMartPaymentMethod paymentMethod, BigDecimal total) {
     }
 }

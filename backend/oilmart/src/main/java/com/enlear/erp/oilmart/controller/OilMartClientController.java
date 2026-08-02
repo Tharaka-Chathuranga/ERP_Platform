@@ -3,11 +3,11 @@ package com.enlear.erp.oilmart.controller;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.QuickAddOilMartClientRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.SaveOilMartClientRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartClientResponse;
+import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartInvoiceResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
-import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartSaleResponse;
 import com.enlear.erp.oilmart.service.master.OilMartClientService;
+import com.enlear.erp.oilmart.service.selling.OilMartInvoiceService;
 import com.enlear.erp.oilmart.service.selling.OilMartQuotationService;
-import com.enlear.erp.oilmart.service.selling.OilMartSaleService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -28,16 +28,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class OilMartClientController {
 
     private final OilMartClientService clients;
-    private final OilMartSaleService sales;
     private final OilMartQuotationService quotations;
+    private final OilMartInvoiceService invoices;
     private final OilMartResponseAssembler assembler;
 
-    public OilMartClientController(OilMartClientService clients, OilMartSaleService sales,
+    public OilMartClientController(OilMartClientService clients,
                                    OilMartQuotationService quotations,
+                                   OilMartInvoiceService invoices,
                                    OilMartResponseAssembler assembler) {
         this.clients = clients;
-        this.sales = sales;
         this.quotations = quotations;
+        this.invoices = invoices;
         this.assembler = assembler;
     }
 
@@ -53,16 +54,16 @@ public class OilMartClientController {
         return OilMartClientResponse.from(clients.get(clientId));
     }
 
-    @GetMapping("/{clientId}/sales")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
-    public List<OilMartSaleResponse> sales(@PathVariable UUID clientId) {
-        return assembler.toSaleResponses(sales.listByClient(clientId));
-    }
-
     @GetMapping("/{clientId}/quotations")
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public List<OilMartQuotationResponse> quotations(@PathVariable UUID clientId) {
         return assembler.toQuotationResponses(quotations.listByClient(clientId));
+    }
+
+    @GetMapping("/{clientId}/invoices")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    public List<OilMartInvoiceResponse> invoices(@PathVariable UUID clientId) {
+        return assembler.toInvoiceResponses(invoices.listByClient(clientId));
     }
 
     @PostMapping

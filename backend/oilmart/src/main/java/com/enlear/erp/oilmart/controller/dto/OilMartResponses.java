@@ -1,21 +1,21 @@
 package com.enlear.erp.oilmart.controller.dto;
 
+import com.enlear.erp.oilmart.model.OilMartBankDetails;
 import com.enlear.erp.oilmart.model.OilMartClient;
 import com.enlear.erp.oilmart.model.OilMartClientStatus;
+import com.enlear.erp.oilmart.model.OilMartInvoice;
+import com.enlear.erp.oilmart.model.OilMartInvoiceLine;
+import com.enlear.erp.oilmart.model.OilMartInvoiceStatus;
 import com.enlear.erp.oilmart.model.OilMartItem;
 import com.enlear.erp.oilmart.model.OilMartItemPrice;
 import com.enlear.erp.oilmart.model.OilMartItemStatus;
 import com.enlear.erp.oilmart.model.OilMartMovementReferenceType;
 import com.enlear.erp.oilmart.model.OilMartMovementType;
-import com.enlear.erp.oilmart.model.OilMartPaymentMethod;
 import com.enlear.erp.oilmart.model.OilMartQuotation;
 import com.enlear.erp.oilmart.model.OilMartQuotationLine;
 import com.enlear.erp.oilmart.model.OilMartQuotationStatus;
 import com.enlear.erp.oilmart.model.OilMartReceipt;
 import com.enlear.erp.oilmart.model.OilMartReceiptLine;
-import com.enlear.erp.oilmart.model.OilMartSale;
-import com.enlear.erp.oilmart.model.OilMartSaleLine;
-import com.enlear.erp.oilmart.model.OilMartSaleStatus;
 import com.enlear.erp.oilmart.model.OilMartStockMovement;
 import com.enlear.erp.oilmart.model.OilMartSupplier;
 import com.enlear.erp.oilmart.model.OilMartSupplierStatus;
@@ -134,48 +134,6 @@ public final class OilMartResponses {
         }
     }
 
-    public record OilMartSaleLineResponse(
-            UUID id, UUID itemId, String itemCode, String itemName, BigDecimal quantityLitres,
-            BigDecimal listUnitPrice, BigDecimal unitPrice, boolean isPriceOverride,
-            BigDecimal discountPercent, BigDecimal lineTotal) {
-
-        static OilMartSaleLineResponse from(OilMartSaleLine line, OilMartItem item) {
-            return new OilMartSaleLineResponse(line.getId(), line.getItemId(),
-                    item != null ? item.getCode() : null,
-                    item != null ? item.getName() : null,
-                    line.getQuantityLitres(), line.getListUnitPrice(), line.getUnitPrice(),
-                    line.isPriceOverride(), line.getDiscountPercent(), line.getLineTotal());
-        }
-    }
-
-    public record OilMartSaleResponse(
-            UUID id, String saleNo, UUID clientId, String clientName, OilMartSaleStatus status,
-            UUID createdByUserId, Instant quotedAt, LocalDate validUntil,
-            UUID quotationApprovedByUserId, Instant quotationApprovedAt, Instant orderedAt,
-            UUID approvedByUserId, Instant approvedAt, String rejectionReason,
-            Instant dispatchedAt, UUID dispatchedByUserId, String vehicleNo, String driverName,
-            String invoiceNo, Instant invoicedAt, UUID invoicedByUserId,
-            OilMartPaymentMethod paymentMethod, String cancellationReason,
-            BigDecimal subtotal, BigDecimal discountAmount, BigDecimal total, String note,
-            List<OilMartSaleLineResponse> lines) {
-
-        public static OilMartSaleResponse from(OilMartSale sale, String clientName,
-                                               Map<UUID, OilMartItem> itemsById) {
-            return new OilMartSaleResponse(sale.getId(), sale.getSaleNo(), sale.getClientId(),
-                    clientName, sale.getStatus(), sale.getCreatedByUserId(), sale.getQuotedAt(),
-                    sale.getValidUntil(), sale.getQuotationApprovedByUserId(),
-                    sale.getQuotationApprovedAt(), sale.getOrderedAt(), sale.getApprovedByUserId(),
-                    sale.getApprovedAt(), sale.getRejectionReason(), sale.getDispatchedAt(),
-                    sale.getDispatchedByUserId(), sale.getVehicleNo(), sale.getDriverName(),
-                    sale.getInvoiceNo(), sale.getInvoicedAt(), sale.getInvoicedByUserId(),
-                    sale.getPaymentMethod(), sale.getCancellationReason(), sale.getSubtotal(),
-                    sale.getDiscountAmount(), sale.getTotal(), sale.getNote(),
-                    sale.getLines().stream()
-                            .map(line -> OilMartSaleLineResponse.from(line, itemsById.get(line.getItemId())))
-                            .toList());
-        }
-    }
-
     public record OilMartQuotationLineResponse(
             UUID id, UUID itemId, String itemCode, String itemName, BigDecimal quantityLitres,
             BigDecimal listUnitPrice, BigDecimal unitPrice, boolean isPriceOverride,
@@ -204,7 +162,7 @@ public final class OilMartResponses {
             String cancellationReason,
             BigDecimal subtotal, BigDecimal gstRatePercent, BigDecimal gstAmount,
             BigDecimal grandTotal, BigDecimal totalCost, BigDecimal totalProfit,
-            String note, List<OilMartQuotationLineResponse> lines) {
+            String note, Instant updatedAt, List<OilMartQuotationLineResponse> lines) {
 
         public static OilMartQuotationResponse from(OilMartQuotation quotation, String clientName,
                                                     Map<UUID, OilMartItem> itemsById,
@@ -221,9 +179,72 @@ public final class OilMartResponses {
                     quotation.getGrandTotal(),
                     withProfit ? quotation.getTotalCost() : null,
                     withProfit ? quotation.getTotalProfit() : null,
-                    quotation.getNote(),
+                    quotation.getNote(), quotation.getUpdatedAt(),
                     quotation.getLines().stream()
                             .map(line -> OilMartQuotationLineResponse.from(
+                                    line, itemsById.get(line.getItemId()), withProfit))
+                            .toList());
+        }
+    }
+
+    public record OilMartInvoiceLineResponse(
+            UUID id, UUID itemId, String itemCode, String itemName, BigDecimal quantityLitres,
+            BigDecimal listUnitPrice, BigDecimal unitPrice, boolean isPriceOverride,
+            BigDecimal discountPercent, BigDecimal lineTotal,
+            BigDecimal unitCost, BigDecimal lineCost, BigDecimal lineProfit) {
+
+        static OilMartInvoiceLineResponse from(OilMartInvoiceLine line, OilMartItem item,
+                                               boolean withProfit) {
+            return new OilMartInvoiceLineResponse(line.getId(), line.getItemId(),
+                    item != null ? item.getCode() : null,
+                    item != null ? item.getName() : null,
+                    line.getQuantityLitres(), line.getListUnitPrice(), line.getUnitPrice(),
+                    line.isPriceOverride(), line.getDiscountPercent(), line.getLineTotal(),
+                    withProfit ? line.getUnitCost() : null,
+                    withProfit ? line.getLineCost() : null,
+                    withProfit ? line.getLineProfit() : null);
+        }
+    }
+
+    public record OilMartBankDetailsResponse(
+            String accountName, String bankName, String branch, String accountNumber,
+            String swiftCode) {
+
+        static OilMartBankDetailsResponse from(OilMartBankDetails details) {
+            return details == null ? null : new OilMartBankDetailsResponse(
+                    details.getAccountName(), details.getBankName(), details.getBranch(),
+                    details.getAccountNumber(), details.getSwiftCode());
+        }
+    }
+
+    public record OilMartInvoiceResponse(
+            UUID id, String invoiceNo, UUID quotationId, String quotationNo,
+            UUID clientId, String clientName, OilMartInvoiceStatus status, UUID createdByUserId,
+            LocalDate invoiceDate, UUID approvedByUserId, Instant approvedAt,
+            UUID rejectedByUserId, Instant rejectedAt, String rejectionReason,
+            String cancellationReason, OilMartBankDetailsResponse bankDetails,
+            BigDecimal subtotal, BigDecimal gstRatePercent, BigDecimal gstAmount,
+            BigDecimal grandTotal, BigDecimal totalCost, BigDecimal totalProfit,
+            String note, Instant updatedAt, List<OilMartInvoiceLineResponse> lines) {
+
+        public static OilMartInvoiceResponse from(OilMartInvoice invoice, String clientName,
+                                                  Map<UUID, OilMartItem> itemsById,
+                                                  boolean withProfit) {
+            return new OilMartInvoiceResponse(invoice.getId(), invoice.getInvoiceNo(),
+                    invoice.getQuotationId(), invoice.getQuotationNo(), invoice.getClientId(),
+                    clientName, invoice.getStatus(), invoice.getCreatedByUserId(),
+                    invoice.getInvoiceDate(), invoice.getApprovedByUserId(),
+                    invoice.getApprovedAt(), invoice.getRejectedByUserId(),
+                    invoice.getRejectedAt(), invoice.getRejectionReason(),
+                    invoice.getCancellationReason(),
+                    OilMartBankDetailsResponse.from(invoice.getBankDetails()),
+                    invoice.getSubtotal(), invoice.getGstRatePercent(), invoice.getGstAmount(),
+                    invoice.getGrandTotal(),
+                    withProfit ? invoice.getTotalCost() : null,
+                    withProfit ? invoice.getTotalProfit() : null,
+                    invoice.getNote(), invoice.getUpdatedAt(),
+                    invoice.getLines().stream()
+                            .map(line -> OilMartInvoiceLineResponse.from(
                                     line, itemsById.get(line.getItemId()), withProfit))
                             .toList());
         }
@@ -232,19 +253,16 @@ public final class OilMartResponses {
     public record OilMartTrendPointResponse(LocalDate date, BigDecimal total) {
     }
 
-    public record OilMartRevenueByMethodResponse(OilMartPaymentMethod paymentMethod, BigDecimal total) {
-    }
-
     public record OilMartOverviewResponse(
             BigDecimal stockValue, BigDecimal salesThisPeriod, long saleCountThisPeriod,
             long awaitingApproval, long lowStockCount,
             List<OilMartTrendPointResponse> salesTrend,
-            List<OilMartRevenueByMethodResponse> revenueByMethod,
             List<OilMartStockBalanceResponse> lowStock,
-            List<OilMartSaleResponse> pendingApprovals) {
+            List<OilMartQuotationResponse> pendingApprovals) {
 
-        public static OilMartOverviewResponse from(OilMartOverviewSnapshot snapshot,
-                                                   Function<OilMartSale, OilMartSaleResponse> saleMapper) {
+        public static OilMartOverviewResponse from(
+                OilMartOverviewSnapshot snapshot,
+                Function<OilMartQuotation, OilMartQuotationResponse> quotationMapper) {
             return new OilMartOverviewResponse(
                     snapshot.stockValue(),
                     snapshot.salesThisPeriod(),
@@ -254,11 +272,8 @@ public final class OilMartResponses {
                     snapshot.salesTrend().stream()
                             .map(point -> new OilMartTrendPointResponse(point.date(), point.total()))
                             .toList(),
-                    snapshot.revenueByMethod().stream()
-                            .map(entry -> new OilMartRevenueByMethodResponse(entry.paymentMethod(), entry.total()))
-                            .toList(),
                     snapshot.lowStock().stream().map(OilMartStockBalanceResponse::from).toList(),
-                    snapshot.pendingApprovals().stream().map(saleMapper).toList());
+                    snapshot.pendingApprovals().stream().map(quotationMapper).toList());
         }
     }
 }
