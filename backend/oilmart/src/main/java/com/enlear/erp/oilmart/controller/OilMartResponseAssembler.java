@@ -1,8 +1,10 @@
 package com.enlear.erp.oilmart.controller;
 
+import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartReceiptResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartSaleResponse;
 import com.enlear.erp.oilmart.model.OilMartItem;
+import com.enlear.erp.oilmart.model.OilMartQuotation;
 import com.enlear.erp.oilmart.model.OilMartReceipt;
 import com.enlear.erp.oilmart.model.OilMartSale;
 import com.enlear.erp.oilmart.repository.OilMartClientRepository;
@@ -23,13 +25,16 @@ public class OilMartResponseAssembler {
     private final OilMartItemRepository items;
     private final OilMartClientRepository clients;
     private final OilMartSupplierRepository suppliers;
+    private final OilMartProfitVisibility profitVisibility;
 
     public OilMartResponseAssembler(OilMartItemRepository items,
                                     OilMartClientRepository clients,
-                                    OilMartSupplierRepository suppliers) {
+                                    OilMartSupplierRepository suppliers,
+                                    OilMartProfitVisibility profitVisibility) {
         this.items = items;
         this.clients = clients;
         this.suppliers = suppliers;
+        this.profitVisibility = profitVisibility;
     }
 
     public OilMartSaleResponse toResponse(OilMartSale sale) {
@@ -41,6 +46,21 @@ public class OilMartResponseAssembler {
         Map<UUID, String> clientNames = clientNames();
         return sales.stream()
                 .map(sale -> OilMartSaleResponse.from(sale, clientNames.get(sale.getClientId()), itemsById))
+                .toList();
+    }
+
+    public OilMartQuotationResponse toResponse(OilMartQuotation quotation) {
+        return OilMartQuotationResponse.from(quotation, clientName(quotation.getClientId()),
+                itemsById(), profitVisibility.isVisible());
+    }
+
+    public List<OilMartQuotationResponse> toQuotationResponses(List<OilMartQuotation> quotations) {
+        Map<UUID, OilMartItem> itemsById = itemsById();
+        Map<UUID, String> clientNames = clientNames();
+        boolean withProfit = profitVisibility.isVisible();
+        return quotations.stream()
+                .map(quotation -> OilMartQuotationResponse.from(
+                        quotation, clientNames.get(quotation.getClientId()), itemsById, withProfit))
                 .toList();
     }
 

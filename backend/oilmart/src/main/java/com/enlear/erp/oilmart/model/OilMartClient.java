@@ -61,4 +61,12 @@ public class OilMartClient extends BaseEntity {
     public boolean isActive() {
         return status == OilMartClientStatus.ACTIVE;
     }
+
+    public boolean isProfileIncomplete() {
+        return isBlank(address) || (isBlank(phone) && isBlank(email));
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
 }

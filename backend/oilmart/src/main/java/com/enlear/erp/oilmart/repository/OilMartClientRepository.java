@@ -2,6 +2,7 @@ package com.enlear.erp.oilmart.repository;
 
 import com.enlear.erp.oilmart.model.OilMartClient;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,8 @@ public interface OilMartClientRepository extends JpaRepository<OilMartClient, UU
     List<OilMartClient> findAllByOrderByNameAsc();
 
     boolean existsByCodeIgnoreCase(String code);
+
+    Optional<OilMartClient> findFirstByNameIgnoreCase(String name);
 
     @Query("select c from OilMartClient c "
             + "where lower(c.code) like lower(concat('%', :search, '%')) "

@@ -1,9 +1,12 @@
 package com.enlear.erp.oilmart.controller;
 
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.QuickAddOilMartClientRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.SaveOilMartClientRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartClientResponse;
+import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartSaleResponse;
 import com.enlear.erp.oilmart.service.master.OilMartClientService;
+import com.enlear.erp.oilmart.service.selling.OilMartQuotationService;
 import com.enlear.erp.oilmart.service.selling.OilMartSaleService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -26,12 +29,15 @@ public class OilMartClientController {
 
     private final OilMartClientService clients;
     private final OilMartSaleService sales;
+    private final OilMartQuotationService quotations;
     private final OilMartResponseAssembler assembler;
 
     public OilMartClientController(OilMartClientService clients, OilMartSaleService sales,
+                                   OilMartQuotationService quotations,
                                    OilMartResponseAssembler assembler) {
         this.clients = clients;
         this.sales = sales;
+        this.quotations = quotations;
         this.assembler = assembler;
     }
 
@@ -53,11 +59,27 @@ public class OilMartClientController {
         return assembler.toSaleResponses(sales.listByClient(clientId));
     }
 
+    @GetMapping("/{clientId}/quotations")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    public List<OilMartQuotationResponse> quotations(@PathVariable UUID clientId) {
+        return assembler.toQuotationResponses(quotations.listByClient(clientId));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
     public ResponseEntity<OilMartClientResponse> create(
             @Valid @RequestBody SaveOilMartClientRequest request) {
         var client = clients.create(request.toCommand());
+        return ResponseEntity
+                .created(URI.create("/api/oilmart/clients/" + client.getId()))
+                .body(OilMartClientResponse.from(client));
+    }
+
+    @PostMapping("/quick-add")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    public ResponseEntity<OilMartClientResponse> quickAdd(
+            @Valid @RequestBody QuickAddOilMartClientRequest request) {
+        var client = clients.quickAdd(request.name());
         return ResponseEntity
                 .created(URI.create("/api/oilmart/clients/" + client.getId()))
                 .body(OilMartClientResponse.from(client));

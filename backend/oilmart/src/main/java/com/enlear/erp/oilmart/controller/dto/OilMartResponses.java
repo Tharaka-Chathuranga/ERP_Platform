@@ -8,6 +8,9 @@ import com.enlear.erp.oilmart.model.OilMartItemStatus;
 import com.enlear.erp.oilmart.model.OilMartMovementReferenceType;
 import com.enlear.erp.oilmart.model.OilMartMovementType;
 import com.enlear.erp.oilmart.model.OilMartPaymentMethod;
+import com.enlear.erp.oilmart.model.OilMartQuotation;
+import com.enlear.erp.oilmart.model.OilMartQuotationLine;
+import com.enlear.erp.oilmart.model.OilMartQuotationStatus;
 import com.enlear.erp.oilmart.model.OilMartReceipt;
 import com.enlear.erp.oilmart.model.OilMartReceiptLine;
 import com.enlear.erp.oilmart.model.OilMartSale;
@@ -67,12 +70,12 @@ public final class OilMartResponses {
 
     public record OilMartClientResponse(
             UUID id, String code, String name, String contactPerson, String phone, String email,
-            String address, OilMartClientStatus status) {
+            String address, OilMartClientStatus status, boolean profileIncomplete) {
 
         public static OilMartClientResponse from(OilMartClient client) {
             return new OilMartClientResponse(client.getId(), client.getCode(), client.getName(),
                     client.getContactPerson(), client.getPhone(), client.getEmail(),
-                    client.getAddress(), client.getStatus());
+                    client.getAddress(), client.getStatus(), client.isProfileIncomplete());
         }
     }
 
@@ -169,6 +172,59 @@ public final class OilMartResponses {
                     sale.getDiscountAmount(), sale.getTotal(), sale.getNote(),
                     sale.getLines().stream()
                             .map(line -> OilMartSaleLineResponse.from(line, itemsById.get(line.getItemId())))
+                            .toList());
+        }
+    }
+
+    public record OilMartQuotationLineResponse(
+            UUID id, UUID itemId, String itemCode, String itemName, BigDecimal quantityLitres,
+            BigDecimal listUnitPrice, BigDecimal unitPrice, boolean isPriceOverride,
+            BigDecimal discountPercent, BigDecimal lineTotal,
+            BigDecimal unitCost, BigDecimal lineCost, BigDecimal lineProfit) {
+
+        static OilMartQuotationLineResponse from(OilMartQuotationLine line, OilMartItem item,
+                                                 boolean withProfit) {
+            return new OilMartQuotationLineResponse(line.getId(), line.getItemId(),
+                    item != null ? item.getCode() : null,
+                    item != null ? item.getName() : null,
+                    line.getQuantityLitres(), line.getListUnitPrice(), line.getUnitPrice(),
+                    line.isPriceOverride(), line.getDiscountPercent(), line.getLineTotal(),
+                    withProfit ? line.getUnitCost() : null,
+                    withProfit ? line.getLineCost() : null,
+                    withProfit ? line.getLineProfit() : null);
+        }
+    }
+
+    public record OilMartQuotationResponse(
+            UUID id, String quotationNo, UUID clientId, String clientName,
+            OilMartQuotationStatus status, UUID createdByUserId,
+            LocalDate issuedDate, LocalDate validUntil, boolean expired, boolean editable,
+            Instant submittedAt, UUID approvedByUserId, Instant approvedAt,
+            UUID rejectedByUserId, Instant rejectedAt, String rejectionReason,
+            String cancellationReason,
+            BigDecimal subtotal, BigDecimal gstRatePercent, BigDecimal gstAmount,
+            BigDecimal grandTotal, BigDecimal totalCost, BigDecimal totalProfit,
+            String note, List<OilMartQuotationLineResponse> lines) {
+
+        public static OilMartQuotationResponse from(OilMartQuotation quotation, String clientName,
+                                                    Map<UUID, OilMartItem> itemsById,
+                                                    boolean withProfit) {
+            return new OilMartQuotationResponse(quotation.getId(), quotation.getQuotationNo(),
+                    quotation.getClientId(), clientName, quotation.getStatus(),
+                    quotation.getCreatedByUserId(), quotation.getIssuedDate(),
+                    quotation.getValidUntil(), quotation.isExpired(), quotation.isEditable(),
+                    quotation.getSubmittedAt(), quotation.getApprovedByUserId(),
+                    quotation.getApprovedAt(), quotation.getRejectedByUserId(),
+                    quotation.getRejectedAt(), quotation.getRejectionReason(),
+                    quotation.getCancellationReason(), quotation.getSubtotal(),
+                    quotation.getGstRatePercent(), quotation.getGstAmount(),
+                    quotation.getGrandTotal(),
+                    withProfit ? quotation.getTotalCost() : null,
+                    withProfit ? quotation.getTotalProfit() : null,
+                    quotation.getNote(),
+                    quotation.getLines().stream()
+                            .map(line -> OilMartQuotationLineResponse.from(
+                                    line, itemsById.get(line.getItemId()), withProfit))
                             .toList());
         }
     }

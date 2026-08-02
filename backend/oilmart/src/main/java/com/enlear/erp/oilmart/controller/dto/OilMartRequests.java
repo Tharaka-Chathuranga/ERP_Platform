@@ -11,8 +11,10 @@ import com.enlear.erp.oilmart.service.command.DispatchOilMartSaleCommand;
 import com.enlear.erp.oilmart.service.command.RecordOilMartReceiptCommand;
 import com.enlear.erp.oilmart.service.command.SaveOilMartClientCommand;
 import com.enlear.erp.oilmart.service.command.SaveOilMartItemCommand;
+import com.enlear.erp.oilmart.service.command.SaveOilMartQuotationCommand;
 import com.enlear.erp.oilmart.service.command.SaveOilMartSupplierCommand;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -159,5 +161,42 @@ public final class OilMartRequests {
     }
 
     public record InvoiceOilMartSaleRequest(@NotNull OilMartPaymentMethod paymentMethod) {
+    }
+
+    public record QuickAddOilMartClientRequest(@NotBlank @Size(max = 200) String name) {
+    }
+
+    public record OilMartQuotationLineRequest(
+            @NotNull UUID itemId,
+            @NotNull @Positive BigDecimal quantityLitres,
+            @PositiveOrZero BigDecimal listUnitPrice,
+            @PositiveOrZero BigDecimal unitPrice,
+            @DecimalMin("0.00") @DecimalMax("100.00") BigDecimal discountPercent) {
+    }
+
+    public record SaveOilMartQuotationRequest(
+            @NotNull UUID clientId,
+            @NotNull LocalDate issuedDate,
+            @NotNull LocalDate validUntil,
+            @Size(max = 1000) String note,
+            @NotEmpty @Valid List<OilMartQuotationLineRequest> lines) {
+
+        public SaveOilMartQuotationCommand toCommand() {
+            return new SaveOilMartQuotationCommand(clientId, issuedDate, validUntil, note,
+                    lines.stream()
+                            .map(line -> new SaveOilMartQuotationCommand.Line(
+                                    line.itemId(), line.quantityLitres(), line.listUnitPrice(),
+                                    line.unitPrice(),
+                                    line.discountPercent() != null
+                                            ? line.discountPercent()
+                                            : BigDecimal.ZERO))
+                            .toList());
+        }
+    }
+
+    public record RejectOilMartDocumentRequest(@NotBlank @Size(max = 1000) String reason) {
+    }
+
+    public record CancelOilMartDocumentRequest(@Size(max = 1000) String reason) {
     }
 }
