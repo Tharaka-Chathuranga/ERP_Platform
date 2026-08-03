@@ -25,8 +25,6 @@ export function ApproveDocumentModal({
   onClose,
   onSubmit,
 }: ApproveDocumentModalProps) {
-  const overrides = quotation?.lines.filter((line) => line.isPriceOverride) ?? [];
-
   return (
     <Modal opened={opened} onClose={onClose} title={title} centered size="xl">
       <Stack gap="md">
@@ -39,24 +37,6 @@ export function ApproveDocumentModal({
           <Alert color="red" variant="light" icon={<IconAlertTriangle size={18} />}>
             This quotation expired on {quotation.validUntil}. It must be edited with current dates
             before it can be approved.
-          </Alert>
-        )}
-
-        {overrides.length > 0 && (
-          <Alert
-            color="orange"
-            variant="light"
-            icon={<IconAlertTriangle size={18} />}
-            title={`${overrides.length} line${overrides.length === 1 ? "" : "s"} priced below or above list`}
-          >
-            <Text size="sm">
-              {overrides
-                .map(
-                  (line) =>
-                    `${line.itemName}: list ${line.listUnitPrice} → charged ${line.unitPrice}`,
-                )
-                .join(" · ")}
-            </Text>
           </Alert>
         )}
 

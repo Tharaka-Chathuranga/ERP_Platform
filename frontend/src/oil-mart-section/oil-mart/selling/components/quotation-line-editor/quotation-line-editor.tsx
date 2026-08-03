@@ -12,8 +12,10 @@ import type { OilMartItem, OilMartStockBalance } from "@core/types";
 import { ItemPicker } from "../../../components/item-picker";
 import { LitreInput } from "../../../components/litre-input";
 import { MoneyText } from "../../../components/money-text";
-import { PriceOverrideField } from "../price-override-field";
+import { StockOnHandHint } from "../../../components/stock-on-hand-hint";
+import { PriceOverrideField, PriceOverrideHint } from "../price-override-field";
 import { DocumentTotals } from "../document-totals";
+import { LineFieldCell, LineValueCell, NUMERIC_INPUT_STYLES } from "./line-cells";
 
 export interface QuotationLineDraft {
   key: string;
@@ -64,6 +66,12 @@ export function QuotationLineEditor({
   const onHandById = new Map((stock ?? []).map((balance) => [balance.itemId, balance.quantityOnHand]));
   const uomById = new Map(items.map((item) => [item.id, item.unitOfMeasure]));
 
+  const requestedByItem = lines.reduce((totals, line) => {
+    if (!line.itemId) return totals;
+    totals.set(line.itemId, (totals.get(line.itemId) ?? 0) + (line.quantityLitres ?? 0));
+    return totals;
+  }, new Map<string, number>());
+
   const subtotal = lines.reduce((sum, line) => sum + quotationLineTotal(line), 0);
   const totalProfit = showProfit
     ? lines.reduce((sum, line) => sum + (quotationLineProfit(line) ?? 0), 0)
@@ -80,20 +88,32 @@ export function QuotationLineEditor({
         )}
       </Group>
 
-      <Table.ScrollContainer minWidth={showProfit ? 1000 : 860}>
-        <Table verticalSpacing="sm">
+      <Table.ScrollContainer minWidth={showProfit ? 1080 : 940}>
+        <Table verticalSpacing="sm" styles={{ td: { verticalAlign: "top" } }}>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th style={{ width: "24%" }}>Oil</Table.Th>
-              <Table.Th style={{ width: "14%" }}>Quantity</Table.Th>
-              <Table.Th style={{ width: "6%" }}>UOM</Table.Th>
-              <Table.Th style={{ width: "17%" }}>Unit price</Table.Th>
-              <Table.Th style={{ width: "12%" }}>Discount</Table.Th>
-              <Table.Th style={{ width: "15%", textAlign: "right" }}>Line total</Table.Th>
+              <Table.Th w="24%">Description</Table.Th>
+              <Table.Th w="16%" ta="right">
+                Quantity
+              </Table.Th>
+              <Table.Th w="6%" ta="center">
+                UOM
+              </Table.Th>
+              <Table.Th w="16%" ta="right">
+                Unit price
+              </Table.Th>
+              <Table.Th w="11%" ta="right">
+                Discount
+              </Table.Th>
+              <Table.Th w="13%" ta="right">
+                Line total
+              </Table.Th>
               {showProfit && (
-                <Table.Th style={{ width: "14%", textAlign: "right" }}>Profit</Table.Th>
+                <Table.Th w="14%" ta="right">
+                  Profit
+                </Table.Th>
               )}
-              {!readOnly && <Table.Th style={{ width: 44 }} />}
+              {!readOnly && <Table.Th w={44} />}
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -104,78 +124,114 @@ export function QuotationLineEditor({
               return (
                 <Table.Tr key={line.key}>
                   <Table.Td>
-                    <ItemPicker
-                      items={items}
-                      stock={stock}
-                      value={line.itemId}
-                      onChange={(itemId) => onChange(line.key, { itemId })}
-                      requiredLitres={line.quantityLitres}
-                      disabled={readOnly}
-                      placeholder="Select oil"
-                    />
+                    <LineFieldCell>
+                      <ItemPicker
+                        items={items}
+                        stock={stock}
+                        showAvailableStock={false}
+                        value={line.itemId}
+                        onChange={(itemId) => onChange(line.key, { itemId })}
+                        disabled={readOnly}
+                        placeholder="Select oil"
+                      />
+                    </LineFieldCell>
                   </Table.Td>
                   <Table.Td>
-                    <LitreInput
-                      value={line.quantityLitres}
-                      onChange={(quantityLitres) => onChange(line.key, { quantityLitres })}
-                      disabled={readOnly}
-                      max={onHand}
-                      placeholder="0"
-                    />
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm" c="dimmed">
-                      {unitOfMeasure}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <PriceOverrideField
-                      listUnitPrice={line.listUnitPrice}
-                      unitPrice={line.unitPrice}
-                      disabled={readOnly}
-                      onChange={(unitPrice, isPriceOverride) =>
-                        onChange(line.key, { unitPrice, isPriceOverride })
+                    <LineFieldCell
+                      align="right"
+                      hint={
+                        line.itemId ? (
+                          <StockOnHandHint
+                            quantityOnHand={onHand}
+                            requestedQuantity={requestedByItem.get(line.itemId)}
+                          />
+                        ) : undefined
                       }
-                    />
+                    >
+                      <LitreInput
+                        value={line.quantityLitres}
+                        onChange={(quantityLitres) => onChange(line.key, { quantityLitres })}
+                        disabled={readOnly}
+                        max={onHand}
+                        placeholder="0"
+                        styles={NUMERIC_INPUT_STYLES}
+                      />
+                    </LineFieldCell>
                   </Table.Td>
                   <Table.Td>
-                    <NumberInput
-                      value={line.discountPercent}
-                      onChange={(value) =>
-                        onChange(line.key, { discountPercent: value === "" ? 0 : Number(value) })
-                      }
-                      disabled={readOnly}
-                      min={0}
-                      max={100}
-                      decimalScale={2}
-                      suffix="%"
-                    />
+                    <LineValueCell align="center">
+                      <Text size="sm" c="dimmed">
+                        {unitOfMeasure}
+                      </Text>
+                    </LineValueCell>
                   </Table.Td>
-                  <Table.Td style={{ textAlign: "right" }}>
-                    <MoneyText value={quotationLineTotal(line)} emphasis />
+                  <Table.Td>
+                    <LineFieldCell
+                      align="right"
+                      hint={
+                        <PriceOverrideHint
+                          listUnitPrice={line.listUnitPrice}
+                          unitPrice={line.unitPrice}
+                        />
+                      }
+                    >
+                      <PriceOverrideField
+                        listUnitPrice={line.listUnitPrice}
+                        unitPrice={line.unitPrice}
+                        disabled={readOnly}
+                        onChange={(unitPrice, isPriceOverride) =>
+                          onChange(line.key, { unitPrice, isPriceOverride })
+                        }
+                      />
+                    </LineFieldCell>
+                  </Table.Td>
+                  <Table.Td>
+                    <LineFieldCell align="right">
+                      <NumberInput
+                        value={line.discountPercent}
+                        onChange={(value) =>
+                          onChange(line.key, { discountPercent: value === "" ? 0 : Number(value) })
+                        }
+                        disabled={readOnly}
+                        min={0}
+                        max={100}
+                        decimalScale={2}
+                        suffix="%"
+                        styles={NUMERIC_INPUT_STYLES}
+                      />
+                    </LineFieldCell>
+                  </Table.Td>
+                  <Table.Td>
+                    <LineValueCell align="right">
+                      <MoneyText value={quotationLineTotal(line)} emphasis />
+                    </LineValueCell>
                   </Table.Td>
                   {showProfit && (
-                    <Table.Td style={{ textAlign: "right" }}>
-                      {profit === undefined ? (
-                        <Text size="sm" c="dimmed">
-                          —
-                        </Text>
-                      ) : (
-                        <MoneyText value={profit} c={profit < 0 ? "red" : "teal"} />
-                      )}
+                    <Table.Td>
+                      <LineValueCell align="right">
+                        {profit === undefined ? (
+                          <Text size="sm" c="dimmed">
+                            —
+                          </Text>
+                        ) : (
+                          <MoneyText value={profit} c={profit < 0 ? "red" : "teal"} />
+                        )}
+                      </LineValueCell>
                     </Table.Td>
                   )}
                   {!readOnly && (
                     <Table.Td>
-                      <ActionIcon
-                        variant="subtle"
-                        color="red"
-                        aria-label="Remove line"
-                        disabled={lines.length === 1}
-                        onClick={() => onRemove(line.key)}
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
+                      <LineValueCell align="center">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          aria-label="Remove line"
+                          disabled={lines.length === 1}
+                          onClick={() => onRemove(line.key)}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      </LineValueCell>
                     </Table.Td>
                   )}
                 </Table.Tr>

@@ -64,32 +64,9 @@ export function OilMartQuotationDetailCard({ quotation }: { quotation: OilMartQu
         <Stat label="Valid until" value={dayjs(quotation.validUntil).format("MMM D, YYYY")} />
       </SimpleGrid>
 
-      <DefinitionList
-        cols={{ base: 2, sm: 3 }}
-        items={[
-          {
-            label: "Sent for approval",
-            value: quotation.submittedAt
-              ? dayjs(quotation.submittedAt).format("MMM D, YYYY h:mm A")
-              : null,
-          },
-          {
-            label: "Approved at",
-            value: quotation.approvedAt
-              ? dayjs(quotation.approvedAt).format("MMM D, YYYY h:mm A")
-              : null,
-          },
-          {
-            label: "Rejected at",
-            value: quotation.rejectedAt
-              ? dayjs(quotation.rejectedAt).format("MMM D, YYYY h:mm A")
-              : null,
-          },
-          { label: "Rejection reason", value: quotation.rejectionReason },
-          { label: "Cancellation reason", value: quotation.cancellationReason },
-          { label: "Note", value: quotation.note },
-        ]}
-      />
+      {quotation.note && (
+        <DefinitionList cols={{ base: 1 }} items={[{ label: "Note", value: quotation.note }]} />
+      )}
 
       <Divider my="lg" />
 

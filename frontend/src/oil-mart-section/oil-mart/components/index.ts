@@ -4,3 +4,4 @@ export * from "./oil-mart-status-badge";
 export * from "./oil-type-badge";
 export * from "./item-picker";
 export * from "./client-picker";
+export * from "./stock-on-hand-hint";

@@ -90,27 +90,9 @@ export function OilMartInvoiceDetailCard({ invoice }: { invoice: OilMartInvoice 
         />
       </SimpleGrid>
 
-      <DefinitionList
-        cols={{ base: 2, sm: 3 }}
-        items={[
-          {
-            label: "Approved at",
-            value: invoice.approvedAt
-              ? dayjs(invoice.approvedAt).format("MMM D, YYYY h:mm A")
-              : null,
-          },
-          {
-            label: "Rejected at",
-            value: invoice.rejectedAt
-              ? dayjs(invoice.rejectedAt).format("MMM D, YYYY h:mm A")
-              : null,
-          },
-          { label: "Rejection reason", value: invoice.rejectionReason },
-          { label: "Bank", value: invoice.bankDetails?.bankName },
-          { label: "Account", value: invoice.bankDetails?.accountNumber },
-          { label: "Note", value: invoice.note },
-        ]}
-      />
+      {invoice.note && (
+        <DefinitionList cols={{ base: 1 }} items={[{ label: "Note", value: invoice.note }]} />
+      )}
 
       <Divider my="lg" />
 

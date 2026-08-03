@@ -121,7 +121,6 @@ export function NewOilMartQuotationForm({
               onChange={onValidUntilChange}
               minDate={minValidUntil}
               valueFormat="MMM D, YYYY"
-              description="At least one month out"
               error={
                 showErrors && !validUntil
                   ? "Select a valid-until date"
