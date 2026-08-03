@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="|${doc.documentTitle} ${doc.documentNo}|">Document</title>
+    <style>
+        @page { size: A4; margin: 10mm 9mm 9mm 9mm; }
+
+        body { font-family: Helvetica, sans-serif; font-size: 7.5pt; color: #000000; }
+        table { border-collapse: collapse; }
+        .w100 { width: 100%; }
+
+        .b   { border: 0.8pt solid #000000; }
+        .cell { border: 0.5pt solid #000000; padding: 0.7mm 1.2mm; }
+        .lbl { background-color: #d9d9d9; font-size: 6.8pt; }
+        .r { text-align: right; }
+        .c { text-align: center; }
+        .bold { font-weight: bold; }
+
+        /* ── letterhead ─────────────────────────────────────── */
+        .head td { vertical-align: top; }
+        .logo-box { width: 46mm; }
+        .logo-box img { width: 42mm; }
+        .logo-fallback {
+            border: 1.2pt solid #000000; padding: 3mm 2mm; text-align: center;
+            font-size: 12pt; font-weight: bold; letter-spacing: 1pt;
+        }
+        .co-name { font-weight: bold; font-size: 9.5pt; }
+        .co-line { font-size: 7.5pt; }
+        .doc-type { font-size: 17pt; font-weight: bold; text-align: right; letter-spacing: 0.5pt; }
+        .doc-meta { text-align: right; font-size: 8pt; padding-top: 0.8mm; }
+        .doc-meta .k { font-weight: bold; }
+
+        /* ── parties + meta grid ────────────────────────────── */
+        .mid-band { margin-top: 3mm; }
+        .mid-band > tbody > tr > td { vertical-align: top; padding-right: 2mm; }
+        .mid-band > tbody > tr > td.last { padding-right: 0; }
+
+        .party { height: 25mm; }
+        .party .tab {
+            background-color: #d9d9d9; border: 0.5pt solid #000000;
+            padding: 0.5mm 2mm; font-size: 6.8pt; width: 18mm;
+        }
+        .party-body { border: 0.5pt solid #000000; padding: 1.2mm; height: 21mm; vertical-align: top; }
+        .party-name { font-weight: bold; }
+
+        .meta td { font-size: 7pt; }
+
+        /* ── line table ─────────────────────────────────────── */
+        .lines { margin-top: 2.5mm; width: 100%; }
+        .lines th {
+            background-color: #d9d9d9; border: 0.5pt solid #000000;
+            padding: 0.9mm 1.2mm; font-size: 7pt; font-weight: normal;
+        }
+        .lines td { border-left: 0.5pt solid #000000; border-right: 0.5pt solid #000000;
+                    padding: 0.6mm 1.2mm; font-size: 7.2pt; vertical-align: top; }
+        .lines td.row-first { border-top: 0.4pt solid #bfbfbf; }
+        .lines tr.filler td { border-bottom: 0.8pt solid #000000; height: 62mm; }
+        .desc-sub { font-size: 6.9pt; }
+
+        /* ── footer ─────────────────────────────────────────── */
+        .foot { margin-top: 2.5mm; width: 100%; }
+        .foot > tbody > tr > td { vertical-align: top; }
+        .terms {
+            font-family: Courier, monospace; font-size: 6.2pt; font-style: italic;
+            border: 0.5pt solid #000000; padding: 1.2mm; height: 11mm; vertical-align: top;
+        }
+        .instr { border: 0.5pt solid #000000; padding: 1.2mm; height: 12mm; vertical-align: top; font-size: 7pt; }
+        .instr .h { font-weight: bold; font-size: 7pt; }
+
+        .totals { width: 100%; }
+        .totals td { border: 0.5pt solid #000000; padding: 1.1mm 1.5mm; font-size: 8pt; }
+        .totals td.k { font-weight: bold; width: 46%; }
+        .totals tr.grand td { font-size: 10.5pt; font-weight: bold; padding: 1.4mm 1.5mm; }
+
+        .pageno { text-align: right; font-size: 6.5pt; padding-top: 0.8mm; }
+    </style>
+</head>
+<body>
+
+<!-- letterhead -->
+<table class="head w100">
+    <tr>
+        <td class="logo-box">
+            <img th:if="${doc.logoUri}" th:src="${doc.logoUri}" alt="" />
+            <div th:unless="${doc.logoUri}" class="logo-fallback" th:text="${doc.company.name}">Company</div>
+        </td>
+        <td>
+            <div class="co-name" th:text="${doc.company.name}">Company</div>
+            <div class="co-line" th:each="line : ${doc.company.addressLines}" th:text="${line}">Address</div>
+            <div class="co-line" th:if="${doc.company.registrationNumber}">
+                Reg #:&#160;&#160;&#160;<span th:text="${doc.company.registrationNumber}"></span>
+            </div>
+            <div class="co-line" th:if="${doc.company.taxNumber}">
+                TIN #:&#160;&#160;&#160;&#160;<span th:text="${doc.company.taxNumber}"></span>
+            </div>
+            <div class="co-line">
+                <span th:if="${doc.company.phone}" th:text="'Ph: ' + ${doc.company.phone}"></span>
+                <span th:if="${doc.company.fax}" th:text="'&#160;&#160;Fax: ' + ${doc.company.fax}"></span>
+            </div>
+            <div class="co-line" th:if="${doc.company.email}" th:text="${doc.company.email}"></div>
+        </td>
+        <td width="42mm">
+            <div class="doc-type" th:text="${doc.documentTitle}">QUOTATION</div>
+            <div class="doc-meta">
+                <span th:text="${doc.documentTitle} == 'INVOICE' ? 'Invoice Date: ' : 'Quotation Date: '">Date: </span>
+                <span th:text="${#temporals.format(doc.issuedDate, 'dd-MMM-yy')}">30-JUL-26</span>
+            </div>
+            <div class="doc-meta">
+                <span class="k" th:text="${doc.documentTitle} == 'INVOICE' ? 'Invoice No:' : 'Quotation No:'">No:</span>
+                <span th:text="'&#160;' + ${doc.documentNo}">8349578</span>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- bill to / deliver to / account grid -->
+<table class="mid-band w100">
+    <tr>
+        <td width="33%">
+            <table class="party w100">
+                <tr><td class="tab">Bill To:</td><td></td></tr>
+                <tr>
+                    <td class="party-body" colspan="2">
+                        <div class="party-name" th:text="${doc.billTo.name}">Client</div>
+                        <div th:each="line : ${doc.billTo.addressLines}" th:text="${line}"></div>
+                        <div style="padding-top:1mm">
+                            <span th:if="${doc.billTo.phone}" th:text="'Ph: ' + ${doc.billTo.phone}"></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="33%">
+            <table class="party w100">
+                <tr><td class="tab">Deliver To:</td><td></td></tr>
+                <tr>
+                    <td class="party-body" colspan="2">
+                        <div class="party-name" th:text="${doc.deliverTo.name}">Client</div>
+                        <div th:each="line : ${doc.deliverTo.addressLines}" th:text="${line}"></div>
+                        <div style="padding-top:1mm">
+                            <span th:if="${doc.deliverTo.email}" th:text="${doc.deliverTo.email}"></span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="34%" class="last">
+            <table class="meta w100">
+                <tr>
+                    <td class="cell lbl c" width="26%">Account</td>
+                    <td class="cell lbl c" width="40%">Order Ref:</td>
+                    <td class="cell lbl c" width="17%">Terr:</td>
+                    <td class="cell lbl c" width="17%">Whse:</td>
+                </tr>
+                <tr>
+                    <td class="cell" th:text="${doc.accountCode}">&#160;</td>
+                    <td class="cell" th:text="${doc.orderRef}">&#160;</td>
+                    <td class="cell">&#160;</td>
+                    <td class="cell">&#160;</td>
+                </tr>
+                <tr>
+                    <td class="cell lbl c" colspan="2">Con Note:</td>
+                    <td class="cell lbl c" colspan="2">Sales Rep:</td>
+                </tr>
+                <tr>
+                    <td class="cell" colspan="2">&#160;</td>
+                    <td class="cell c" colspan="2" th:text="${doc.salesRep}">&#160;</td>
+                </tr>
+                <tr>
+                    <td class="cell lbl c" colspan="2"
+                        th:text="${doc.validUntil} ? 'Valid Until:' : 'Currency:'">Valid Until:</td>
+                    <td class="cell c" colspan="2"
+                        th:text="${doc.validUntil} ? ${#temporals.format(doc.validUntil, 'dd-MMM-yy')} : ${doc.currencyCode}">&#160;</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<!-- lines -->
+<table class="lines">
+    <thead>
+    <tr>
+        <th width="12%">Code</th>
+        <th width="38%">Item Description</th>
+        <th width="8%">Ordered</th>
+        <th width="8%">Supplied</th>
+        <th width="6%">UOM</th>
+        <th width="11%">Unit Price</th>
+        <th width="6%">Disc %</th>
+        <th width="11%">Line Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="line : ${doc.lines}">
+        <td class="row-first" th:text="${line.itemCode}">71810242</td>
+        <td class="row-first">
+            <div th:text="${line.itemName}">ELECTRODE</div>
+            <div class="desc-sub" th:each="extra : ${line.descriptionLines}" th:text="${extra}"></div>
+        </td>
+        <td class="row-first r" th:text="${line.ordered}">6</td>
+        <td class="row-first r" th:text="${line.supplied}">6</td>
+        <td class="row-first c" th:text="${line.unitOfMeasure}">L</td>
+        <td class="row-first r" th:text="${#numbers.formatDecimal(line.unitPrice, 1, 'COMMA', 2, 'POINT')}">130.00</td>
+        <td class="row-first r" th:text="${#numbers.formatDecimal(line.discountPercent, 1, 'COMMA', 2, 'POINT')}">0.00</td>
+        <td class="row-first r" th:text="${#numbers.formatDecimal(line.lineTotal, 1, 'COMMA', 2, 'POINT')}">780.00</td>
+    </tr>
+    <tr th:if="${doc.note}">
+        <td>&#160;</td>
+        <td colspan="7" class="desc-sub" th:text="${doc.note}"></td>
+    </tr>
+    <tr class="filler">
+        <td>&#160;</td><td>&#160;</td><td>&#160;</td><td>&#160;</td>
+        <td>&#160;</td><td>&#160;</td><td>&#160;</td><td>&#160;</td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- footer -->
+<table class="foot">
+    <tr>
+        <td width="62%">
+            <table class="w100">
+                <tr>
+                    <td class="terms" colspan="2">
+                        The above quotation is based on current exchange rates as at the above date, and any
+                        variation at time of supply will be to your account. The acceptance of any order
+                        resulting from this quotation will be subject to the standard Trading Terms and
+                        Conditions of <span th:text="${doc.company.name}"></span>.<br />
+                        All goods are quoted subject to prior sale. E &amp; O.E.<span
+                            th:if="${doc.validUntil}"
+                            th:text="' Quotation valid until ' + ${#temporals.format(doc.validUntil, 'dd-MMM-yy')} + '.'"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="instr" width="50%">
+                        <div class="h">Delivery Instructions:</div>
+                    </td>
+                    <td class="instr" width="50%">
+                        <div class="h">Payee Instructions</div>
+                        <div th:if="${doc.bank}">
+                            Please remit payment to:
+                            <div th:text="${doc.bank.accountName}"></div>
+                            <div th:text="${doc.bank.bankName} + ' &#8212; ' + ${doc.bank.branch}"></div>
+                            <div th:text="'A/C ' + ${doc.bank.accountNumber}
+                                          + (${doc.bank.swiftCode} ? ' &#160;SWIFT ' + ${doc.bank.swiftCode} : '')"></div>
+                        </div>
+                        <div th:unless="${doc.bank}">
+                            Please remit cheque payable to:
+                            <div th:text="${doc.company.name}"></div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td width="4%">&#160;</td>
+        <td width="34%">
+            <table class="totals">
+                <tr>
+                    <td class="k">Ex Tax:</td>
+                    <td class="r" th:text="${#numbers.formatDecimal(doc.subtotal, 1, 'COMMA', 2, 'POINT')}">780.00</td>
+                </tr>
+                <tr>
+                    <td class="k">GST:</td>
+                    <td class="r" th:text="${#numbers.formatDecimal(doc.gstAmount, 1, 'COMMA', 2, 'POINT')}">78.00</td>
+                </tr>
+                <tr class="grand">
+                    <td th:text="'Total: ' + ${doc.currencyCode}">Total: PGK</td>
+                    <td class="r" th:text="${#numbers.formatDecimal(doc.grandTotal, 1, 'COMMA', 2, 'POINT')}">858.00</td>
+                </tr>
+            </table>
+            <div class="pageno">Page: 1 of 1</div>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

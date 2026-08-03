@@ -10,6 +10,7 @@ import { fuelRoutes } from "@fuel/fuel.routes";
 import { usersRoutes } from "@users/users.routes";
 import { adminRoutes } from "@admin/admin.routes";
 import { qaRoutes } from "@qa/qa.routes";
+import { oilMartRoutes } from "@oilmart/oil-mart.routes";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -39,6 +40,7 @@ export default function App() {
         {usersRoutes}
         {adminRoutes}
         {qaRoutes}
+        {oilMartRoutes}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

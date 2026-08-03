@@ -1,0 +1,113 @@
+package com.enlear.erp.oilmart.controller;
+
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.CancelOilMartDocumentRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.OilMartDocumentTokenRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.RejectOilMartDocumentRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.ReviseOilMartQuotationRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartRequests.SaveOilMartQuotationRequest;
+import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartQuotationResponse;
+import com.enlear.erp.oilmart.model.OilMartQuotationStatus;
+import com.enlear.erp.oilmart.service.pdf.OilMartDocumentPdfService;
+import com.enlear.erp.oilmart.service.selling.OilMartQuotationService;
+import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/oilmart/quotations")
+public class OilMartQuotationController {
+
+    private final OilMartQuotationService quotations;
+    private final OilMartResponseAssembler assembler;
+    private final OilMartDocumentPdfService pdfs;
+
+    public OilMartQuotationController(OilMartQuotationService quotations,
+                                      OilMartResponseAssembler assembler,
+                                      OilMartDocumentPdfService pdfs) {
+        this.quotations = quotations;
+        this.assembler = assembler;
+        this.pdfs = pdfs;
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public List<OilMartQuotationResponse> list(
+            @RequestParam(required = false) OilMartQuotationStatus status) {
+        return assembler.toQuotationResponses(quotations.list(status));
+    }
+
+    @GetMapping("/{quotationId}")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public OilMartQuotationResponse get(@PathVariable UUID quotationId) {
+        return assembler.toResponse(quotations.get(quotationId));
+    }
+
+    @GetMapping(value = "/{quotationId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public ResponseEntity<byte[]> pdf(@PathVariable UUID quotationId) {
+        var quotation = quotations.get(quotationId);
+        return OilMartPdfResponse.inline(pdfs.renderQuotation(quotation), quotation.getQuotationNo());
+    }
+
+    @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public ResponseEntity<OilMartQuotationResponse> create(
+            @Valid @RequestBody SaveOilMartQuotationRequest request) {
+        var quotation = quotations.create(request.toCommand());
+        return ResponseEntity
+                .created(URI.create("/api/oilmart/quotations/" + quotation.getId()))
+                .body(assembler.toResponse(quotation));
+    }
+
+    @PutMapping("/{quotationId}")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public OilMartQuotationResponse revise(@PathVariable UUID quotationId,
+                                           @Valid @RequestBody ReviseOilMartQuotationRequest request) {
+        return assembler.toResponse(quotations.revise(
+                quotationId, request.toCommand(), request.expectedUpdatedAt()));
+    }
+
+    @PostMapping("/{quotationId}/submit")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public OilMartQuotationResponse submitForApproval(
+            @PathVariable UUID quotationId,
+            @Valid @RequestBody OilMartDocumentTokenRequest request) {
+        return assembler.toResponse(
+                quotations.submitForApproval(quotationId, request.expectedUpdatedAt()));
+    }
+
+    @PostMapping("/{quotationId}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
+    public OilMartQuotationResponse approve(@PathVariable UUID quotationId,
+                                            @Valid @RequestBody OilMartDocumentTokenRequest request) {
+        return assembler.toResponse(quotations.approve(quotationId, request.expectedUpdatedAt()));
+    }
+
+    @PostMapping("/{quotationId}/reject")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
+    public OilMartQuotationResponse reject(@PathVariable UUID quotationId,
+                                           @Valid @RequestBody RejectOilMartDocumentRequest request) {
+        return assembler.toResponse(quotations.reject(
+                quotationId, request.reason(), request.expectedUpdatedAt()));
+    }
+
+    @PostMapping("/{quotationId}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
+    public OilMartQuotationResponse cancel(@PathVariable UUID quotationId,
+                                           @Valid @RequestBody CancelOilMartDocumentRequest request) {
+        return assembler.toResponse(quotations.cancel(
+                quotationId, request.reason(), request.expectedUpdatedAt()));
+    }
+}

@@ -1,5 +1,14 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { api, getToken, setToken } from "@core/http/client";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { api, setToken } from "@core/http/client";
+import { getAccessToken, getAccessTokenExpiry } from "@core/http/access-token";
 import type { LoginResponse } from "@core/types";
 
 interface StoredUser {
@@ -10,14 +19,12 @@ interface StoredUser {
 
 const USER_KEY = "erp.user";
 
-/**
- * Restore a previously stored session synchronously, so it's present on the
- * very first render. Doing this in a useEffect instead would leave the first
- * render unauthenticated and bounce the user to /login on every refresh.
- */
 function restoreUser(): StoredUser | null {
-  if (!getToken()) return null;
   const cached = localStorage.getItem(USER_KEY);
+  if (!getAccessToken()) {
+    if (cached) localStorage.removeItem(USER_KEY);
+    return null;
+  }
   if (!cached) return null;
   try {
     return JSON.parse(cached) as StoredUser;
@@ -39,8 +46,33 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
+const MAX_TIMEOUT_MILLIS = 2 ** 31 - 1;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<StoredUser | null>(restoreUser);
+
+  const endSession = useCallback(() => {
+    setToken(null);
+    localStorage.removeItem(USER_KEY);
+    setUser(null);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const expiresAt = getAccessTokenExpiry();
+    if (expiresAt === null) {
+      endSession();
+      return;
+    }
+    const delay = expiresAt - Date.now();
+    if (delay <= 0) {
+      endSession();
+      return;
+    }
+    if (delay > MAX_TIMEOUT_MILLIS) return;
+    const timer = window.setTimeout(endSession, delay);
+    return () => window.clearTimeout(timer);
+  }, [user, endSession]);
 
   async function login(username: string, password: string) {
     const { data } = await api.post<LoginResponse>("/auth/login", { username, password });
@@ -55,9 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
-    setToken(null);
-    localStorage.removeItem(USER_KEY);
-    setUser(null);
+    endSession();
   }
 
   const value = useMemo<AuthState>(

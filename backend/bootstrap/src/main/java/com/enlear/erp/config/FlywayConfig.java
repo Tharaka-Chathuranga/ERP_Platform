@@ -57,6 +57,18 @@ public class FlywayConfig {
 
     @Bean(initMethod = "migrate")
     @DependsOn("fuelFlyway")
+    public Flyway oilMartFlyway(DataSource dataSource) {
+        return Flyway.configure()
+                .dataSource(dataSource)
+                .schemas("oilmart")
+                .defaultSchema("oilmart")
+                .locations("classpath:db/migration/oilmart")
+                .baselineOnMigrate(true)
+                .load();
+    }
+
+    @Bean(initMethod = "migrate")
+    @DependsOn("oilMartFlyway")
     public Flyway notificationFlyway(DataSource dataSource) {
         return Flyway.configure()
                 .dataSource(dataSource)
@@ -71,7 +83,7 @@ public class FlywayConfig {
     @Configuration
     static class JpaDependsOnFlyway extends EntityManagerFactoryDependsOnPostProcessor {
         JpaDependsOnFlyway() {
-            super("userFlyway", "storeFlyway", "fuelFlyway", "notificationFlyway");
+            super("userFlyway", "storeFlyway", "fuelFlyway", "oilMartFlyway", "notificationFlyway");
         }
     }
 }

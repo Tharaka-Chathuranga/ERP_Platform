@@ -21,19 +21,27 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
 });
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <MantineProvider theme={theme} colorSchemeManager={colorSchemeManager} defaultColorScheme="light">
-      <Notifications position="top-right" />
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AuthProvider>
-            <VoiceProvider>
-              <App />
-            </VoiceProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </MantineProvider>
-  </React.StrictMode>
+async function startMocks() {
+  if (!import.meta.env.DEV || import.meta.env.VITE_OILMART_MOCKS !== "1") return;
+  const { startOilMartMocks } = await import("@oilmart/mocks/browser");
+  await startOilMartMocks();
+}
+
+startMocks().then(() =>
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <MantineProvider theme={theme} colorSchemeManager={colorSchemeManager} defaultColorScheme="light">
+        <Notifications position="top-right" />
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <AuthProvider>
+              <VoiceProvider>
+                <App />
+              </VoiceProvider>
+            </AuthProvider>
+          </BrowserRouter>
+        </QueryClientProvider>
+      </MantineProvider>
+    </React.StrictMode>
+  )
 );

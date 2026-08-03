@@ -486,3 +486,246 @@ export interface FuelOverview {
     consumptionSincePrevious?: number;
   };
 }
+
+export type OilType = "ENGINE" | "HYDRAULIC" | "GEAR" | "BRAKE" | "COOLANT" | "GREASE" | "TRANSMISSION";
+export type OilMartItemStatus = "ACTIVE" | "INACTIVE";
+export type OilMartSupplierStatus = "ACTIVE" | "INACTIVE";
+export type OilMartClientStatus = "ACTIVE" | "INACTIVE";
+
+export type OilMartMovementType = "RECEIPT" | "SALE" | "ADJUSTMENT";
+export type OilMartMovementReferenceType = "RECEIPT" | "SALE" | "INVOICE" | "MANUAL";
+
+export type OilMartQuotationStatus =
+  | "DRAFT"
+  | "PENDING_APPROVAL"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export interface OilMartItem {
+  id: string;
+  code: string;
+  name: string;
+  oilType: OilType;
+  brand?: string;
+  grade?: string;
+  description?: string;
+  /** Printed next to quantities; varies per item. */
+  unitOfMeasure: string;
+  reorderLevelLitres: number;
+  status: OilMartItemStatus;
+}
+
+export interface OilMartItemPrice {
+  id: string;
+  itemId: string;
+  buyPrice: number;
+  sellPrice: number;
+  effectiveFrom: string;
+  effectiveTo?: string | null;
+  recordedByUserId: string;
+  note?: string;
+}
+
+export interface OilMartSupplier {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  status: OilMartSupplierStatus;
+}
+
+export interface OilMartClient {
+  id: string;
+  code: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  status: OilMartClientStatus;
+  profileIncomplete: boolean;
+}
+
+export interface OilMartStockBalance {
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  oilType: OilType;
+  quantityOnHand: number;
+  reorderLevelLitres: number;
+  buyPrice?: number;
+  sellPrice?: number;
+  stockValue: number;
+  lastMovementAt?: string;
+}
+
+export interface OilMartStockMovement {
+  id: string;
+  itemId: string;
+  movementType: OilMartMovementType;
+  quantityDelta: number;
+  balanceAfter: number;
+  referenceType: OilMartMovementReferenceType;
+  referenceId?: string;
+  referenceNo?: string;
+  movedAt: string;
+  movedByUserId: string;
+  note?: string;
+}
+
+export interface OilMartReceiptLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  quantityLitres: number;
+  buyUnitPrice: number;
+  lineTotal: number;
+}
+
+export interface OilMartReceipt {
+  id: string;
+  receiptNo: string;
+  supplierId: string;
+  supplierName: string;
+  referenceNo?: string;
+  receivedAt: string;
+  receivedByUserId: string;
+  totalCost: number;
+  note?: string;
+  lines: OilMartReceiptLine[];
+}
+
+export interface OilMartQuotationLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  unitOfMeasure: string;
+  quantityLitres: number;
+  listUnitPrice: number;
+  unitPrice: number;
+  isPriceOverride: boolean;
+  discountPercent: number;
+  lineTotal: number;
+  /** Present only for callers allowed to see margin. */
+  unitCost?: number;
+  lineCost?: number;
+  lineProfit?: number;
+}
+
+export interface OilMartQuotation {
+  id: string;
+  quotationNo: string;
+  clientId: string;
+  clientName: string;
+  status: OilMartQuotationStatus;
+  createdByUserId: string;
+  issuedDate: string;
+  validUntil: string;
+  expired: boolean;
+  editable: boolean;
+  submittedAt?: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  cancellationReason?: string;
+  subtotal: number;
+  gstRatePercent: number;
+  gstAmount: number;
+  grandTotal: number;
+  /** Present only for callers allowed to see margin. */
+  totalCost?: number;
+  totalProfit?: number;
+  note?: string;
+  /** Concurrency token echoed back on every state transition. */
+  updatedAt: string;
+  lines: OilMartQuotationLine[];
+}
+
+export type OilMartInvoiceStatus = "PENDING_APPROVAL" | "APPROVED" | "REJECTED";
+
+export interface OilMartInvoiceLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  unitOfMeasure: string;
+  quantityLitres: number;
+  listUnitPrice: number;
+  unitPrice: number;
+  isPriceOverride: boolean;
+  discountPercent: number;
+  lineTotal: number;
+  /** Present only for callers allowed to see margin. */
+  unitCost?: number;
+  lineCost?: number;
+  lineProfit?: number;
+}
+
+export interface OilMartBankDetails {
+  accountName?: string;
+  bankName?: string;
+  branch?: string;
+  accountNumber?: string;
+  swiftCode?: string;
+}
+
+export interface OilMartInvoice {
+  id: string;
+  invoiceNo: string;
+  quotationId: string;
+  quotationNo: string;
+  clientId: string;
+  clientName: string;
+  status: OilMartInvoiceStatus;
+  createdByUserId: string;
+  invoiceDate: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  bankDetails?: OilMartBankDetails;
+  subtotal: number;
+  gstRatePercent: number;
+  gstAmount: number;
+  grandTotal: number;
+  /** Present only for callers allowed to see margin. */
+  totalCost?: number;
+  totalProfit?: number;
+  note?: string;
+  /** Concurrency token echoed back on every state transition. */
+  updatedAt: string;
+  lines: OilMartInvoiceLine[];
+}
+
+export type OilMartOverviewPeriod = "TODAY" | "THIS_WEEK" | "THIS_MONTH";
+
+/** HOURS when the period is today, otherwise DAYS. */
+export type OilMartTrendBucket = "HOURS" | "DAYS";
+
+export interface OilMartSalesTrendPoint {
+  /** ISO instant the bucket opens. */
+  bucketStart: string;
+  total: number;
+}
+
+export interface OilMartOverview {
+  period: OilMartOverviewPeriod;
+  trendBucket: OilMartTrendBucket;
+  stockValue: number;
+  salesThisPeriod: number;
+  saleCountThisPeriod: number;
+  awaitingApproval: number;
+  lowStockCount: number;
+  salesTrend: OilMartSalesTrendPoint[];
+  lowStock: OilMartStockBalance[];
+  pendingApprovals: OilMartQuotation[];
+}

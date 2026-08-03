@@ -33,7 +33,6 @@ import { notifyError, notifySuccess } from "@core/notify";
 import type { FuelTank } from "@core/types";
 import { listTanks, recordFuelDelivery, type FuelDeliveryLineInput } from "../../../api";
 
-/** Per-tank editable line: litres discharged plus the before/after dip readings. */
 interface LineDraft {
   litresDelivered: number | "";
   dipBeforeLitres: number | "";
@@ -42,7 +41,6 @@ interface LineDraft {
 
 const EMPTY_LINE: LineDraft = { litresDelivered: "", dipBeforeLitres: "", dipAfterLitres: "" };
 
-/** Combine the delivery date with an "HH:mm" time into an ISO instant, or undefined. */
 function toInstant(date: Date | null, time: string): string | undefined {
   if (!date || !time) return undefined;
   return dayjs(`${dayjs(date).format("YYYY-MM-DD")}T${time}`).toISOString();
@@ -52,11 +50,6 @@ function num(value: number | ""): number | undefined {
   return value === "" ? undefined : Number(value);
 }
 
-/**
- * Record a supplier fuel delivery the way the station logs it on paper: ordered
- * vs delivered litres, discharge timing, and a per-tank line carrying the dip
- * readings before and after discharge, with the reconciliation shown live.
- */
 export function FuelDeliveryForm() {
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -271,7 +264,6 @@ export function FuelDeliveryForm() {
 
 const PURPOSE_LABEL: Record<string, string> = { INTERNAL: "Big / internal", VEHICLE: "Small / vehicle" };
 
-/** One tank's delivered litres + dip readings, with a live reconciliation line. */
 function TankLineEditor({
   tank,
   line,
@@ -343,7 +335,6 @@ function TankLineEditor({
   );
 }
 
-/** Signed variance with a colour cue; green when within tolerance. */
 function VarianceText({
   value,
   unit,
