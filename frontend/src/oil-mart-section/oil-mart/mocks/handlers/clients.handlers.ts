@@ -16,9 +16,9 @@ export const clientHandlers = [
     return HttpResponse.json(clients);
   }),
 
-  http.get("/api/oilmart/clients/:clientId/sales", async ({ params }) => {
+  http.get("/api/oilmart/clients/:clientId/quotations", async ({ params }) => {
     await delay(120);
-    return HttpResponse.json(db.sales.filter((s) => s.clientId === params.clientId));
+    return HttpResponse.json(db.quotations.filter((q) => q.clientId === params.clientId));
   }),
 
   http.get("/api/oilmart/clients/:clientId", async ({ params }) => {
@@ -26,6 +26,31 @@ export const clientHandlers = [
     const client = db.clients.find((c) => c.id === params.clientId);
     if (!client) return HttpResponse.json({ detail: "Client not found" }, { status: 404 });
     return HttpResponse.json(client);
+  }),
+
+  http.post("/api/oilmart/clients/quick-add", async ({ request }) => {
+    await delay(200);
+    const { name } = (await request.json()) as { name: string };
+    const trimmed = name.trim();
+    const existing = db.clients.find(
+      (c) => c.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (existing) return HttpResponse.json(existing, { status: 201 });
+
+    const code = trimmed
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 56);
+    const created: OilMartClient = {
+      id: nextId("cli"),
+      code: code || "CLIENT",
+      name: trimmed,
+      status: "ACTIVE",
+      profileIncomplete: true,
+    };
+    db.clients.push(created);
+    return HttpResponse.json(created, { status: 201 });
   }),
 
   http.post("/api/oilmart/clients", async ({ request }) => {

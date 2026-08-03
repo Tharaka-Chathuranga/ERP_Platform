@@ -493,19 +493,14 @@ export type OilMartSupplierStatus = "ACTIVE" | "INACTIVE";
 export type OilMartClientStatus = "ACTIVE" | "INACTIVE";
 
 export type OilMartMovementType = "RECEIPT" | "SALE" | "ADJUSTMENT";
-export type OilMartMovementReferenceType = "RECEIPT" | "SALE" | "MANUAL";
+export type OilMartMovementReferenceType = "RECEIPT" | "SALE" | "INVOICE" | "MANUAL";
 
-export type OilMartSaleStatus =
-  | "QUOTATION"
-  | "QUOTATION_APPROVAL"
-  | "ORDERED"
+export type OilMartQuotationStatus =
+  | "DRAFT"
+  | "PENDING_APPROVAL"
   | "APPROVED"
   | "REJECTED"
-  | "DISPATCHED"
-  | "INVOICED"
   | "CANCELLED";
-
-export type OilMartPaymentMethod = "CASH" | "CARD" | "BANK_TRANSFER";
 
 export interface OilMartItem {
   id: string;
@@ -550,6 +545,7 @@ export interface OilMartClient {
   email?: string;
   address?: string;
   status: OilMartClientStatus;
+  profileIncomplete: boolean;
 }
 
 export interface OilMartStockBalance {
@@ -602,7 +598,7 @@ export interface OilMartReceipt {
   lines: OilMartReceiptLine[];
 }
 
-export interface OilMartSaleLine {
+export interface OilMartQuotationLine {
   id: string;
   itemId: string;
   itemCode: string;
@@ -613,46 +609,45 @@ export interface OilMartSaleLine {
   isPriceOverride: boolean;
   discountPercent: number;
   lineTotal: number;
+  /** Present only for callers allowed to see margin. */
+  unitCost?: number;
+  lineCost?: number;
+  lineProfit?: number;
 }
 
-export interface OilMartSale {
+export interface OilMartQuotation {
   id: string;
-  saleNo: string;
+  quotationNo: string;
   clientId: string;
   clientName: string;
-  status: OilMartSaleStatus;
+  status: OilMartQuotationStatus;
   createdByUserId: string;
-  quotedAt: string;
-  validUntil?: string;
-  quotationApprovedByUserId?: string;
-  quotationApprovedAt?: string;
-  orderedAt?: string;
+  issuedDate: string;
+  validUntil: string;
+  expired: boolean;
+  editable: boolean;
+  submittedAt?: string;
   approvedByUserId?: string;
   approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
   rejectionReason?: string;
-  dispatchedAt?: string;
-  dispatchedByUserId?: string;
-  vehicleNo?: string;
-  driverName?: string;
-  invoiceNo?: string;
-  invoicedAt?: string;
-  invoicedByUserId?: string;
-  paymentMethod?: OilMartPaymentMethod;
   cancellationReason?: string;
   subtotal: number;
-  discountAmount: number;
-  total: number;
+  gstRatePercent: number;
+  gstAmount: number;
+  grandTotal: number;
+  /** Present only for callers allowed to see margin. */
+  totalCost?: number;
+  totalProfit?: number;
   note?: string;
-  lines: OilMartSaleLine[];
+  /** Concurrency token echoed back on every state transition. */
+  updatedAt: string;
+  lines: OilMartQuotationLine[];
 }
 
 export interface OilMartSalesTrendPoint {
   date: string;
-  total: number;
-}
-
-export interface OilMartRevenueByMethod {
-  paymentMethod: OilMartPaymentMethod;
   total: number;
 }
 
@@ -663,7 +658,6 @@ export interface OilMartOverview {
   awaitingApproval: number;
   lowStockCount: number;
   salesTrend: OilMartSalesTrendPoint[];
-  revenueByMethod: OilMartRevenueByMethod[];
   lowStock: OilMartStockBalance[];
-  pendingApprovals: OilMartSale[];
+  pendingApprovals: OilMartQuotation[];
 }

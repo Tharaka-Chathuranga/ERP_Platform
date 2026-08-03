@@ -2,7 +2,6 @@ import { Card, Group, Stack, Text, Title } from "@mantine/core";
 import { AreaChart } from "@mantine/charts";
 import dayjs from "dayjs";
 import type { OilMartOverview } from "@core/types";
-import { PAYMENT_METHOD_LABELS } from "../../../../selling/components/oil-mart-sale-meta";
 import { MoneyText } from "../../../../components/money-text";
 
 export function OilMartSalesTrendChart({ overview }: { overview: OilMartOverview }) {
@@ -15,16 +14,12 @@ export function OilMartSalesTrendChart({ overview }: { overview: OilMartOverview
     <Card withBorder radius="md" padding="lg" mb="lg">
       <Group justify="space-between" align="flex-start" mb="lg" wrap="wrap">
         <Title order={4}>Sales trend</Title>
-        <Group gap="xl">
-          {overview.revenueByMethod.map((entry) => (
-            <Stack key={entry.paymentMethod} gap={2} align="flex-end">
-              <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
-                {PAYMENT_METHOD_LABELS[entry.paymentMethod]}
-              </Text>
-              <MoneyText value={entry.total} emphasis />
-            </Stack>
-          ))}
-        </Group>
+        <Stack gap={2} align="flex-end">
+          <Text size="xs" c="dimmed" tt="uppercase" fw={600}>
+            Invoiced this period
+          </Text>
+          <MoneyText value={overview.salesThisPeriod} emphasis />
+        </Stack>
       </Group>
 
       <AreaChart

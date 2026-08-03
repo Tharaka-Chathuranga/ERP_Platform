@@ -8,11 +8,11 @@ const meta: Meta<typeof OilMartClientSummaryCard> = {
   args: {
     client: oilMartClients[0],
     stats: {
-      saleCount: 4,
-      invoicedCount: 1,
-      lifetimeValue: 232000,
+      quotationCount: 4,
+      approvedCount: 1,
+      approvedValue: 232000,
       inFlight: 3,
-      lastPurchaseAt: "2026-07-18T14:00:00Z",
+      lastApprovedAt: "2026-07-18T14:00:00Z",
     },
   },
 };
@@ -22,9 +22,9 @@ type Story = StoryObj<typeof OilMartClientSummaryCard>;
 
 export const ActiveClient: Story = {};
 
-export const NeverPurchased: Story = {
+export const NeverQuoted: Story = {
   args: {
     client: oilMartClients[3],
-    stats: { saleCount: 0, invoicedCount: 0, lifetimeValue: 0, inFlight: 0 },
+    stats: { quotationCount: 0, approvedCount: 0, approvedValue: 0, inFlight: 0 },
   },
 };

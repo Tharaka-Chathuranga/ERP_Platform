@@ -6,11 +6,11 @@ import type { OilMartClient } from "@core/types";
 import { MoneyText } from "../../../../components/money-text";
 
 export interface OilMartClientStats {
-  saleCount: number;
-  invoicedCount: number;
-  lifetimeValue: number;
+  quotationCount: number;
+  approvedCount: number;
+  approvedValue: number;
   inFlight: number;
-  lastPurchaseAt?: string;
+  lastApprovedAt?: string;
 }
 
 interface OilMartClientSummaryCardProps {
@@ -47,10 +47,10 @@ export function OilMartClientSummaryCard({ client, stats }: OilMartClientSummary
       </Group>
 
       <SimpleGrid cols={{ base: 2, sm: 4 }} mb="lg">
-        <Stat label="Sales" value={stats.saleCount} />
-        <Stat label="Invoiced" value={stats.invoicedCount} />
+        <Stat label="Quotations" value={stats.quotationCount} />
+        <Stat label="Approved" value={stats.approvedCount} />
         <Stat label="In flight" value={stats.inFlight} />
-        <Stat label="Lifetime value" value={<MoneyText value={stats.lifetimeValue} fz={22} fw={700} />} />
+        <Stat label="Approved value" value={<MoneyText value={stats.approvedValue} fz={22} fw={700} />} />
       </SimpleGrid>
 
       <DefinitionList
@@ -59,8 +59,8 @@ export function OilMartClientSummaryCard({ client, stats }: OilMartClientSummary
           { label: "Phone", value: client.phone },
           { label: "Email", value: client.email },
           {
-            label: "Last purchase",
-            value: stats.lastPurchaseAt ? dayjs(stats.lastPurchaseAt).format("MMM D, YYYY") : null,
+            label: "Last approved",
+            value: stats.lastApprovedAt ? dayjs(stats.lastApprovedAt).format("MMM D, YYYY") : null,
           },
           { label: "Address", value: client.address },
         ]}

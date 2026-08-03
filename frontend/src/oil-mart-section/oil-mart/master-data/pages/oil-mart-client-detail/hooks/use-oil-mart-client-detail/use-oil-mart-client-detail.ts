@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { qk } from "@core/queryKeys";
-import { getOilMartClient, listOilMartClientSales } from "../../../../api";
+import { getOilMartClient, listOilMartClientQuotations } from "../../../../api";
 
 export function useOilMartClientDetail() {
   const { clientId = "" } = useParams();
@@ -13,29 +13,29 @@ export function useOilMartClientDetail() {
     enabled: Boolean(clientId),
   });
 
-  const salesQuery = useQuery({
-    queryKey: qk.oilMartClientSales(clientId),
-    queryFn: () => listOilMartClientSales(clientId),
+  const quotationsQuery = useQuery({
+    queryKey: qk.oilMartClientQuotations(clientId),
+    queryFn: () => listOilMartClientQuotations(clientId),
     enabled: Boolean(clientId),
   });
 
   const stats = useMemo(() => {
-    const sales = salesQuery.data ?? [];
-    const invoiced = sales.filter((sale) => sale.status === "INVOICED");
+    const quotations = quotationsQuery.data ?? [];
+    const approved = quotations.filter((quotation) => quotation.status === "APPROVED");
     return {
-      saleCount: sales.length,
-      invoicedCount: invoiced.length,
-      lifetimeValue: invoiced.reduce((sum, sale) => sum + sale.total, 0),
-      inFlight: sales.filter((sale) =>
-        ["QUOTATION", "ORDERED", "APPROVED", "DISPATCHED"].includes(sale.status),
+      quotationCount: quotations.length,
+      approvedCount: approved.length,
+      approvedValue: approved.reduce((sum, quotation) => sum + quotation.grandTotal, 0),
+      inFlight: quotations.filter((quotation) =>
+        ["DRAFT", "PENDING_APPROVAL"].includes(quotation.status),
       ).length,
-      lastPurchaseAt: invoiced
-        .map((sale) => sale.invoicedAt)
+      lastApprovedAt: approved
+        .map((quotation) => quotation.approvedAt)
         .filter((value): value is string => Boolean(value))
         .sort()
         .slice(-1)[0],
     };
-  }, [salesQuery.data]);
+  }, [quotationsQuery.data]);
 
-  return { clientId, clientQuery, salesQuery, stats };
+  return { clientId, clientQuery, quotationsQuery, stats };
 }

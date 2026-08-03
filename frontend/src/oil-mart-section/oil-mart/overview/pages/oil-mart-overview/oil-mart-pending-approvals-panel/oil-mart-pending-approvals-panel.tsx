@@ -3,48 +3,60 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { DataTable, StackedCell, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import type { OilMartSale } from "@core/types";
+import type { OilMartQuotation } from "@core/types";
 import { MoneyText } from "../../../../components/money-text";
 
-function buildColumns(): Column<OilMartSale>[] {
+function buildColumns(): Column<OilMartQuotation>[] {
   return [
     {
-      header: "Sale",
+      header: "Quotation",
       emphasis: true,
-      render: (sale) => <StackedCell primary={sale.saleNo} secondary={sale.clientName} />,
+      render: (quotation) => (
+        <StackedCell primary={quotation.quotationNo} secondary={quotation.clientName} />
+      ),
     },
     {
-      header: "Ordered",
-      render: (sale) => (sale.orderedAt ? dayjs(sale.orderedAt).format("MMM D") : "—"),
+      header: "Submitted",
+      render: (quotation) =>
+        quotation.submittedAt ? dayjs(quotation.submittedAt).format("MMM D") : "—",
     },
-    { header: "Total", align: "right", render: (sale) => <MoneyText value={sale.total} emphasis /> },
+    {
+      header: "Grand total",
+      align: "right",
+      render: (quotation) => <MoneyText value={quotation.grandTotal} emphasis />,
+    },
   ];
 }
 
 interface OilMartPendingApprovalsPanelProps {
-  sales: OilMartSale[];
-  onSelect?: (sale: OilMartSale) => void;
+  quotations: OilMartQuotation[];
+  onSelect?: (quotation: OilMartQuotation) => void;
 }
 
 export function OilMartPendingApprovalsPanel({
-  sales,
+  quotations,
   onSelect,
 }: OilMartPendingApprovalsPanelProps) {
   return (
     <Card withBorder radius="md" padding="lg">
       <Group justify="space-between" mb="md">
         <Title order={4}>Awaiting approval</Title>
-        <Anchor component={Link} to="/oil-mart/sales" size="sm">
-          Sales board
+        <Anchor component={Link} to="/oil-mart/quotations" size="sm">
+          Quotations
         </Anchor>
       </Group>
       <DataTable
         columns={buildColumns()}
-        data={sales}
-        rowKey={(sale) => sale.id}
+        data={quotations}
+        rowKey={(quotation) => quotation.id}
         onRowClick={onSelect}
         withCard={false}
-        empty={<EmptyState title="Nothing pending" description="No orders are waiting for approval." />}
+        empty={
+          <EmptyState
+            title="Nothing pending"
+            description="No quotations are waiting for approval."
+          />
+        }
       />
     </Card>
   );

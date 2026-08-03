@@ -8,7 +8,7 @@ import { OilMartLowStockPanel } from "./oil-mart-low-stock-panel";
 import { OilMartPendingApprovalsPanel } from "./oil-mart-pending-approvals-panel";
 
 export function OilMartOverviewPage() {
-  const { query, overview, openStockItem, openSale } = useOilMartOverview();
+  const { query, overview, openStockItem, openQuotation } = useOilMartOverview();
 
   return (
     <div>
@@ -23,8 +23,8 @@ export function OilMartOverviewPage() {
             <Grid>
               <Grid.Col span={{ base: 12, lg: 6 }}>
                 <OilMartPendingApprovalsPanel
-                  sales={overview.pendingApprovals}
-                  onSelect={openSale}
+                  quotations={overview.pendingApprovals}
+                  onSelect={openQuotation}
                 />
               </Grid.Col>
               <Grid.Col span={{ base: 12, lg: 6 }}>

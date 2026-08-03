@@ -3,7 +3,7 @@ import type {
   OilMartItem,
   OilMartItemPrice,
   OilMartReceipt,
-  OilMartSale,
+  OilMartQuotation,
   OilMartStockBalance,
   OilMartStockMovement,
   OilMartSupplier,
@@ -14,7 +14,7 @@ import {
   oilMartItems,
   oilMartMovements,
   oilMartReceipts,
-  oilMartSales,
+  oilMartQuotations,
   oilMartStock,
   oilMartSuppliers,
 } from "../oil-mart.fixtures";
@@ -27,7 +27,7 @@ interface MockDb {
   stock: OilMartStockBalance[];
   movements: OilMartStockMovement[];
   receipts: OilMartReceipt[];
-  sales: OilMartSale[];
+  quotations: OilMartQuotation[];
   sequence: number;
 }
 
@@ -42,7 +42,7 @@ function seed(): MockDb {
     stock: clone(oilMartStock),
     movements: clone(oilMartMovements),
     receipts: clone(oilMartReceipts),
-    sales: clone(oilMartSales),
+    quotations: clone(oilMartQuotations),
     sequence: 100,
   };
 }
@@ -60,7 +60,7 @@ export function nextId(prefix: string): string {
 
 export function nextDocumentNo(prefix: string): string {
   db.sequence += 1;
-  return `${prefix}-2026-${String(db.sequence).padStart(6, "0")}`;
+  return `${prefix}-26-08-${String(db.sequence).padStart(3, "0")}`;
 }
 
 export function itemById(itemId: string): OilMartItem | undefined {

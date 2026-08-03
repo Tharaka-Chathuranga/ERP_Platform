@@ -7,7 +7,7 @@ export const overviewHandlers = [
   http.get("/api/oilmart/overview", async () => {
     await delay(180);
     const lowStock = db.stock.filter((s) => s.quantityOnHand < s.reorderLevelLitres);
-    const pendingApprovals = db.sales.filter((s) => s.status === "ORDERED");
+    const pendingApprovals = db.quotations.filter((q) => q.status === "PENDING_APPROVAL");
 
     const overview: OilMartOverview = {
       ...oilMartOverview,

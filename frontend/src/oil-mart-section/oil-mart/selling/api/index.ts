@@ -1,1 +1,1 @@
-export * from "./sales.api";
+export * from "./quotations.api";

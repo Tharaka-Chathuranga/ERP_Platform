@@ -1,5 +1,5 @@
 import { api } from "@core/http/client";
-import type { OilMartClient, OilMartClientStatus, OilMartSale } from "@core/types";
+import type { OilMartClient, OilMartClientStatus, OilMartQuotation } from "@core/types";
 
 export interface SaveOilMartClientInput {
   code: string;
@@ -23,8 +23,15 @@ export async function getOilMartClient(clientId: string): Promise<OilMartClient>
   return data;
 }
 
-export async function listOilMartClientSales(clientId: string): Promise<OilMartSale[]> {
-  const { data } = await api.get<OilMartSale[]>(`/oilmart/clients/${clientId}/sales`);
+export async function listOilMartClientQuotations(
+  clientId: string,
+): Promise<OilMartQuotation[]> {
+  const { data } = await api.get<OilMartQuotation[]>(`/oilmart/clients/${clientId}/quotations`);
+  return data;
+}
+
+export async function quickAddOilMartClient(name: string): Promise<OilMartClient> {
+  const { data } = await api.post<OilMartClient>("/oilmart/clients/quick-add", { name });
   return data;
 }
 

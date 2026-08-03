@@ -18,7 +18,7 @@ export const FlatWeek: Story = {
     overview: {
       ...oilMartOverview,
       salesTrend: oilMartOverview.salesTrend.map((point) => ({ ...point, total: 0 })),
-      revenueByMethod: [],
+      salesThisPeriod: 0,
     },
   },
 };

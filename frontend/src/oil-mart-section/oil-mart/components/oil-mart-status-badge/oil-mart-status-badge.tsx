@@ -1,35 +1,29 @@
 import { Badge, type BadgeProps } from "@mantine/core";
-import type { OilMartSaleStatus } from "@core/types";
+import type { OilMartQuotationStatus } from "@core/types";
 
-const SALE_COLORS: Record<OilMartSaleStatus, string> = {
-  QUOTATION: "gray",
-  QUOTATION_APPROVAL: "orange",
-  ORDERED: "yellow",
-  APPROVED: "blue",
+const QUOTATION_COLORS: Record<OilMartQuotationStatus, string> = {
+  DRAFT: "gray",
+  PENDING_APPROVAL: "orange",
+  APPROVED: "green",
   REJECTED: "red",
-  DISPATCHED: "grape",
-  INVOICED: "green",
   CANCELLED: "dark",
 };
 
-const SALE_LABELS: Record<OilMartSaleStatus, string> = {
-  QUOTATION: "Quotation",
-  QUOTATION_APPROVAL: "Quotation approval",
-  ORDERED: "Ordered",
+const QUOTATION_LABELS: Record<OilMartQuotationStatus, string> = {
+  DRAFT: "Draft",
+  PENDING_APPROVAL: "Pending approval",
   APPROVED: "Approved",
   REJECTED: "Rejected",
-  DISPATCHED: "Dispatched",
-  INVOICED: "Invoiced",
   CANCELLED: "Cancelled",
 };
 
 interface OilMartStatusBadgeProps extends Omit<BadgeProps, "color" | "children"> {
-  status?: OilMartSaleStatus;
+  status?: OilMartQuotationStatus;
 }
 
 export function OilMartStatusBadge({ status, ...rest }: OilMartStatusBadgeProps) {
-  const color = status ? SALE_COLORS[status] : "gray";
-  const label = status ? SALE_LABELS[status] : "—";
+  const color = status ? QUOTATION_COLORS[status] : "gray";
+  const label = status ? QUOTATION_LABELS[status] : "—";
 
   return (
     <Badge color={color} variant="light" radius="sm" {...rest}>
@@ -38,15 +32,12 @@ export function OilMartStatusBadge({ status, ...rest }: OilMartStatusBadgeProps)
   );
 }
 
-export const OIL_MART_SALE_STATUSES: OilMartSaleStatus[] = [
-  "QUOTATION",
-  "QUOTATION_APPROVAL",
-  "ORDERED",
+export const OIL_MART_QUOTATION_STATUSES: OilMartQuotationStatus[] = [
+  "DRAFT",
+  "PENDING_APPROVAL",
   "APPROVED",
   "REJECTED",
-  "DISPATCHED",
-  "INVOICED",
   "CANCELLED",
 ];
 
-export { SALE_LABELS as OIL_MART_SALE_STATUS_LABELS };
+export { QUOTATION_LABELS as OIL_MART_QUOTATION_STATUS_LABELS };

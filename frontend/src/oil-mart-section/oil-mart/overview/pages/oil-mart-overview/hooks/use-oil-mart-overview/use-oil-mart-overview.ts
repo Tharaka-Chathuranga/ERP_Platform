@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { qk } from "@core/queryKeys";
-import type { OilMartSale, OilMartStockBalance } from "@core/types";
+import type { OilMartQuotation, OilMartStockBalance } from "@core/types";
 import { getOilMartOverview } from "../../../../api";
 
 export function useOilMartOverview() {
@@ -14,6 +14,7 @@ export function useOilMartOverview() {
     overview: query.data,
     openStockItem: (balance: OilMartStockBalance) =>
       navigate(`/oil-mart/items/${balance.itemId}`),
-    openSale: (sale: OilMartSale) => navigate(`/oil-mart/sales/${sale.id}`),
+    openQuotation: (quotation: OilMartQuotation) =>
+      navigate(`/oil-mart/quotations/${quotation.id}`),
   };
 }

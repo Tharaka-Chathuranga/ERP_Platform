@@ -4,11 +4,11 @@ import { PageHeader } from "@ui/layout/PageHeader";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { useOilMartClientDetail } from "./hooks/use-oil-mart-client-detail";
 import { OilMartClientSummaryCard } from "./oil-mart-client-summary-card";
-import { OilMartClientSalesTable } from "./oil-mart-client-sales-table";
+import { OilMartClientQuotationsTable } from "./oil-mart-client-quotations-table";
 
 export function OilMartClientDetailPage() {
   const navigate = useNavigate();
-  const { clientQuery, salesQuery, stats } = useOilMartClientDetail();
+  const { clientQuery, quotationsQuery, stats } = useOilMartClientDetail();
 
   return (
     <div>
@@ -27,11 +27,11 @@ export function OilMartClientDetailPage() {
         {clientQuery.data && (
           <>
             <OilMartClientSummaryCard client={clientQuery.data} stats={stats} />
-            <OilMartClientSalesTable
-              data={salesQuery.data ?? []}
-              loading={salesQuery.isLoading}
-              error={salesQuery.error}
-              onRowClick={(sale) => navigate(`/oil-mart/sales/${sale.id}`)}
+            <OilMartClientQuotationsTable
+              data={quotationsQuery.data ?? []}
+              loading={quotationsQuery.isLoading}
+              error={quotationsQuery.error}
+              onRowClick={(quotation) => navigate(`/oil-mart/quotations/${quotation.id}`)}
             />
           </>
         )}

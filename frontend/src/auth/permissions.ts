@@ -35,6 +35,7 @@ export type Permission =
   | "oilmart:sale:approve"
   | "oilmart:item:manage"
   | "oilmart:price:manage"
+  | "oilmart:profit:view" // see cost & margin on quotations and invoices
   | "oilmart:report";
 
 const OIL_MART_ALL: Permission[] = [
@@ -45,6 +46,7 @@ const OIL_MART_ALL: Permission[] = [
   "oilmart:sale:approve",
   "oilmart:item:manage",
   "oilmart:price:manage",
+  "oilmart:profit:view",
   "oilmart:report",
 ];
 
@@ -63,6 +65,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "oilmart:sale:approve",
     "oilmart:item:manage",
     "oilmart:price:manage",
+    "oilmart:profit:view",
     "oilmart:report",
   ],
   ADMIN: [
@@ -109,4 +112,5 @@ export const OILMART_SALE_CREATE: Permission = "oilmart:sale:create";
 export const OILMART_SALE_APPROVE: Permission = "oilmart:sale:approve";
 export const OILMART_ITEM_MANAGE: Permission = "oilmart:item:manage";
 export const OILMART_PRICE_MANAGE: Permission = "oilmart:price:manage";
+export const OILMART_PROFIT_VIEW: Permission = "oilmart:profit:view";
 export const OILMART_REPORT: Permission = "oilmart:report";
