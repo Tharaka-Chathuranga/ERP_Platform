@@ -22,7 +22,7 @@ export function OilMartQuotationsPage() {
     clientsQuery,
     active,
     rejected,
-    closed,
+    // closed,
     period,
     setPeriod,
     clientId,
@@ -80,7 +80,6 @@ export function OilMartQuotationsPage() {
 
       <OilMartQuotationsTable
         title="Approved, pending & draft"
-        description="Everything still moving toward a sale."
         data={active}
         showProfit={showProfit}
         loading={query.isLoading}
@@ -93,7 +92,6 @@ export function OilMartQuotationsPage() {
 
       <OilMartQuotationsTable
         title="Rejected"
-        description="Sent back by the approver — edit and resubmit."
         data={rejected}
         showProfit={showProfit}
         loading={query.isLoading}
@@ -102,6 +100,7 @@ export function OilMartQuotationsPage() {
         onRowClick={openDetail}
       />
 
+      {/*
       <OilMartQuotationsTable
         title="Closed"
         description="Cancelled and no longer actionable."
@@ -112,6 +111,7 @@ export function OilMartQuotationsPage() {
         emptyDescription={`No quotations were cancelled ${scope}.`}
         onRowClick={openDetail}
       />
+      */}
 
     </div>
   );

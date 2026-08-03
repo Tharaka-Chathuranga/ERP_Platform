@@ -8,7 +8,6 @@ const meta: Meta<typeof OilMartQuotationsTable> = {
   component: OilMartQuotationsTable,
   args: {
     title: "Approved, pending & draft",
-    description: "Everything still moving toward a sale.",
     data: oilMartQuotations.filter((q) =>
       ["DRAFT", "PENDING_APPROVAL", "APPROVED"].includes(q.status),
     ),
@@ -29,7 +28,6 @@ export const WithoutProfit: Story = { args: { showProfit: false } };
 export const Rejected: Story = {
   args: {
     title: "Rejected",
-    description: "Sent back by the approver — edit and resubmit.",
     data: oilMartQuotations.filter((q) => q.status === "REJECTED"),
     emptyTitle: "Nothing rejected",
     emptyDescription: "No quotations were rejected this month.",

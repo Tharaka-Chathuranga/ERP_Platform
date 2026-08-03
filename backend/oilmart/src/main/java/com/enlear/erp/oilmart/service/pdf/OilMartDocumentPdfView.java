@@ -30,14 +30,14 @@ public record OilMartDocumentPdfView(
                         String phone,
                         String fax,
                         String email,
-                        String taxNumber) {
+                        String taxNumber,
+                        String registrationNumber) {
     }
 
     public record Line(String itemCode,
                        String itemName,
                        List<String> descriptionLines,
                        String ordered,
-                       String backOrdered,
                        String supplied,
                        String unitOfMeasure,
                        BigDecimal unitPrice,

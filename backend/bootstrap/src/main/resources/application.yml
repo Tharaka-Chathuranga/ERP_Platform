@@ -60,14 +60,16 @@ erp:
     currency-code: ${ERP_OILMART_CURRENCY_CODE:PGK}
     # Letterhead on the quotation and invoice PDFs sent to clients.
     company:
-      name: ${ERP_OILMART_COMPANY_NAME:Enlear Oil Mart (Pvt) Ltd}
+      name: ${ERP_OILMART_COMPANY_NAME:CPL Toboi Lubricant Shop}
       # Pipes (or newlines) separate the printed address lines on the letterhead.
-      address: ${ERP_OILMART_COMPANY_ADDRESS:No. 42, Nawala Road|Colombo 05|Sri Lanka}
-      phone: ${ERP_OILMART_COMPANY_PHONE:+94 11 234 5678}
-      fax: ${ERP_OILMART_COMPANY_FAX:+94 11 234 5679}
-      email: ${ERP_OILMART_COMPANY_EMAIL:sales@enlear.com}
-      registration-number: ${ERP_OILMART_COMPANY_REGISTRATION_NUMBER:PV 123456}
-      tax-number: ${ERP_OILMART_COMPANY_TAX_NUMBER:100123456}
+      address: ${ERP_OILMART_COMPANY_ADDRESS:Toboi, Rabaul|East New Britain Province|Papua New Guinea}
+      # Left blank until confirmed: the letterhead omits any detail that is not set,
+      # so an unverified phone, TIN or registration number never reaches a client.
+      phone: ${ERP_OILMART_COMPANY_PHONE:}
+      fax: ${ERP_OILMART_COMPANY_FAX:}
+      email: ${ERP_OILMART_COMPANY_EMAIL:}
+      registration-number: ${ERP_OILMART_COMPANY_REGISTRATION_NUMBER:}
+      tax-number: ${ERP_OILMART_COMPANY_TAX_NUMBER:}
       # Optional letterhead logo; absolute file path or blank for none.
       logo-path: ${ERP_OILMART_COMPANY_LOGO_PATH:}
     # Printed on invoices; snapshotted at invoice creation.

@@ -79,7 +79,6 @@ export function OilMartInvoicesPage() {
 
       <OilMartInvoicesTable
         title="Approved & pending approval"
-        description="Invoices still moving through approval, and those already issued."
         data={active}
         showProfit={showProfit}
         loading={query.isLoading}
@@ -92,7 +91,6 @@ export function OilMartInvoicesPage() {
 
       <OilMartInvoicesTable
         title="Rejected"
-        description="Sent back by the approver — point them at the correct quotation."
         data={rejected}
         showProfit={showProfit}
         loading={query.isLoading}

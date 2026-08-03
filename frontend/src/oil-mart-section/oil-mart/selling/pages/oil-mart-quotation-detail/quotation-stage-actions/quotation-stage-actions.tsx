@@ -1,7 +1,7 @@
 import { Alert, Button, Card, Group, Text } from "@mantine/core";
 import {
   IconAlertTriangle,
-  IconBan,
+  // IconBan,
   IconCircleCheck,
   IconFileTypePdf,
   IconPencil,
@@ -31,7 +31,7 @@ export function QuotationStageActions({
   onSubmitForApproval,
   onApprove,
   onReject,
-  onCancel,
+  // onCancel,
   onEdit,
   onPreviewPdf,
 }: QuotationStageActionsProps) {
@@ -106,6 +106,7 @@ export function QuotationStageActions({
             </>
           )}
 
+          {/*
           {canCreate && quotation.status !== "APPROVED" && quotation.status !== "CANCELLED" && (
             <Button
               color="dark"
@@ -117,6 +118,7 @@ export function QuotationStageActions({
               Cancel
             </Button>
           )}
+          */}
         </Group>
       </Group>
     </Card>

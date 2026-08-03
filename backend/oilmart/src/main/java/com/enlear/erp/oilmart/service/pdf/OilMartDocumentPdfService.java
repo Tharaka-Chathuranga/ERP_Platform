@@ -146,7 +146,6 @@ public class OilMartDocumentPdfService {
                 item != null ? item.getName() : "",
                 descriptionLines,
                 plain(quantity),
-                "0",
                 plain(quantity),
                 item != null ? item.getUnitOfMeasure() : OilMartItem.DEFAULT_UNIT_OF_MEASURE,
                 unitPrice,
@@ -161,16 +160,17 @@ public class OilMartDocumentPdfService {
     private OilMartDocumentPdfView.Party company() {
         OilMartProperties.Company source = properties.company();
         return new OilMartDocumentPdfView.Party(source.name(), addressLines(source.address()),
-                source.phone(), source.fax(), source.email(), source.taxNumber());
+                source.phone(), source.fax(), source.email(), source.taxNumber(),
+                source.registrationNumber());
     }
 
     private OilMartDocumentPdfView.Party client(UUID clientId) {
         return clients.findById(clientId)
                 .map(client -> new OilMartDocumentPdfView.Party(client.getName(),
                         addressLines(client.getAddress()), client.getPhone(), null,
-                        client.getEmail(), null))
+                        client.getEmail(), null, null))
                 .orElseGet(() -> new OilMartDocumentPdfView.Party(null, List.of(), null, null,
-                        null, null));
+                        null, null, null));
     }
 
     private String accountCode(UUID clientId) {

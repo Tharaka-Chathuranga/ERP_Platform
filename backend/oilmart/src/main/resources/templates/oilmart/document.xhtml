@@ -87,6 +87,9 @@
         <td>
             <div class="co-name" th:text="${doc.company.name}">Company</div>
             <div class="co-line" th:each="line : ${doc.company.addressLines}" th:text="${line}">Address</div>
+            <div class="co-line" th:if="${doc.company.registrationNumber}">
+                Reg #:&#160;&#160;&#160;<span th:text="${doc.company.registrationNumber}"></span>
+            </div>
             <div class="co-line" th:if="${doc.company.taxNumber}">
                 TIN #:&#160;&#160;&#160;&#160;<span th:text="${doc.company.taxNumber}"></span>
             </div>
@@ -94,6 +97,7 @@
                 <span th:if="${doc.company.phone}" th:text="'Ph: ' + ${doc.company.phone}"></span>
                 <span th:if="${doc.company.fax}" th:text="'&#160;&#160;Fax: ' + ${doc.company.fax}"></span>
             </div>
+            <div class="co-line" th:if="${doc.company.email}" th:text="${doc.company.email}"></div>
         </td>
         <td width="42mm">
             <div class="doc-type" th:text="${doc.documentTitle}">QUOTATION</div>
@@ -178,14 +182,13 @@
     <thead>
     <tr>
         <th width="12%">Code</th>
-        <th width="34%">Item Description</th>
-        <th width="7%">Ordered</th>
-        <th width="6%">B/Ord</th>
-        <th width="7%">Supplied</th>
+        <th width="38%">Item Description</th>
+        <th width="8%">Ordered</th>
+        <th width="8%">Supplied</th>
         <th width="6%">UOM</th>
-        <th width="10%">Unit Price</th>
+        <th width="11%">Unit Price</th>
         <th width="6%">Disc %</th>
-        <th width="12%">Line Total</th>
+        <th width="11%">Line Total</th>
     </tr>
     </thead>
     <tbody>
@@ -196,7 +199,6 @@
             <div class="desc-sub" th:each="extra : ${line.descriptionLines}" th:text="${extra}"></div>
         </td>
         <td class="row-first r" th:text="${line.ordered}">6</td>
-        <td class="row-first r" th:text="${line.backOrdered}">0</td>
         <td class="row-first r" th:text="${line.supplied}">6</td>
         <td class="row-first c" th:text="${line.unitOfMeasure}">L</td>
         <td class="row-first r" th:text="${#numbers.formatDecimal(line.unitPrice, 1, 'COMMA', 2, 'POINT')}">130.00</td>
@@ -205,10 +207,10 @@
     </tr>
     <tr th:if="${doc.note}">
         <td>&#160;</td>
-        <td colspan="8" class="desc-sub" th:text="${doc.note}"></td>
+        <td colspan="7" class="desc-sub" th:text="${doc.note}"></td>
     </tr>
     <tr class="filler">
-        <td>&#160;</td><td>&#160;</td><td>&#160;</td><td>&#160;</td><td>&#160;</td>
+        <td>&#160;</td><td>&#160;</td><td>&#160;</td><td>&#160;</td>
         <td>&#160;</td><td>&#160;</td><td>&#160;</td><td>&#160;</td>
     </tr>
     </tbody>
