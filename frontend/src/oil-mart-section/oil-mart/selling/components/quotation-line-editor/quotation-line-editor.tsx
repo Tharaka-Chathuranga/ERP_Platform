@@ -144,6 +144,7 @@ export function QuotationLineEditor({
                           <StockOnHandHint
                             quantityOnHand={onHand}
                             requestedQuantity={requestedByItem.get(line.itemId)}
+                            unitOfMeasure={unitOfMeasure}
                           />
                         ) : undefined
                       }

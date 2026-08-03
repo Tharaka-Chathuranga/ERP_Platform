@@ -17,24 +17,36 @@ import type { ReactNode } from "react";
 interface OverviewCardProps {
   title: string;
   description?: string;
-  icon: ReactNode;
-  accent: string;
+  icon?: ReactNode;
+  accent?: string;
   count?: number;
+  action?: ReactNode;
   toolbar?: ReactNode;
   children: ReactNode | ((expanded: boolean) => ReactNode);
 }
 
 const BODY_MAX_HEIGHT = 320;
 
-export function OverviewCard({ title, description, icon, accent, count, toolbar, children }: OverviewCardProps) {
+export function OverviewCard({
+  title,
+  description,
+  icon,
+  accent = "gray",
+  count,
+  action,
+  toolbar,
+  children,
+}: OverviewCardProps) {
   const [expanded, { open, close }] = useDisclosure(false);
   const body = (isExpanded: boolean) => (typeof children === "function" ? children(isExpanded) : children);
 
   const heading = (
     <Group gap="sm" wrap="nowrap">
-      <ThemeIcon variant="light" color={accent} radius="md" size={38}>
-        {icon}
-      </ThemeIcon>
+      {icon && (
+        <ThemeIcon variant="light" color={accent} radius="md" size={38}>
+          {icon}
+        </ThemeIcon>
+      )}
       <div>
         <Text fw={600}>{title}</Text>
         {description && (
@@ -58,6 +70,7 @@ export function OverviewCard({ title, description, icon, accent, count, toolbar,
                   {count}
                 </Badge>
               )}
+              {action}
               <Tooltip label="Open full screen" withArrow>
                 <ActionIcon variant="subtle" color="gray" onClick={open} aria-label={`Expand ${title}`}>
                   <IconArrowsMaximize size={18} />

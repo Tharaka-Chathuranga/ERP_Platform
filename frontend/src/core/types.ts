@@ -494,6 +494,7 @@ export type OilMartClientStatus = "ACTIVE" | "INACTIVE";
 
 export type OilMartMovementType = "RECEIPT" | "SALE" | "ADJUSTMENT";
 export type OilMartMovementReferenceType = "RECEIPT" | "SALE" | "INVOICE" | "MANUAL";
+export type OilMartStockAdjustmentDirection = "IN" | "OUT";
 
 export type OilMartQuotationStatus =
   | "DRAFT"

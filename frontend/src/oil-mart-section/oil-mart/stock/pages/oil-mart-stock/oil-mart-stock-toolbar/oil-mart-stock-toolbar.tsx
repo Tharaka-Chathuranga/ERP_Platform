@@ -1,7 +1,15 @@
-import { Group, Switch, Text } from "@mantine/core";
+import { Button } from "@mantine/core";
+import { IconPackageImport } from "@tabler/icons-react";
 import { TableToolbar } from "@ui/data";
 import { OIL_TYPE_OPTIONS } from "../../../../components/oil-type-badge";
-import { MoneyText } from "../../../../components/money-text";
+
+const STOCK_LEVEL_ALL = "ALL";
+const STOCK_LEVEL_BELOW_REORDER = "BELOW_REORDER";
+
+const STOCK_LEVEL_OPTIONS = [
+  { value: STOCK_LEVEL_ALL, label: "All stock levels" },
+  { value: STOCK_LEVEL_BELOW_REORDER, label: "Below reorder level" },
+];
 
 interface OilMartStockToolbarProps {
   search: string;
@@ -10,8 +18,8 @@ interface OilMartStockToolbarProps {
   onOilTypeChange: (value: string) => void;
   lowOnly: boolean;
   onLowOnlyChange: (value: boolean) => void;
-  stockValue: number;
-  lowCount: number;
+  canAdjust: boolean;
+  onRestock: () => void;
 }
 
 export function OilMartStockToolbar({
@@ -21,30 +29,12 @@ export function OilMartStockToolbar({
   onOilTypeChange,
   lowOnly,
   onLowOnlyChange,
-  stockValue,
-  lowCount,
+  canAdjust,
+  onRestock,
 }: OilMartStockToolbarProps) {
   return (
     <TableToolbar
       search={{ value: search, onChange: onSearchChange, placeholder: "Search code or name" }}
-      leftSection={
-        <Group gap="lg">
-          <Group gap={6}>
-            <Text size="sm" c="dimmed">
-              Stock value
-            </Text>
-            <MoneyText value={stockValue} emphasis />
-          </Group>
-          <Group gap={6}>
-            <Text size="sm" c="dimmed">
-              Below reorder
-            </Text>
-            <Text size="sm" fw={700} c={lowCount > 0 ? "red" : undefined}>
-              {lowCount}
-            </Text>
-          </Group>
-        </Group>
-      }
       filters={[
         {
           label: "Oil type",
@@ -52,13 +42,19 @@ export function OilMartStockToolbar({
           onChange: onOilTypeChange,
           options: [{ value: "ALL", label: "All types" }, ...OIL_TYPE_OPTIONS],
         },
+        {
+          label: "Stock level",
+          value: lowOnly ? STOCK_LEVEL_BELOW_REORDER : STOCK_LEVEL_ALL,
+          onChange: (value) => onLowOnlyChange(value === STOCK_LEVEL_BELOW_REORDER),
+          options: STOCK_LEVEL_OPTIONS,
+        },
       ]}
       actions={
-        <Switch
-          label="Low stock only"
-          checked={lowOnly}
-          onChange={(event) => onLowOnlyChange(event.currentTarget.checked)}
-        />
+        canAdjust && (
+          <Button leftSection={<IconPackageImport size={18} />} onClick={onRestock}>
+            Restock
+          </Button>
+        )
       }
     />
   );

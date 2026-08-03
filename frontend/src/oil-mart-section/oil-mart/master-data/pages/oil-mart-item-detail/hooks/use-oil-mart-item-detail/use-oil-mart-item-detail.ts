@@ -4,7 +4,12 @@ import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { qk } from "@core/queryKeys";
 import { notifyError, notifySuccess } from "@core/notify";
-import { listOilMartStock } from "../../../../../stock/api";
+import {
+  adjustOilMartStock,
+  listOilMartStock,
+  listOilMartStockMovements,
+  type AdjustOilMartStockInput,
+} from "../../../../../stock/api";
 import {
   addOilMartItemPrice,
   getOilMartItem,
@@ -16,6 +21,7 @@ export function useOilMartItemDetail() {
   const { itemId = "" } = useParams();
   const queryClient = useQueryClient();
   const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [adjustmentOpen, setAdjustmentOpen] = useState(false);
 
   const itemQuery = useQuery({
     queryKey: qk.oilMartItem(itemId),
@@ -30,6 +36,12 @@ export function useOilMartItemDetail() {
   });
 
   const stockQuery = useQuery({ queryKey: qk.oilMartStock(), queryFn: listOilMartStock });
+
+  const movementsQuery = useQuery({
+    queryKey: qk.oilMartMovements(itemId),
+    queryFn: () => listOilMartStockMovements(itemId),
+    enabled: Boolean(itemId),
+  });
 
   const balance = useMemo(
     () => stockQuery.data?.find((s) => s.itemId === itemId),
@@ -54,14 +66,33 @@ export function useOilMartItemDetail() {
     onError: notifyError,
   });
 
+  const adjust = useMutation({
+    mutationFn: (values: AdjustOilMartStockInput) => adjustOilMartStock(values),
+    onSuccess: (movement) => {
+      queryClient.invalidateQueries({ queryKey: qk.oilMartStock() });
+      queryClient.invalidateQueries({ queryKey: qk.oilMartMovements(itemId) });
+      queryClient.invalidateQueries({ queryKey: qk.oilMartOverview() });
+      notifySuccess(
+        `Stock ${movement.quantityDelta >= 0 ? "added" : "removed"}: ${Math.abs(movement.quantityDelta).toLocaleString()} L`,
+      );
+      setAdjustmentOpen(false);
+    },
+    onError: notifyError,
+  });
+
   return {
     itemId,
     itemQuery,
     pricesQuery,
+    movementsQuery,
+    stockQuery,
     balance,
     currentPrice,
     priceModalOpen,
     setPriceModalOpen,
     addPrice,
+    adjustmentOpen,
+    setAdjustmentOpen,
+    adjust,
   };
 }

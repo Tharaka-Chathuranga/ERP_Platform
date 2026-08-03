@@ -9,11 +9,11 @@ const meta: Meta<typeof OilMartStockToolbar> = {
     search: "",
     oilType: "ALL",
     lowOnly: false,
-    stockValue: 2635320,
-    lowCount: 3,
+    canAdjust: true,
     onSearchChange: fn(),
     onOilTypeChange: fn(),
     onLowOnlyChange: fn(),
+    onRestock: fn(),
   },
 };
 
@@ -22,6 +22,6 @@ type Story = StoryObj<typeof OilMartStockToolbar>;
 
 export const Default: Story = {};
 
-export const AllStockHealthy: Story = { args: { lowCount: 0 } };
+export const BelowReorderFilterOn: Story = { args: { lowOnly: true, oilType: "ENGINE" } };
 
-export const LowStockFilterOn: Story = { args: { lowOnly: true, oilType: "ENGINE" } };
+export const WithoutRestockRights: Story = { args: { canAdjust: false } };

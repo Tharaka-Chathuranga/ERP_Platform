@@ -1,12 +1,14 @@
-import { Anchor, Card, Group, Title } from "@mantine/core";
+import { Anchor } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { IconClipboardList } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { DataTable, StackedCell, type Column } from "@ui/data";
+import { OverviewCard } from "@ui/layout/OverviewCard";
 import { EmptyState } from "@ui/feedback/EmptyState";
 import type { OilMartQuotation } from "@core/types";
 import { MoneyText } from "../../../../components/money-text";
 
-function buildColumns(): Column<OilMartQuotation>[] {
+function buildColumns(expanded: boolean): Column<OilMartQuotation>[] {
   return [
     {
       header: "Quotation",
@@ -18,7 +20,9 @@ function buildColumns(): Column<OilMartQuotation>[] {
     {
       header: "Submitted",
       render: (quotation) =>
-        quotation.submittedAt ? dayjs(quotation.submittedAt).format("MMM D") : "—",
+        quotation.submittedAt
+          ? dayjs(quotation.submittedAt).format(expanded ? "MMM D, YYYY" : "MMM D")
+          : "—",
     },
     {
       header: "Grand total",
@@ -38,26 +42,33 @@ export function OilMartPendingApprovalsPanel({
   onSelect,
 }: OilMartPendingApprovalsPanelProps) {
   return (
-    <Card withBorder radius="md" padding="lg" h="100%">
-      <Group justify="space-between" mb="md">
-        <Title order={4}>Awaiting approval</Title>
+    <OverviewCard
+      title="Awaiting approval"
+      description="Quotations waiting for a manager"
+      icon={<IconClipboardList size={22} />}
+      accent="yellow"
+      count={quotations.length}
+      action={
         <Anchor component={Link} to="/oil-mart/quotations" size="sm">
           Quotations
         </Anchor>
-      </Group>
-      <DataTable
-        columns={buildColumns()}
-        data={quotations}
-        rowKey={(quotation) => quotation.id}
-        onRowClick={onSelect}
-        withCard={false}
-        empty={
-          <EmptyState
-            title="Nothing pending"
-            description="No quotations are waiting for approval."
-          />
-        }
-      />
-    </Card>
+      }
+    >
+      {(expanded) => (
+        <DataTable
+          columns={buildColumns(expanded)}
+          data={quotations}
+          rowKey={(quotation) => quotation.id}
+          onRowClick={onSelect}
+          withCard={false}
+          empty={
+            <EmptyState
+              title="Nothing pending"
+              description="No quotations are waiting for approval."
+            />
+          }
+        />
+      )}
+    </OverviewCard>
   );
 }

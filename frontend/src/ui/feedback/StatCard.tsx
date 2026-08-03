@@ -9,13 +9,15 @@ interface StatCardProps {
   icon: ReactNode;
   color?: string;
   to?: string;
+  onClick?: () => void;
   hint?: string;
 }
 
-export function StatCard({ label, value, icon, color = "brand", to, hint }: StatCardProps) {
+export function StatCard({ label, value, icon, color = "brand", to, onClick, hint }: StatCardProps) {
   const navigate = useNavigate();
   const { hovered, ref } = useHover();
-  const interactive = Boolean(to);
+  const activate = to ? () => navigate(to) : onClick;
+  const interactive = Boolean(activate);
   const lifted = interactive && hovered;
 
   return (
@@ -25,7 +27,7 @@ export function StatCard({ label, value, icon, color = "brand", to, hint }: Stat
       padding="lg"
       radius="md"
       shadow={lifted ? "md" : "xs"}
-      onClick={to ? () => navigate(to) : undefined}
+      onClick={activate}
       style={{
         cursor: interactive ? "pointer" : "default",
         transform: lifted ? "translateY(-2px)" : "none",

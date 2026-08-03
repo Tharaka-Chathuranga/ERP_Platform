@@ -16,7 +16,7 @@ const MOVEMENT_LABELS: Record<OilMartMovementType, string> = {
   ADJUSTMENT: "Adjustment",
 };
 
-export function buildOilMartMovementColumns(): Column<OilMartStockMovement>[] {
+export function buildStockMovementColumns(): Column<OilMartStockMovement>[] {
   return [
     {
       header: "Type",
