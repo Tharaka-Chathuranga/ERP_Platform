@@ -2,10 +2,14 @@ import { Badge, Card, Divider, Group, SimpleGrid, Stack, Text, ThemeIcon, Title 
 import dayjs from "dayjs";
 import { DefinitionList } from "@ui/data";
 import type { OilMartQuotation } from "@core/types";
-import { OIL_MART_QUOTATION_STATUS_META, DocumentTotals } from "../../../components";
+import {
+  OIL_MART_QUOTATION_STATUS_META,
+  DocumentLinesTable,
+  DocumentTotals,
+} from "../../../components";
 import { MoneyText } from "../../../../components/money-text";
+import { formatQuantity } from "../../../../components/quantity-text";
 import { Stat } from "./stat";
-import { QuotationLines } from "./quotation-lines";
 
 export function OilMartQuotationDetailCard({ quotation }: { quotation: OilMartQuotation }) {
   const meta = OIL_MART_QUOTATION_STATUS_META[quotation.status];
@@ -51,10 +55,10 @@ export function OilMartQuotationDetailCard({ quotation }: { quotation: OilMartQu
       <SimpleGrid cols={{ base: 2, sm: 4 }} mb="lg">
         <Stat label="Lines" value={quotation.lines.length} />
         <Stat
-          label="Litres"
-          value={`${quotation.lines
-            .reduce((sum, line) => sum + line.quantityLitres, 0)
-            .toLocaleString()} L`}
+          label="Total quantity"
+          value={formatQuantity(
+            quotation.lines.reduce((sum, line) => sum + line.quantityLitres, 0),
+          )}
         />
         <Stat label="Issued" value={dayjs(quotation.issuedDate).format("MMM D, YYYY")} />
         <Stat label="Valid until" value={dayjs(quotation.validUntil).format("MMM D, YYYY")} />
@@ -89,7 +93,7 @@ export function OilMartQuotationDetailCard({ quotation }: { quotation: OilMartQu
 
       <Divider my="lg" />
 
-      <QuotationLines quotation={quotation} />
+      <DocumentLinesTable lines={quotation.lines} showProfit />
 
       <DocumentTotals
         subtotal={quotation.subtotal}

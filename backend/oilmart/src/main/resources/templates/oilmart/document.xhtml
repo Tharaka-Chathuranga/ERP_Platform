@@ -195,9 +195,9 @@
             <div th:text="${line.itemName}">ELECTRODE</div>
             <div class="desc-sub" th:each="extra : ${line.descriptionLines}" th:text="${extra}"></div>
         </td>
-        <td class="row-first r" th:text="${#numbers.formatDecimal(line.ordered, 1, 'COMMA', 2, 'POINT')}">6</td>
-        <td class="row-first r" th:text="${#numbers.formatDecimal(line.backOrdered, 1, 0)}">0</td>
-        <td class="row-first r" th:text="${#numbers.formatDecimal(line.supplied, 1, 'COMMA', 2, 'POINT')}">6</td>
+        <td class="row-first r" th:text="${line.ordered}">6</td>
+        <td class="row-first r" th:text="${line.backOrdered}">0</td>
+        <td class="row-first r" th:text="${line.supplied}">6</td>
         <td class="row-first c" th:text="${line.unitOfMeasure}">L</td>
         <td class="row-first r" th:text="${#numbers.formatDecimal(line.unitPrice, 1, 'COMMA', 2, 'POINT')}">130.00</td>
         <td class="row-first r" th:text="${#numbers.formatDecimal(line.discountPercent, 1, 'COMMA', 2, 'POINT')}">0.00</td>

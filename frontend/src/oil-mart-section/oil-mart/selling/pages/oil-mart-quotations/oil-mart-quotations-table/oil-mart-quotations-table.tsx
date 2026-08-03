@@ -3,34 +3,49 @@ import { IconPlus } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { DataTable, StackedCell, type Column } from "@ui/data";
 import { EmptyState } from "@ui/feedback/EmptyState";
-import type { OilMartInvoice } from "@core/types";
-import { OilMartInvoiceStatusBadge } from "../../../../components/oil-mart-invoice-status-badge";
+import type { OilMartQuotation } from "@core/types";
+import { OilMartStatusBadge } from "../../../../components/oil-mart-status-badge";
 import { MoneyText } from "../../../../components/money-text";
 
-function buildColumns(showProfit: boolean): Column<OilMartInvoice>[] {
-  const columns: Column<OilMartInvoice>[] = [
-    {
-      header: "Invoice",
-      emphasis: true,
-      render: (invoice) => (
-        <StackedCell primary={invoice.invoiceNo} secondary={invoice.clientName} />
-      ),
-    },
+function buildColumns(showProfit: boolean): Column<OilMartQuotation>[] {
+  const columns: Column<OilMartQuotation>[] = [
     {
       header: "Quotation",
-      render: (invoice) => (
-        <StackedCell
-          primary={invoice.quotationNo}
-          secondary={`${invoice.lines.length} line${invoice.lines.length === 1 ? "" : "s"}`}
-        />
+      emphasis: true,
+      render: (quotation) => (
+        <StackedCell primary={quotation.quotationNo} secondary={quotation.clientName} />
       ),
     },
-    { header: "Status", render: (invoice) => <OilMartInvoiceStatusBadge status={invoice.status} /> },
-    { header: "Date", render: (invoice) => dayjs(invoice.invoiceDate).format("MMM D, YYYY") },
+    {
+      header: "Status",
+      render: (quotation) => (
+        <Group gap={6} wrap="nowrap">
+          <OilMartStatusBadge status={quotation.status} />
+          {quotation.expired && quotation.status !== "CANCELLED" && (
+            <Badge color="orange" variant="light" radius="sm" size="sm">
+              Expired
+            </Badge>
+          )}
+        </Group>
+      ),
+    },
+    {
+      header: "Issued",
+      render: (quotation) => dayjs(quotation.issuedDate).format("MMM D, YYYY"),
+    },
+    {
+      header: "Valid until",
+      render: (quotation) => dayjs(quotation.validUntil).format("MMM D, YYYY"),
+    },
+    {
+      header: "Lines",
+      align: "right",
+      render: (quotation) => quotation.lines.length,
+    },
     {
       header: "Grand total",
       align: "right",
-      render: (invoice) => <MoneyText value={invoice.grandTotal} emphasis />,
+      render: (quotation) => <MoneyText value={quotation.grandTotal} emphasis />,
     },
   ];
 
@@ -38,10 +53,10 @@ function buildColumns(showProfit: boolean): Column<OilMartInvoice>[] {
     columns.push({
       header: "Profit",
       align: "right",
-      render: (invoice) => (
+      render: (quotation) => (
         <MoneyText
-          value={invoice.totalProfit}
-          c={(invoice.totalProfit ?? 0) < 0 ? "red" : "teal"}
+          value={quotation.totalProfit}
+          c={(quotation.totalProfit ?? 0) < 0 ? "red" : "teal"}
         />
       ),
     });
@@ -50,20 +65,20 @@ function buildColumns(showProfit: boolean): Column<OilMartInvoice>[] {
   return columns;
 }
 
-interface OilMartInvoicesTableProps {
+interface OilMartQuotationsTableProps {
   title: string;
   description?: string;
-  data: OilMartInvoice[];
+  data: OilMartQuotation[];
   showProfit?: boolean;
   loading?: boolean;
   error?: unknown;
   emptyTitle: string;
   emptyDescription: string;
-  onRowClick?: (invoice: OilMartInvoice) => void;
+  onRowClick?: (quotation: OilMartQuotation) => void;
   onNew?: () => void;
 }
 
-export function OilMartInvoicesTable({
+export function OilMartQuotationsTable({
   title,
   description,
   data,
@@ -74,7 +89,7 @@ export function OilMartInvoicesTable({
   emptyDescription,
   onRowClick,
   onNew,
-}: OilMartInvoicesTableProps) {
+}: OilMartQuotationsTableProps) {
   return (
     <Card withBorder radius="md" padding="lg" mb="lg">
       <Group justify="space-between" mb="md" align="flex-start">
@@ -96,7 +111,7 @@ export function OilMartInvoicesTable({
       <DataTable
         columns={buildColumns(Boolean(showProfit))}
         data={data}
-        rowKey={(invoice) => invoice.id}
+        rowKey={(quotation) => quotation.id}
         loading={loading}
         error={error}
         onRowClick={onRowClick}
@@ -108,7 +123,7 @@ export function OilMartInvoicesTable({
             action={
               onNew ? (
                 <Button leftSection={<IconPlus size={16} />} onClick={onNew}>
-                  Create invoice
+                  Create quotation
                 </Button>
               ) : undefined
             }

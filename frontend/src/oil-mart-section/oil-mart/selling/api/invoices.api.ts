@@ -67,18 +67,6 @@ export async function rejectOilMartInvoice(
   return data;
 }
 
-export async function cancelOilMartInvoice(
-  invoiceId: string,
-  reason: string,
-  expectedUpdatedAt: string,
-): Promise<OilMartInvoice> {
-  const { data } = await api.post<OilMartInvoice>(`/oilmart/invoices/${invoiceId}/cancel`, {
-    reason,
-    expectedUpdatedAt,
-  });
-  return data;
-}
-
 export function oilMartInvoicePdfUrl(invoiceId: string): string {
   return `/oilmart/invoices/${invoiceId}/pdf`;
 }

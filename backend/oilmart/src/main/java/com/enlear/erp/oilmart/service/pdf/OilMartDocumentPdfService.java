@@ -33,7 +33,6 @@ import org.xhtmlrenderer.pdf.ITextRenderer;
 public class OilMartDocumentPdfService {
 
     private static final String TEMPLATE = "document";
-    private static final String UNIT_OF_MEASURE = "L";
 
     private final TemplateEngine templates;
     private final OilMartItemRepository items;
@@ -146,13 +145,17 @@ public class OilMartDocumentPdfService {
                 item != null ? item.getCode() : "",
                 item != null ? item.getName() : "",
                 descriptionLines,
-                quantity,
-                BigDecimal.ZERO,
-                quantity,
-                UNIT_OF_MEASURE,
+                plain(quantity),
+                "0",
+                plain(quantity),
+                item != null ? item.getUnitOfMeasure() : OilMartItem.DEFAULT_UNIT_OF_MEASURE,
                 unitPrice,
                 discountPercent,
                 lineTotal);
+    }
+
+    private String plain(BigDecimal value) {
+        return value == null ? "" : value.stripTrailingZeros().toPlainString();
     }
 
     private OilMartDocumentPdfView.Party company() {

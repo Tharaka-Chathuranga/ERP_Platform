@@ -23,8 +23,7 @@ export function LitreInput({ value, onChange, ...rest }: LitreInputProps) {
       allowNegative={false}
       allowDecimal
       thousandSeparator=","
-      suffix=" L"
-      hideControls={false}
+        hideControls={false}
       {...rest}
     />
   );

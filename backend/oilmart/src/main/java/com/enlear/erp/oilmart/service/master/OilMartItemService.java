@@ -27,7 +27,8 @@ public class OilMartItemService {
                     "An oil with code %s already exists".formatted(cmd.code()));
         }
         return items.save(new OilMartItem(cmd.code(), cmd.name(), cmd.oilType(), cmd.brand(),
-                cmd.grade(), cmd.description(), cmd.reorderLevelLitres(), cmd.status()));
+                cmd.grade(), cmd.description(), cmd.unitOfMeasure(), cmd.reorderLevelLitres(),
+                cmd.status()));
     }
 
     public OilMartItem update(UUID id, SaveOilMartItemCommand cmd) {
@@ -40,7 +41,7 @@ public class OilMartItemService {
                             "An oil with code %s already exists".formatted(cmd.code()));
                 });
         item.update(cmd.code(), cmd.name(), cmd.oilType(), cmd.brand(), cmd.grade(),
-                cmd.description(), cmd.reorderLevelLitres(), cmd.status());
+                cmd.description(), cmd.unitOfMeasure(), cmd.reorderLevelLitres(), cmd.status());
         return items.save(item);
     }
 

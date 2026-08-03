@@ -20,6 +20,7 @@ const EMPTY: SaveOilMartItemInput = {
   brand: "",
   grade: "",
   description: "",
+  unitOfMeasure: "L",
   reorderLevelLitres: 0,
   status: "ACTIVE",
 };
@@ -31,6 +32,7 @@ export function ItemFormModal({ opened, item, submitting, onClose, onSubmit }: I
       code: (value) => (value.trim() ? null : "Code is required"),
       name: (value) => (value.trim() ? null : "Name is required"),
       reorderLevelLitres: (value) => (value >= 0 ? null : "Reorder level cannot be negative"),
+      unitOfMeasure: (value: string) => (value.trim() ? null : "A unit of measure is required"),
     },
   });
 
@@ -45,6 +47,7 @@ export function ItemFormModal({ opened, item, submitting, onClose, onSubmit }: I
             brand: item.brand ?? "",
             grade: item.grade ?? "",
             description: item.description ?? "",
+            unitOfMeasure: item.unitOfMeasure ?? "L",
             reorderLevelLitres: item.reorderLevelLitres,
             status: item.status,
           }
@@ -69,13 +72,20 @@ export function ItemFormModal({ opened, item, submitting, onClose, onSubmit }: I
             <TextInput label="Brand" {...form.getInputProps("brand")} />
             <TextInput label="Grade" {...form.getInputProps("grade")} />
           </Group>
-          <NumberInput
-            label="Reorder level"
-            suffix=" L"
-            min={0}
-            decimalScale={4}
-            {...form.getInputProps("reorderLevelLitres")}
-          />
+          <Group grow>
+            <TextInput
+              label="Unit of measure"
+              description="Shown beside every quantity, e.g. L, PK, DRUM"
+              withAsterisk
+              {...form.getInputProps("unitOfMeasure")}
+            />
+            <NumberInput
+              label="Reorder level"
+              min={0}
+              decimalScale={4}
+              {...form.getInputProps("reorderLevelLitres")}
+            />
+          </Group>
           <Textarea label="Description" autosize minRows={2} {...form.getInputProps("description")} />
           <Select
             label="Status"

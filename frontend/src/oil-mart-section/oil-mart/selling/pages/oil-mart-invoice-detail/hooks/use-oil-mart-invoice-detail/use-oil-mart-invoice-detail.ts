@@ -6,7 +6,6 @@ import { notifyError, notifySuccess } from "@core/notify";
 import type { OilMartInvoice } from "@core/types";
 import {
   approveOilMartInvoice,
-  cancelOilMartInvoice,
   getOilMartInvoice,
   listInvoiceableOilMartQuotations,
   oilMartInvoicePdfUrl,
@@ -14,7 +13,7 @@ import {
   reselectOilMartInvoiceQuotation,
 } from "../../../../api";
 
-export type InvoiceDetailModal = "approve" | "reject" | "cancel" | "preview" | "reselect";
+export type InvoiceDetailModal = "reject" | "preview" | "reselect";
 
 export function useOilMartInvoiceDetail() {
   const { invoiceId } = useParams<{ invoiceId: string }>();
@@ -68,12 +67,6 @@ export function useOilMartInvoiceDetail() {
     onError: onConflict,
   });
 
-  const cancel = useMutation({
-    mutationFn: (reason: string) => cancelOilMartInvoice(invoiceId!, reason, token),
-    onSuccess: (next) => afterTransition(next, `${next.invoiceNo} cancelled`),
-    onError: onConflict,
-  });
-
   const reselect = useMutation({
     mutationFn: (quotationId: string) =>
       reselectOilMartInvoiceQuotation(invoiceId!, quotationId, token),
@@ -82,8 +75,7 @@ export function useOilMartInvoiceDetail() {
     onError: onConflict,
   });
 
-  const busy =
-    approve.isPending || reject.isPending || cancel.isPending || reselect.isPending;
+  const busy = approve.isPending || reject.isPending || reselect.isPending;
 
   return {
     invoiceQuery,
@@ -95,7 +87,6 @@ export function useOilMartInvoiceDetail() {
     busy,
     approve,
     reject,
-    cancel,
     reselect,
   };
 }

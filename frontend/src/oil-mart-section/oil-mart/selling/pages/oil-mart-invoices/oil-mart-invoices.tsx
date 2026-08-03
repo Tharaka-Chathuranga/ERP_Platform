@@ -1,21 +1,16 @@
-import { Badge, Button, Group } from "@mantine/core";
+import { Badge, Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { TableToolbar } from "@ui/data";
 import { useCan } from "@auth/useCan";
 import { OILMART_PROFIT_VIEW, OILMART_SALE_CREATE } from "@auth/permissions";
-import type { OilMartInvoiceStatus } from "@core/types";
-import { OIL_MART_INVOICE_STATUS_LABELS } from "../../../components/oil-mart-invoice-status-badge";
+import {
+  DOCUMENT_PERIOD_OPTIONS,
+  periodLabel,
+  type DocumentPeriod,
+} from "../../components";
 import { useOilMartInvoices } from "./hooks/use-oil-mart-invoices";
 import { OilMartInvoicesTable } from "./oil-mart-invoices-table";
-
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All statuses" },
-  ...(Object.keys(OIL_MART_INVOICE_STATUS_LABELS) as OilMartInvoiceStatus[]).map((value) => ({
-    value,
-    label: OIL_MART_INVOICE_STATUS_LABELS[value],
-  })),
-];
 
 export function OilMartInvoicesPage() {
   const can = useCan();
@@ -24,24 +19,28 @@ export function OilMartInvoicesPage() {
 
   const {
     query,
-    invoices,
     clientsQuery,
-    status,
-    setStatus,
+    active,
+    rejected,
+    period,
+    setPeriod,
     clientId,
     setClientId,
-    dateRange,
-    setDateRange,
+    search,
+    setSearch,
     awaitingApproval,
     openNew,
     openDetail,
   } = useOilMartInvoices();
+
+  const scope = periodLabel(period).toLowerCase();
 
   return (
     <div>
       <PageHeader title="Invoices" />
 
       <TableToolbar
+        search={{ value: search, onChange: setSearch, placeholder: "Invoice, quotation or client" }}
         leftSection={
           awaitingApproval > 0 ? (
             <Badge color="orange" variant="light" size="lg" radius="sm">
@@ -51,10 +50,10 @@ export function OilMartInvoicesPage() {
         }
         filters={[
           {
-            label: "Status",
-            value: status,
-            onChange: (value: string) => setStatus(value as OilMartInvoiceStatus | "ALL"),
-            options: STATUS_OPTIONS,
+            label: "Period",
+            value: period,
+            onChange: (value: string) => setPeriod(value as DocumentPeriod),
+            options: DOCUMENT_PERIOD_OPTIONS,
           },
           {
             label: "Client",
@@ -68,26 +67,38 @@ export function OilMartInvoicesPage() {
               })),
             ],
           },
-          { type: "daterange", label: "Invoiced", value: dateRange, onChange: setDateRange },
         ]}
         actions={
           canCreate ? (
-            <Group gap="sm">
-              <Button leftSection={<IconPlus size={16} />} onClick={openNew}>
-                New invoice
-              </Button>
-            </Group>
+            <Button leftSection={<IconPlus size={16} />} onClick={openNew}>
+              Create invoice
+            </Button>
           ) : undefined
         }
       />
 
       <OilMartInvoicesTable
-        data={invoices}
+        title="Approved & pending approval"
+        description="Invoices still moving through approval, and those already issued."
+        data={active}
         showProfit={showProfit}
         loading={query.isLoading}
         error={query.error}
+        emptyTitle="Nothing in progress"
+        emptyDescription={`No pending or approved invoices ${scope}.`}
         onRowClick={openDetail}
         onNew={canCreate ? openNew : undefined}
+      />
+
+      <OilMartInvoicesTable
+        title="Rejected"
+        description="Sent back by the approver — point them at the correct quotation."
+        data={rejected}
+        showProfit={showProfit}
+        loading={query.isLoading}
+        emptyTitle="Nothing rejected"
+        emptyDescription={`No invoices were rejected ${scope}.`}
+        onRowClick={openDetail}
       />
     </div>
   );

@@ -8,6 +8,7 @@ export interface SaveOilMartItemInput {
   brand?: string;
   grade?: string;
   description?: string;
+  unitOfMeasure: string;
   reorderLevelLitres: number;
   status: OilMartItemStatus;
 }

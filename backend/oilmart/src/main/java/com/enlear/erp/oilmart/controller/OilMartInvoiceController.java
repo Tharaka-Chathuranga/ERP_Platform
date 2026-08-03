@@ -1,6 +1,5 @@
 package com.enlear.erp.oilmart.controller;
 
-import com.enlear.erp.oilmart.controller.dto.OilMartRequests.CancelOilMartDocumentRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.CreateOilMartInvoiceRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.OilMartDocumentTokenRequest;
 import com.enlear.erp.oilmart.controller.dto.OilMartRequests.RejectOilMartDocumentRequest;
@@ -99,14 +98,6 @@ public class OilMartInvoiceController {
     public OilMartInvoiceResponse reject(@PathVariable UUID invoiceId,
                                          @Valid @RequestBody RejectOilMartDocumentRequest request) {
         return assembler.toResponse(invoices.reject(
-                invoiceId, request.reason(), request.expectedUpdatedAt()));
-    }
-
-    @PostMapping("/{invoiceId}/cancel")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
-    public OilMartInvoiceResponse cancel(@PathVariable UUID invoiceId,
-                                         @Valid @RequestBody CancelOilMartDocumentRequest request) {
-        return assembler.toResponse(invoices.cancel(
                 invoiceId, request.reason(), request.expectedUpdatedAt()));
     }
 }

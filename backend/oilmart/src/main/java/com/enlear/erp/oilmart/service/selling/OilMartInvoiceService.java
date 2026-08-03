@@ -110,12 +110,6 @@ public class OilMartInvoiceService {
         return saved;
     }
 
-    public OilMartInvoice cancel(UUID id, String reason, Instant expectedUpdatedAt) {
-        OilMartInvoice invoice = lockForUpdate(id, expectedUpdatedAt);
-        invoice.cancel(reason);
-        return invoices.save(invoice);
-    }
-
     private OilMartInvoice lockForUpdate(UUID id, Instant expectedUpdatedAt) {
         OilMartInvoice invoice = invoices.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("OilMartInvoice", id));
@@ -176,7 +170,7 @@ public class OilMartInvoiceService {
     }
 
     private boolean isAlreadyInvoiced(UUID quotationId) {
-        return invoices.existsByQuotationIdAndStatusNot(quotationId, OilMartInvoiceStatus.CANCELLED);
+        return invoices.existsByQuotationId(quotationId);
     }
 
     private void notifyAuthorOfRejection(OilMartInvoice invoice) {

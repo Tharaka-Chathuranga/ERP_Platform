@@ -1,8 +1,20 @@
-import { Alert, Button, Group } from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  Divider,
+  Grid,
+  Group,
+  LoadingOverlay,
+  Textarea,
+} from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+import { IconChevronRight, IconInfoCircle } from "@tabler/icons-react";
+import { StepHeading } from "@ui/layout/StepHeading";
 import type { OilMartClient, OilMartItem, OilMartStockBalance } from "@core/types";
+import { ClientPicker } from "../../../../components/client-picker";
 import { QuotationLineEditor, type QuotationLineDraft } from "../../../components";
-import { QuotationHeaderFields } from "./quotation-header-fields";
 
 interface NewOilMartQuotationFormProps {
   clients: OilMartClient[];
@@ -68,54 +80,114 @@ export function NewOilMartQuotationForm({
   );
 
   return (
-    <div>
-      <QuotationHeaderFields
-        clients={clients}
-        clientId={clientId}
-        onClientChange={onClientChange}
-        onQuickAddClient={onQuickAddClient}
-        quickAddPending={quickAddPending}
-        issuedDate={issuedDate}
-        onIssuedDateChange={onIssuedDateChange}
-        validUntil={validUntil}
-        onValidUntilChange={onValidUntilChange}
-        minValidUntil={minValidUntil}
-        validityTooShort={validityTooShort}
-        note={note}
-        onNoteChange={onNoteChange}
-        showErrors={showErrors}
+    <Card withBorder radius="md" padding={0} pos="relative">
+      <LoadingOverlay
+        visible={submitting}
+        overlayProps={{ blur: 1 }}
+        loaderProps={{ children: editing ? "Saving quotation…" : "Creating quotation…" }}
       />
 
-      <QuotationLineEditor
-        lines={lines}
-        items={items}
-        stock={stock}
-        gstRatePercent={gstRatePercent}
-        showProfit={showProfit}
-        error={
-          showErrors && linesInvalid
-            ? "Every line needs an oil, a quantity and a price"
-            : undefined
-        }
-        onChange={onLineChange}
-        onAdd={onAddLine}
-        onRemove={onRemoveLine}
-      />
+      <Box p="xl">
+        <StepHeading number={1} title="Who is this quotation for?" />
+        <Grid>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <ClientPicker
+              label="Client"
+              withAsterisk
+              placeholder="Select or type a new client"
+              clients={clients}
+              value={clientId}
+              onChange={onClientChange}
+              onQuickAdd={onQuickAddClient}
+              quickAddPending={quickAddPending}
+              error={showErrors && !clientId ? "Select a client" : undefined}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 3 }}>
+            <DateInput
+              label="Issued date"
+              withAsterisk
+              value={issuedDate}
+              onChange={onIssuedDateChange}
+              valueFormat="MMM D, YYYY"
+              error={showErrors && !issuedDate ? "Select the issued date" : undefined}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 3 }}>
+            <DateInput
+              label="Valid until"
+              withAsterisk
+              value={validUntil}
+              onChange={onValidUntilChange}
+              minDate={minValidUntil}
+              valueFormat="MMM D, YYYY"
+              description="At least one month out"
+              error={
+                showErrors && !validUntil
+                  ? "Select a valid-until date"
+                  : validityTooShort
+                    ? "Must be at least one month after the issued date"
+                    : undefined
+              }
+            />
+          </Grid.Col>
+        </Grid>
+      </Box>
 
-      <Alert color="blue" variant="light" icon={<IconInfoCircle size={18} />} mt="lg">
-        {resubmits
-          ? "Saving sends this straight back to the manager for approval."
-          : "Quantities are checked against stock on hand. Stock is only deducted later, when an invoice is approved."}
-      </Alert>
+      <Divider />
+      <Box p="xl">
+        <StepHeading number={2} title="What are they buying?" />
+        <QuotationLineEditor
+          lines={lines}
+          items={items}
+          stock={stock}
+          gstRatePercent={gstRatePercent}
+          showProfit={showProfit}
+          error={
+            showErrors && linesInvalid
+              ? "Every line needs an oil, a quantity and a price"
+              : undefined
+          }
+          onChange={onLineChange}
+          onAdd={onAddLine}
+          onRemove={onRemoveLine}
+        />
+      </Box>
 
-      <Group justify="flex-end" mt="lg">
-        <Button variant="default" onClick={onCancel} disabled={submitting}>
-          Cancel
-        </Button>
-        <Button onClick={onSubmit} loading={submitting}>
-          {resubmits ? "Save & resubmit" : editing ? "Save changes" : "Raise quotation"}
-        </Button>
-      </Group>
-    </div>
+      <Divider />
+      <Box p="xl">
+        <StepHeading number={3} title="Anything the client should see?" />
+        <Textarea
+          label="Note"
+          description="Printed on the client PDF."
+          autosize
+          minRows={2}
+          value={note}
+          onChange={(event) => onNoteChange(event.currentTarget.value)}
+        />
+
+        <Alert color="blue" variant="light" icon={<IconInfoCircle size={18} />} mt="lg">
+          {resubmits
+            ? "Saving sends this straight back to the manager for approval."
+            : "Quantities are checked against stock on hand. Stock is only deducted later, when an invoice is approved."}
+        </Alert>
+      </Box>
+
+      <Box p="xl" pt={0}>
+        <Group justify="space-between">
+          <Button variant="default" onClick={onCancel} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button
+            radius="md"
+            rightSection={<IconChevronRight size={16} />}
+            onClick={onSubmit}
+            loading={submitting}
+          >
+            {resubmits ? "Save & resubmit" : editing ? "Save changes" : "Create quotation"}
+          </Button>
+        </Group>
+      </Box>
+    </Card>
   );
 }

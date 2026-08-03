@@ -39,11 +39,13 @@ public final class OilMartRequests {
             @Size(max = 100) String brand,
             @Size(max = 100) String grade,
             @Size(max = 1000) String description,
+            @Size(max = 16) String unitOfMeasure,
             @PositiveOrZero BigDecimal reorderLevelLitres,
             OilMartItemStatus status) {
 
         public SaveOilMartItemCommand toCommand() {
             return new SaveOilMartItemCommand(code, name, oilType, brand, grade, description,
+                    unitOfMeasure,
                     reorderLevelLitres != null ? reorderLevelLitres : BigDecimal.ZERO,
                     status != null ? status : OilMartItemStatus.ACTIVE);
         }

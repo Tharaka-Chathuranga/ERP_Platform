@@ -1,32 +1,23 @@
 import { useMemo, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { qk } from "@core/queryKeys";
-import { notifyError, notifySuccess } from "@core/notify";
 import type { OilMartQuotation } from "@core/types";
 import { listOilMartClients } from "../../../../../master-data/api";
-import {
-  approveOilMartQuotation,
-  cancelOilMartQuotation,
-  listOilMartQuotations,
-  rejectOilMartQuotation,
-  submitOilMartQuotation,
-} from "../../../../api";
-import { applyQuotationFilters, type QuotationFilters } from "../../oil-mart-quotations-board";
+import { listOilMartQuotations } from "../../../../api";
+import { withinPeriod, type DocumentPeriod } from "../../../../components";
 
-export type BoardAction = "approve" | "reject" | "cancel" | "preview";
+/** Active work, what the approver bounced back, and what is closed for good. */
+const ACTIVE_STATUSES = ["DRAFT", "PENDING_APPROVAL", "APPROVED"];
+const REJECTED_STATUSES = ["REJECTED"];
+const CLOSED_STATUSES = ["CANCELLED"];
 
 export function useOilMartQuotations() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
+  const [period, setPeriod] = useState<DocumentPeriod>("THIS_MONTH");
   const [clientId, setClientId] = useState("ALL");
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
-  const [showTerminal, setShowTerminal] = useState(false);
-  const [pending, setPending] = useState<{
-    quotation: OilMartQuotation;
-    action: BoardAction;
-  } | null>(null);
+  const [search, setSearch] = useState("");
 
   const query = useQuery({
     queryKey: qk.oilMartQuotations(),
@@ -37,77 +28,53 @@ export function useOilMartQuotations() {
     queryFn: () => listOilMartClients(),
   });
 
-  const filters: QuotationFilters = { clientId, dateRange, showTerminal };
+  const visible = useMemo(() => {
+    const needle = search.trim().toLowerCase();
+    return (query.data ?? []).filter((quotation) => {
+      if (!withinPeriod(quotation.issuedDate, period)) return false;
+      if (clientId !== "ALL" && quotation.clientId !== clientId) return false;
+      if (
+        needle &&
+        !quotation.quotationNo.toLowerCase().includes(needle) &&
+        !quotation.clientName.toLowerCase().includes(needle)
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [query.data, period, clientId, search]);
 
-  const quotations = useMemo(
-    () => applyQuotationFilters(query.data ?? [], filters),
-    [query.data, clientId, dateRange, showTerminal],
+  const active = useMemo(
+    () => visible.filter((quotation) => ACTIVE_STATUSES.includes(quotation.status)),
+    [visible],
+  );
+  const rejected = useMemo(
+    () => visible.filter((quotation) => REJECTED_STATUSES.includes(quotation.status)),
+    [visible],
+  );
+  const closed = useMemo(
+    () => visible.filter((quotation) => CLOSED_STATUSES.includes(quotation.status)),
+    [visible],
   );
 
   const awaitingApproval = useMemo(
-    () => (query.data ?? []).filter((quotation) => quotation.status === "PENDING_APPROVAL").length,
-    [query.data],
+    () => visible.filter((quotation) => quotation.status === "PENDING_APPROVAL").length,
+    [visible],
   );
-
-  function afterTransition(quotation: OilMartQuotation, message: string) {
-    queryClient.setQueryData(qk.oilMartQuotation(quotation.id), quotation);
-    queryClient.invalidateQueries({ queryKey: qk.oilMartQuotations() });
-    queryClient.invalidateQueries({ queryKey: qk.oilMartOverview() });
-    queryClient.invalidateQueries({ queryKey: qk.oilMartClientQuotations(quotation.clientId) });
-    notifySuccess(message);
-    setPending(null);
-  }
-
-  const submit = useMutation({
-    mutationFn: (quotation: OilMartQuotation) =>
-      submitOilMartQuotation(quotation.id, quotation.updatedAt),
-    onSuccess: (quotation) =>
-      afterTransition(quotation, `${quotation.quotationNo} sent for approval`),
-    onError: notifyError,
-  });
-
-  const approve = useMutation({
-    mutationFn: () => approveOilMartQuotation(pending!.quotation.id, pending!.quotation.updatedAt),
-    onSuccess: (quotation) => afterTransition(quotation, `${quotation.quotationNo} approved`),
-    onError: notifyError,
-  });
-
-  const reject = useMutation({
-    mutationFn: (reason: string) =>
-      rejectOilMartQuotation(pending!.quotation.id, reason, pending!.quotation.updatedAt),
-    onSuccess: (quotation) =>
-      afterTransition(quotation, `${quotation.quotationNo} rejected and sent back for editing`),
-    onError: notifyError,
-  });
-
-  const cancel = useMutation({
-    mutationFn: (reason: string) =>
-      cancelOilMartQuotation(pending!.quotation.id, reason, pending!.quotation.updatedAt),
-    onSuccess: (quotation) => afterTransition(quotation, `${quotation.quotationNo} cancelled`),
-    onError: notifyError,
-  });
-
-  const busy = submit.isPending || approve.isPending || reject.isPending || cancel.isPending;
 
   return {
     query,
-    quotations,
     clientsQuery,
+    active,
+    rejected,
+    closed,
+    period,
+    setPeriod,
     clientId,
     setClientId,
-    dateRange,
-    setDateRange,
-    showTerminal,
-    setShowTerminal,
+    search,
+    setSearch,
     awaitingApproval,
-    pending,
-    setPending,
-    closePending: () => setPending(null),
-    busy,
-    submit,
-    approve,
-    reject,
-    cancel,
     openNew: () => navigate("/oil-mart/quotations/new"),
     openDetail: (quotation: OilMartQuotation) => navigate(`/oil-mart/quotations/${quotation.id}`),
   };

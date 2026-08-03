@@ -11,6 +11,7 @@ public record SaveOilMartItemCommand(
         String brand,
         String grade,
         String description,
+        String unitOfMeasure,
         BigDecimal reorderLevelLitres,
         OilMartItemStatus status) {
 }

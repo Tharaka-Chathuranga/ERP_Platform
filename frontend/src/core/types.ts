@@ -510,6 +510,8 @@ export interface OilMartItem {
   brand?: string;
   grade?: string;
   description?: string;
+  /** Printed next to quantities; varies per item. */
+  unitOfMeasure: string;
   reorderLevelLitres: number;
   status: OilMartItemStatus;
 }
@@ -603,6 +605,7 @@ export interface OilMartQuotationLine {
   itemId: string;
   itemCode: string;
   itemName: string;
+  unitOfMeasure: string;
   quantityLitres: number;
   listUnitPrice: number;
   unitPrice: number;
@@ -646,17 +649,14 @@ export interface OilMartQuotation {
   lines: OilMartQuotationLine[];
 }
 
-export type OilMartInvoiceStatus =
-  | "PENDING_APPROVAL"
-  | "APPROVED"
-  | "REJECTED"
-  | "CANCELLED";
+export type OilMartInvoiceStatus = "PENDING_APPROVAL" | "APPROVED" | "REJECTED";
 
 export interface OilMartInvoiceLine {
   id: string;
   itemId: string;
   itemCode: string;
   itemName: string;
+  unitOfMeasure: string;
   quantityLitres: number;
   listUnitPrice: number;
   unitPrice: number;
@@ -692,7 +692,6 @@ export interface OilMartInvoice {
   rejectedByUserId?: string;
   rejectedAt?: string;
   rejectionReason?: string;
-  cancellationReason?: string;
   bankDetails?: OilMartBankDetails;
   subtotal: number;
   gstRatePercent: number;

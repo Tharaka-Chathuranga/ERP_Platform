@@ -8,17 +8,11 @@ import { InvoiceStageActions } from "./invoice-stage-actions";
 const HANDLERS = {
   onApprove: fn(),
   onReject: fn(),
-  onCancel: fn(),
   onReselect: fn(),
   onPreviewPdf: fn(),
 };
 
-const ALL_STATUSES: OilMartInvoiceStatus[] = [
-  "PENDING_APPROVAL",
-  "APPROVED",
-  "REJECTED",
-  "CANCELLED",
-];
+const ALL_STATUSES: OilMartInvoiceStatus[] = ["PENDING_APPROVAL", "APPROVED", "REJECTED"];
 
 const meta: Meta<typeof InvoiceStageActions> = {
   title: "Oil Mart/Selling/InvoiceStageActions",

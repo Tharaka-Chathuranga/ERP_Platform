@@ -63,9 +63,6 @@ public class OilMartInvoice extends AuditedEntity {
     @Column(name = "rejection_reason", length = 1000)
     private String rejectionReason;
 
-    @Column(name = "cancellation_reason", length = 1000)
-    private String cancellationReason;
-
     @Embedded
     private OilMartBankDetails bankDetails;
 
@@ -132,15 +129,6 @@ public class OilMartInvoice extends AuditedEntity {
         this.rejectedByUserId = approverId;
         this.rejectedAt = Instant.now();
         this.rejectionReason = reason;
-    }
-
-    public void cancel(String reason) {
-        if (status == OilMartInvoiceStatus.APPROVED || status == OilMartInvoiceStatus.CANCELLED) {
-            throw new BusinessRuleException("OILMART_INVOICE_ILLEGAL_TRANSITION",
-                    "An %s invoice cannot be cancelled".formatted(status));
-        }
-        this.status = OilMartInvoiceStatus.CANCELLED;
-        this.cancellationReason = reason;
     }
 
     private void copyFrom(OilMartQuotation quotation) {

@@ -26,7 +26,6 @@ export function OilMartInvoiceDetailPage() {
     busy,
     approve,
     reject,
-    cancel,
     reselect,
   } = useOilMartInvoiceDetail();
 
@@ -53,7 +52,6 @@ export function OilMartInvoiceDetailPage() {
               busy={busy}
               onApprove={() => approve.mutate()}
               onReject={() => setModal("reject")}
-              onCancel={() => setModal("cancel")}
               onReselect={() => {
                 setReplacementId(null);
                 setModal("reselect");
@@ -72,17 +70,6 @@ export function OilMartInvoiceDetailPage() {
               submitting={reject.isPending}
               onClose={() => setModal(null)}
               onSubmit={(reason) => reject.mutate(reason)}
-            />
-
-            <RejectDocumentModal
-              opened={modal === "cancel"}
-              documentNo={invoice.invoiceNo}
-              title="Cancel invoice"
-              description={`${invoice.invoiceNo} will be cancelled. Its quotation becomes available to invoice again.`}
-              confirmLabel="Cancel invoice"
-              submitting={cancel.isPending}
-              onClose={() => setModal(null)}
-              onSubmit={(reason) => cancel.mutate(reason)}
             />
 
             <Modal

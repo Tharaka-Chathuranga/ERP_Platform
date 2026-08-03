@@ -55,6 +55,7 @@ function buildLines(input: SaveOilMartQuotationInput): OilMartQuotationLine[] {
       itemId: line.itemId,
       itemCode: item?.code ?? "—",
       itemName: item?.name ?? "Unknown oil",
+      unitOfMeasure: item?.unitOfMeasure ?? "L",
       quantityLitres: line.quantityLitres,
       listUnitPrice,
       unitPrice,

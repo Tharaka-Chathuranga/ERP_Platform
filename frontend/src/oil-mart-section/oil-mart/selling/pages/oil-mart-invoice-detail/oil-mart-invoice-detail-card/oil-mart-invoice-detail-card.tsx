@@ -6,7 +6,6 @@ import {
   Group,
   SimpleGrid,
   Stack,
-  Table,
   Text,
   ThemeIcon,
   Title,
@@ -15,8 +14,13 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import { DefinitionList } from "@ui/data";
 import type { OilMartInvoice } from "@core/types";
-import { OIL_MART_INVOICE_STATUS_META, DocumentTotals } from "../../../components";
+import {
+  OIL_MART_INVOICE_STATUS_META,
+  DocumentLinesTable,
+  DocumentTotals,
+} from "../../../components";
 import { MoneyText } from "../../../../components/money-text";
+import { formatQuantity } from "../../../../components/quantity-text";
 
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -33,7 +37,6 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 
 export function OilMartInvoiceDetailCard({ invoice }: { invoice: OilMartInvoice }) {
   const meta = OIL_MART_INVOICE_STATUS_META[invoice.status];
-  const showProfit = invoice.lines.some((line) => line.lineProfit !== undefined);
 
   return (
     <Card
@@ -71,10 +74,10 @@ export function OilMartInvoiceDetailCard({ invoice }: { invoice: OilMartInvoice 
       <SimpleGrid cols={{ base: 2, sm: 4 }} mb="lg">
         <Stat label="Lines" value={invoice.lines.length} />
         <Stat
-          label="Litres"
-          value={`${invoice.lines
-            .reduce((sum, line) => sum + line.quantityLitres, 0)
-            .toLocaleString()} L`}
+          label="Total quantity"
+          value={formatQuantity(
+            invoice.lines.reduce((sum, line) => sum + line.quantityLitres, 0),
+          )}
         />
         <Stat label="Invoice date" value={dayjs(invoice.invoiceDate).format("MMM D, YYYY")} />
         <Stat
@@ -103,7 +106,6 @@ export function OilMartInvoiceDetailCard({ invoice }: { invoice: OilMartInvoice 
               : null,
           },
           { label: "Rejection reason", value: invoice.rejectionReason },
-          { label: "Cancellation reason", value: invoice.cancellationReason },
           { label: "Bank", value: invoice.bankDetails?.bankName },
           { label: "Account", value: invoice.bankDetails?.accountNumber },
           { label: "Note", value: invoice.note },
@@ -112,55 +114,7 @@ export function OilMartInvoiceDetailCard({ invoice }: { invoice: OilMartInvoice 
 
       <Divider my="lg" />
 
-      <Table.ScrollContainer minWidth={showProfit ? 900 : 760}>
-        <Table verticalSpacing="sm" striped>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Oil</Table.Th>
-              <Table.Th style={{ textAlign: "right" }}>Quantity</Table.Th>
-              <Table.Th style={{ textAlign: "right" }}>Unit price</Table.Th>
-              <Table.Th style={{ textAlign: "right" }}>Discount</Table.Th>
-              <Table.Th style={{ textAlign: "right" }}>Line total</Table.Th>
-              {showProfit && <Table.Th style={{ textAlign: "right" }}>Profit</Table.Th>}
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {invoice.lines.map((line) => (
-              <Table.Tr key={line.id}>
-                <Table.Td>
-                  <Text size="sm" fw={500}>
-                    {line.itemName}
-                  </Text>
-                  <Text size="xs" c="dimmed">
-                    {line.itemCode}
-                    {line.isPriceOverride ? " · price overridden" : ""}
-                  </Text>
-                </Table.Td>
-                <Table.Td style={{ textAlign: "right" }}>
-                  {line.quantityLitres.toLocaleString()} L
-                </Table.Td>
-                <Table.Td style={{ textAlign: "right" }}>
-                  <MoneyText value={line.unitPrice} />
-                </Table.Td>
-                <Table.Td style={{ textAlign: "right" }}>
-                  {line.discountPercent ? `${line.discountPercent}%` : "—"}
-                </Table.Td>
-                <Table.Td style={{ textAlign: "right" }}>
-                  <MoneyText value={line.lineTotal} emphasis />
-                </Table.Td>
-                {showProfit && (
-                  <Table.Td style={{ textAlign: "right" }}>
-                    <MoneyText
-                      value={line.lineProfit}
-                      c={(line.lineProfit ?? 0) < 0 ? "red" : "teal"}
-                    />
-                  </Table.Td>
-                )}
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
+      <DocumentLinesTable lines={invoice.lines} showProfit />
 
       <DocumentTotals
         subtotal={invoice.subtotal}

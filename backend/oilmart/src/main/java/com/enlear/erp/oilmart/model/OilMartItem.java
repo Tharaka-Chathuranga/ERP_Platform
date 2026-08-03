@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OilMartItem extends BaseEntity {
 
+    public static final String DEFAULT_UNIT_OF_MEASURE = "L";
+
     @Column(nullable = false, unique = true, length = 64)
     private String code;
 
@@ -35,6 +37,9 @@ public class OilMartItem extends BaseEntity {
     @Column(length = 1000)
     private String description;
 
+    @Column(name = "unit_of_measure", nullable = false, length = 16)
+    private String unitOfMeasure = DEFAULT_UNIT_OF_MEASURE;
+
     @Column(name = "reorder_level_litres", nullable = false, precision = 19, scale = 4)
     private BigDecimal reorderLevelLitres = BigDecimal.ZERO;
 
@@ -43,23 +48,31 @@ public class OilMartItem extends BaseEntity {
     private OilMartItemStatus status = OilMartItemStatus.ACTIVE;
 
     public OilMartItem(String code, String name, OilType oilType, String brand, String grade,
-                       String description, BigDecimal reorderLevelLitres, OilMartItemStatus status) {
-        apply(code, name, oilType, brand, grade, description, reorderLevelLitres, status);
+                       String description, String unitOfMeasure, BigDecimal reorderLevelLitres,
+                       OilMartItemStatus status) {
+        apply(code, name, oilType, brand, grade, description, unitOfMeasure, reorderLevelLitres,
+                status);
     }
 
     public void update(String code, String name, OilType oilType, String brand, String grade,
-                       String description, BigDecimal reorderLevelLitres, OilMartItemStatus status) {
-        apply(code, name, oilType, brand, grade, description, reorderLevelLitres, status);
+                       String description, String unitOfMeasure, BigDecimal reorderLevelLitres,
+                       OilMartItemStatus status) {
+        apply(code, name, oilType, brand, grade, description, unitOfMeasure, reorderLevelLitres,
+                status);
     }
 
     private void apply(String code, String name, OilType oilType, String brand, String grade,
-                       String description, BigDecimal reorderLevelLitres, OilMartItemStatus status) {
+                       String description, String unitOfMeasure, BigDecimal reorderLevelLitres,
+                       OilMartItemStatus status) {
         this.code = code;
         this.name = name;
         this.oilType = oilType;
         this.brand = brand;
         this.grade = grade;
         this.description = description;
+        this.unitOfMeasure = unitOfMeasure != null && !unitOfMeasure.isBlank()
+                ? unitOfMeasure.trim()
+                : DEFAULT_UNIT_OF_MEASURE;
         this.reorderLevelLitres = reorderLevelLitres != null ? reorderLevelLitres : BigDecimal.ZERO;
         this.status = status != null ? status : OilMartItemStatus.ACTIVE;
     }

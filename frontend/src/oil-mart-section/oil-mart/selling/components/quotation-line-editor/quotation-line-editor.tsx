@@ -62,6 +62,7 @@ export function QuotationLineEditor({
   onRemove,
 }: QuotationLineEditorProps) {
   const onHandById = new Map((stock ?? []).map((balance) => [balance.itemId, balance.quantityOnHand]));
+  const uomById = new Map(items.map((item) => [item.id, item.unitOfMeasure]));
 
   const subtotal = lines.reduce((sum, line) => sum + quotationLineTotal(line), 0);
   const totalProfit = showProfit
@@ -83,9 +84,10 @@ export function QuotationLineEditor({
         <Table verticalSpacing="sm">
           <Table.Thead>
             <Table.Tr>
-              <Table.Th style={{ width: "26%" }}>Oil</Table.Th>
-              <Table.Th style={{ width: "15%" }}>Quantity</Table.Th>
-              <Table.Th style={{ width: "18%" }}>Unit price</Table.Th>
+              <Table.Th style={{ width: "24%" }}>Oil</Table.Th>
+              <Table.Th style={{ width: "14%" }}>Quantity</Table.Th>
+              <Table.Th style={{ width: "6%" }}>UOM</Table.Th>
+              <Table.Th style={{ width: "17%" }}>Unit price</Table.Th>
               <Table.Th style={{ width: "12%" }}>Discount</Table.Th>
               <Table.Th style={{ width: "15%", textAlign: "right" }}>Line total</Table.Th>
               {showProfit && (
@@ -97,6 +99,7 @@ export function QuotationLineEditor({
           <Table.Tbody>
             {lines.map((line) => {
               const onHand = line.itemId ? onHandById.get(line.itemId) : undefined;
+              const unitOfMeasure = line.itemId ? (uomById.get(line.itemId) ?? "—") : "—";
               const profit = quotationLineProfit(line);
               return (
                 <Table.Tr key={line.key}>
@@ -119,6 +122,11 @@ export function QuotationLineEditor({
                       max={onHand}
                       placeholder="0"
                     />
+                  </Table.Td>
+                  <Table.Td>
+                    <Text size="sm" c="dimmed">
+                      {unitOfMeasure}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
                     <PriceOverrideField

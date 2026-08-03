@@ -37,12 +37,13 @@ public final class OilMartResponses {
 
     public record OilMartItemResponse(
             UUID id, String code, String name, OilType oilType, String brand, String grade,
-            String description, BigDecimal reorderLevelLitres, OilMartItemStatus status) {
+            String description, String unitOfMeasure, BigDecimal reorderLevelLitres,
+            OilMartItemStatus status) {
 
         public static OilMartItemResponse from(OilMartItem item) {
             return new OilMartItemResponse(item.getId(), item.getCode(), item.getName(),
                     item.getOilType(), item.getBrand(), item.getGrade(), item.getDescription(),
-                    item.getReorderLevelLitres(), item.getStatus());
+                    item.getUnitOfMeasure(), item.getReorderLevelLitres(), item.getStatus());
         }
     }
 
@@ -135,7 +136,8 @@ public final class OilMartResponses {
     }
 
     public record OilMartQuotationLineResponse(
-            UUID id, UUID itemId, String itemCode, String itemName, BigDecimal quantityLitres,
+            UUID id, UUID itemId, String itemCode, String itemName, String unitOfMeasure,
+            BigDecimal quantityLitres,
             BigDecimal listUnitPrice, BigDecimal unitPrice, boolean isPriceOverride,
             BigDecimal discountPercent, BigDecimal lineTotal,
             BigDecimal unitCost, BigDecimal lineCost, BigDecimal lineProfit) {
@@ -145,6 +147,7 @@ public final class OilMartResponses {
             return new OilMartQuotationLineResponse(line.getId(), line.getItemId(),
                     item != null ? item.getCode() : null,
                     item != null ? item.getName() : null,
+                    item != null ? item.getUnitOfMeasure() : OilMartItem.DEFAULT_UNIT_OF_MEASURE,
                     line.getQuantityLitres(), line.getListUnitPrice(), line.getUnitPrice(),
                     line.isPriceOverride(), line.getDiscountPercent(), line.getLineTotal(),
                     withProfit ? line.getUnitCost() : null,
@@ -188,7 +191,8 @@ public final class OilMartResponses {
     }
 
     public record OilMartInvoiceLineResponse(
-            UUID id, UUID itemId, String itemCode, String itemName, BigDecimal quantityLitres,
+            UUID id, UUID itemId, String itemCode, String itemName, String unitOfMeasure,
+            BigDecimal quantityLitres,
             BigDecimal listUnitPrice, BigDecimal unitPrice, boolean isPriceOverride,
             BigDecimal discountPercent, BigDecimal lineTotal,
             BigDecimal unitCost, BigDecimal lineCost, BigDecimal lineProfit) {
@@ -198,6 +202,7 @@ public final class OilMartResponses {
             return new OilMartInvoiceLineResponse(line.getId(), line.getItemId(),
                     item != null ? item.getCode() : null,
                     item != null ? item.getName() : null,
+                    item != null ? item.getUnitOfMeasure() : OilMartItem.DEFAULT_UNIT_OF_MEASURE,
                     line.getQuantityLitres(), line.getListUnitPrice(), line.getUnitPrice(),
                     line.isPriceOverride(), line.getDiscountPercent(), line.getLineTotal(),
                     withProfit ? line.getUnitCost() : null,
@@ -222,7 +227,7 @@ public final class OilMartResponses {
             UUID clientId, String clientName, OilMartInvoiceStatus status, UUID createdByUserId,
             LocalDate invoiceDate, UUID approvedByUserId, Instant approvedAt,
             UUID rejectedByUserId, Instant rejectedAt, String rejectionReason,
-            String cancellationReason, OilMartBankDetailsResponse bankDetails,
+            OilMartBankDetailsResponse bankDetails,
             BigDecimal subtotal, BigDecimal gstRatePercent, BigDecimal gstAmount,
             BigDecimal grandTotal, BigDecimal totalCost, BigDecimal totalProfit,
             String note, Instant updatedAt, List<OilMartInvoiceLineResponse> lines) {
@@ -236,7 +241,6 @@ public final class OilMartResponses {
                     invoice.getInvoiceDate(), invoice.getApprovedByUserId(),
                     invoice.getApprovedAt(), invoice.getRejectedByUserId(),
                     invoice.getRejectedAt(), invoice.getRejectionReason(),
-                    invoice.getCancellationReason(),
                     OilMartBankDetailsResponse.from(invoice.getBankDetails()),
                     invoice.getSubtotal(), invoice.getGstRatePercent(), invoice.getGstAmount(),
                     invoice.getGrandTotal(),

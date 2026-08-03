@@ -22,7 +22,7 @@ public interface OilMartInvoiceRepository extends JpaRepository<OilMartInvoice, 
 
     long countByStatus(OilMartInvoiceStatus status);
 
-    boolean existsByQuotationIdAndStatusNot(UUID quotationId, OilMartInvoiceStatus status);
+    boolean existsByQuotationId(UUID quotationId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select i from OilMartInvoice i where i.id = :id")

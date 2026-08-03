@@ -1,7 +1,6 @@
 import { Alert, Button, Card, Group, Text } from "@mantine/core";
 import {
   IconAlertTriangle,
-  IconBan,
   IconCircleCheck,
   IconFileTypePdf,
   IconReplace,
@@ -16,7 +15,6 @@ interface InvoiceStageActionsProps {
   busy?: boolean;
   onApprove: () => void;
   onReject: () => void;
-  onCancel: () => void;
   onReselect: () => void;
   onPreviewPdf: () => void;
 }
@@ -28,7 +26,6 @@ export function InvoiceStageActions({
   busy,
   onApprove,
   onReject,
-  onCancel,
   onReselect,
   onPreviewPdf,
 }: InvoiceStageActionsProps) {
@@ -98,17 +95,6 @@ export function InvoiceStageActions({
             </>
           )}
 
-          {canCreate && invoice.status !== "APPROVED" && invoice.status !== "CANCELLED" && (
-            <Button
-              color="dark"
-              variant="subtle"
-              leftSection={<IconBan size={16} />}
-              disabled={busy}
-              onClick={onCancel}
-            >
-              Cancel
-            </Button>
-          )}
         </Group>
       </Group>
     </Card>

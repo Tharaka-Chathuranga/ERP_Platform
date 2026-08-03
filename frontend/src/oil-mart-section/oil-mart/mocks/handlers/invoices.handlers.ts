@@ -24,7 +24,7 @@ function isExpired(validUntil: string): boolean {
 }
 
 function hasLiveInvoice(quotationId: string): boolean {
-  return db.invoices.some((i) => i.quotationId === quotationId && i.status !== "CANCELLED");
+  return db.invoices.some((i) => i.quotationId === quotationId);
 }
 
 function invoiceable(): OilMartQuotation[] {
@@ -256,25 +256,4 @@ export const invoiceHandlers = [
     return HttpResponse.json(invoice);
   }),
 
-  http.post("/api/oilmart/invoices/:invoiceId/cancel", async ({ params, request }) => {
-    await delay(240);
-    const invoice = find(String(params.invoiceId));
-    if (!invoice) return notFound();
-    const { expectedUpdatedAt, reason } = await bodyOf(request);
-    if (expectedUpdatedAt !== invoice.updatedAt) return stale(invoice);
-    if (invoice.status === "APPROVED" || invoice.status === "CANCELLED") {
-      return HttpResponse.json(
-        {
-          detail: `An ${invoice.status} invoice cannot be cancelled`,
-          code: "OILMART_INVOICE_ILLEGAL_TRANSITION",
-        },
-        { status: 409 },
-      );
-    }
-
-    invoice.status = "CANCELLED";
-    invoice.cancellationReason = reason;
-    invoice.updatedAt = new Date().toISOString();
-    return HttpResponse.json(invoice);
-  }),
 ];
