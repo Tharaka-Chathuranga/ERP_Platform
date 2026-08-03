@@ -11,7 +11,7 @@ import { StatusBadge } from "@ui/feedback/StatusBadge";
 import { IssueStatusIcon } from "@store/goods-issuing";
 import type { TodayIssueRow } from "@core/types";
 import { getTodayIssues } from "../../api";
-import { OverviewCard } from "./OverviewCard";
+import { OverviewCard } from "@ui/layout/OverviewCard";
 
 export function TodayIssuesCard() {
   const navigate = useNavigate();

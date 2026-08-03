@@ -9,7 +9,7 @@ import { DataTable, TableToolbar } from "@ui/data";
 import { StackedCell } from "@ui/data/cells";
 import type { TodayReceivalRow } from "@core/types";
 import { getTodayReceivals } from "../../api";
-import { OverviewCard } from "./OverviewCard";
+import { OverviewCard } from "@ui/layout/OverviewCard";
 import { money } from "./format";
 
 export function TodayReceivalsCard() {

@@ -22,8 +22,6 @@ export const OnlyLowStock: Story = {
   args: { data: oilMartStock.filter((s) => s.quantityOnHand < s.reorderLevelLitres) },
 };
 
-export const RowSelected: Story = { args: { activeItemId: "itm-engine-15w40" } };
-
 export const Loading: Story = { args: { data: [], loading: true } };
 
 export const Empty: Story = { args: { data: [] } };

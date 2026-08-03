@@ -7,7 +7,7 @@ import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { useUserLabels } from "@core/hooks/useLookups";
 import { qk } from "@core/queryKeys";
 import { getEfficiencyReport, listVehicles } from "@fuel";
-import { OverviewCard } from "./OverviewCard";
+import { OverviewCard } from "@ui/layout/OverviewCard";
 
 interface SummaryRow {
   vehicleId: string;

@@ -7,7 +7,6 @@ interface OilMartStockTableProps {
   data: OilMartStockBalance[];
   loading?: boolean;
   error?: unknown;
-  activeItemId?: string;
   onRowClick?: (balance: OilMartStockBalance) => void;
 }
 
@@ -15,7 +14,6 @@ export function OilMartStockTable({
   data,
   loading,
   error,
-  activeItemId,
   onRowClick,
 }: OilMartStockTableProps) {
   return (
@@ -26,7 +24,6 @@ export function OilMartStockTable({
       loading={loading}
       error={error}
       onRowClick={onRowClick}
-      activeRowKey={activeItemId}
       rowBg={(balance) => (isLowStock(balance) ? "var(--mantine-color-red-light)" : undefined)}
       empty={
         <EmptyState

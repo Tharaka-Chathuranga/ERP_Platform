@@ -80,9 +80,10 @@ export function applyMovement(
   quantityDelta: number,
   movementType: OilMartStockMovement["movementType"],
   referenceType: OilMartStockMovement["referenceType"],
-  referenceId: string,
-  referenceNo: string,
+  referenceId: string | undefined,
+  referenceNo: string | undefined,
   movedByUserId: string,
+  note?: string,
 ): OilMartStockMovement {
   const item = itemById(itemId);
   let balance = balanceFor(itemId);
@@ -124,6 +125,7 @@ export function applyMovement(
     referenceNo,
     movedAt: new Date().toISOString(),
     movedByUserId,
+    note,
   };
 
   db.movements.push(movement);

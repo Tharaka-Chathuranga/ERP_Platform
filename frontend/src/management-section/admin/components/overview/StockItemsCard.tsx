@@ -3,7 +3,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { DataTable, TableToolbar, type Column } from "@ui/data";
 import { StatusBadge } from "@ui/feedback/StatusBadge";
 import type { ItemStockRow } from "@core/types";
-import { OverviewCard } from "./OverviewCard";
+import { OverviewCard } from "@ui/layout/OverviewCard";
 import { money } from "./format";
 
 const STOCK_LEVEL_OPTIONS = [

@@ -1,21 +1,46 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { qk } from "@core/queryKeys";
+import { notifyError, notifySuccess } from "@core/notify";
 import type { OilMartStockBalance } from "@core/types";
-import { listOilMartStock, listOilMartStockMovements } from "../../../../api";
+import { listOilMartItems } from "../../../../../master-data/api";
+import {
+  adjustOilMartStock,
+  listOilMartStock,
+  type AdjustOilMartStockInput,
+} from "../../../../api";
 
 export function useOilMartStock() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const [search, setSearch] = useState("");
   const [oilType, setOilType] = useState("ALL");
   const [lowOnly, setLowOnly] = useState(false);
-  const [selected, setSelected] = useState<OilMartStockBalance | null>(null);
+  const [adjustingItemId, setAdjustingItemId] = useState<string | undefined>();
+  const [adjustmentOpen, setAdjustmentOpen] = useState(false);
 
   const query = useQuery({ queryKey: qk.oilMartStock(), queryFn: listOilMartStock });
 
-  const movementsQuery = useQuery({
-    queryKey: qk.oilMartMovements(selected?.itemId ?? ""),
-    queryFn: () => listOilMartStockMovements(selected!.itemId),
-    enabled: Boolean(selected),
+  const itemsQuery = useQuery({
+    queryKey: qk.oilMartItems(),
+    queryFn: () => listOilMartItems(),
+    enabled: adjustmentOpen,
+  });
+
+  const adjust = useMutation({
+    mutationFn: (values: AdjustOilMartStockInput) => adjustOilMartStock(values),
+    onSuccess: (movement) => {
+      queryClient.invalidateQueries({ queryKey: qk.oilMartStock() });
+      queryClient.invalidateQueries({ queryKey: qk.oilMartMovements(movement.itemId) });
+      queryClient.invalidateQueries({ queryKey: qk.oilMartOverview() });
+      notifySuccess(
+        `Stock ${movement.quantityDelta >= 0 ? "added" : "removed"}: ${Math.abs(movement.quantityDelta).toLocaleString()} L`,
+      );
+      closeAdjustment();
+    },
+    onError: notifyError,
   });
 
   const balances = useMemo(() => {
@@ -39,6 +64,16 @@ export function useOilMartStock() {
     };
   }, [query.data]);
 
+  function openAdjustment(itemId?: string) {
+    setAdjustingItemId(itemId);
+    setAdjustmentOpen(true);
+  }
+
+  function closeAdjustment() {
+    setAdjustmentOpen(false);
+    setAdjustingItemId(undefined);
+  }
+
   return {
     query,
     balances,
@@ -49,8 +84,12 @@ export function useOilMartStock() {
     setOilType,
     lowOnly,
     setLowOnly,
-    selected,
-    setSelected,
-    movementsQuery,
+    openItem: (balance: OilMartStockBalance) => navigate(`/oil-mart/items/${balance.itemId}`),
+    items: itemsQuery.data ?? [],
+    adjustmentOpen,
+    adjustingItemId,
+    openAdjustment,
+    closeAdjustment,
+    adjust,
   };
 }

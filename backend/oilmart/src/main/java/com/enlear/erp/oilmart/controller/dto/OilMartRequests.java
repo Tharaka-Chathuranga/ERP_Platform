@@ -2,9 +2,11 @@ package com.enlear.erp.oilmart.controller.dto;
 
 import com.enlear.erp.oilmart.model.OilMartClientStatus;
 import com.enlear.erp.oilmart.model.OilMartItemStatus;
+import com.enlear.erp.oilmart.model.OilMartStockAdjustmentDirection;
 import com.enlear.erp.oilmart.model.OilMartSupplierStatus;
 import com.enlear.erp.oilmart.model.OilType;
 import com.enlear.erp.oilmart.service.command.AddOilMartItemPriceCommand;
+import com.enlear.erp.oilmart.service.command.AdjustOilMartStockCommand;
 import com.enlear.erp.oilmart.service.command.CreateOilMartInvoiceCommand;
 import com.enlear.erp.oilmart.service.command.RecordOilMartReceiptCommand;
 import com.enlear.erp.oilmart.service.command.SaveOilMartClientCommand;
@@ -113,6 +115,17 @@ public final class OilMartRequests {
                             .map(line -> new RecordOilMartReceiptCommand.Line(
                                     line.itemId(), line.quantityLitres(), line.buyUnitPrice()))
                             .toList());
+        }
+    }
+
+    public record AdjustOilMartStockRequest(
+            @NotNull UUID itemId,
+            @NotNull @Positive BigDecimal quantityLitres,
+            @NotNull OilMartStockAdjustmentDirection direction,
+            @NotBlank @Size(max = 1000) String reason) {
+
+        public AdjustOilMartStockCommand toCommand() {
+            return new AdjustOilMartStockCommand(itemId, quantityLitres, direction, reason);
         }
     }
 

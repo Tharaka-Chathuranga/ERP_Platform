@@ -34,6 +34,7 @@ export type Permission =
   | "fuel:manage" // manage vehicle master data & add fuel prices
   | "oilmart:view"
   | "oilmart:receive"
+  | "oilmart:stock:adjust" // restock / correct oil balances outside a supplier receipt
   | "oilmart:client:manage"
   | "oilmart:sale:create"
   | "oilmart:sale:approve"
@@ -45,6 +46,7 @@ export type Permission =
 const OIL_MART_ALL: Permission[] = [
   "oilmart:view",
   "oilmart:receive",
+  "oilmart:stock:adjust",
   "oilmart:client:manage",
   "oilmart:sale:create",
   "oilmart:sale:approve",
@@ -60,11 +62,13 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   OIL_MART_SALES_ASSISTANT: [
     "oilmart:view",
     "oilmart:receive",
+    "oilmart:stock:adjust",
     "oilmart:client:manage",
     "oilmart:sale:create",
   ],
   OIL_MART_SALES_MANAGER: [
     "oilmart:view",
+    "oilmart:stock:adjust",
     "oilmart:client:manage",
     "oilmart:sale:create",
     "oilmart:sale:approve",
@@ -112,6 +116,7 @@ export const FUEL_VIEW: Permission = "fuel:view";
 export const FUEL_MANAGE: Permission = "fuel:manage";
 export const OILMART_VIEW: Permission = "oilmart:view";
 export const OILMART_RECEIVE: Permission = "oilmart:receive";
+export const OILMART_STOCK_ADJUST: Permission = "oilmart:stock:adjust";
 export const OILMART_CLIENT_MANAGE: Permission = "oilmart:client:manage";
 export const OILMART_SALE_CREATE: Permission = "oilmart:sale:create";
 export const OILMART_SALE_APPROVE: Permission = "oilmart:sale:approve";
