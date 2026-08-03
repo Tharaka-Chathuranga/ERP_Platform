@@ -23,7 +23,7 @@ public class OilMartOverviewController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartOverviewResponse snapshot(
             @RequestParam(defaultValue = "THIS_MONTH") OilMartOverviewPeriod period) {
         return OilMartOverviewResponse.from(overview.snapshot(period), assembler::toResponse);

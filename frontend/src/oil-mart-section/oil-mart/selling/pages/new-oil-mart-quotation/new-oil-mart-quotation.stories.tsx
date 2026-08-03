@@ -10,13 +10,13 @@ const meta: Meta<typeof NewOilMartQuotationPage> = {
 export default meta;
 type Story = StoryObj<typeof NewOilMartQuotationPage>;
 
-export const AsOilMartAssistant: Story = { parameters: { role: "OIL_MART_ASSISTANT" } };
+export const AsSalesAssistant: Story = { parameters: { role: "OIL_MART_SALES_ASSISTANT" } };
 
-export const AsStoresManager: Story = { parameters: { role: "STORES_MANAGER" } };
+export const AsSalesManager: Story = { parameters: { role: "OIL_MART_SALES_MANAGER" } };
 
 export const EditingRejected: Story = {
   parameters: {
-    role: "OIL_MART_ASSISTANT",
+    role: "OIL_MART_SALES_ASSISTANT",
     route: "/oil-mart/quotations/quotation-rejected/edit",
     routePath: "/oil-mart/quotations/:quotationId/edit",
   },

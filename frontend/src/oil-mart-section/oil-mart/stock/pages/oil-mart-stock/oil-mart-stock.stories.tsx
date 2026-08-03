@@ -11,9 +11,9 @@ const meta: Meta<typeof OilMartStockPage> = {
 export default meta;
 type Story = StoryObj<typeof OilMartStockPage>;
 
-export const AsOilMartAssistant: Story = { parameters: { role: "OIL_MART_ASSISTANT" } };
+export const AsSalesAssistant: Story = { parameters: { role: "OIL_MART_SALES_ASSISTANT" } };
 
-export const AsStoresManager: Story = { parameters: { role: "STORES_MANAGER" } };
+export const AsSalesManager: Story = { parameters: { role: "OIL_MART_SALES_MANAGER" } };
 
 export const NoStock: Story = {
   parameters: { msw: { handlers: [http.get("/api/oilmart/stock", () => HttpResponse.json([]))] } },

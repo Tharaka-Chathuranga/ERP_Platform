@@ -14,22 +14,22 @@ const meta: Meta<typeof OilMartInvoiceDetailPage> = {
 export default meta;
 type Story = StoryObj<typeof OilMartInvoiceDetailPage>;
 
-export const PendingApprovalAsManager: Story = { parameters: { role: "STORES_MANAGER" } };
+export const PendingApprovalAsManager: Story = { parameters: { role: "OIL_MART_SALES_MANAGER" } };
 
 export const PendingApprovalAsAssistant: Story = {
-  parameters: { role: "OIL_MART_ASSISTANT" },
+  parameters: { role: "OIL_MART_SALES_ASSISTANT" },
 };
 
 export const RejectedAsAssistant: Story = {
   parameters: {
-    role: "OIL_MART_ASSISTANT",
+    role: "OIL_MART_SALES_ASSISTANT",
     route: "/oil-mart/invoices/invoice-rejected",
   },
 };
 
 export const Approved: Story = {
   parameters: {
-    role: "STORES_MANAGER",
+    role: "OIL_MART_SALES_MANAGER",
     route: "/oil-mart/invoices/invoice-approved",
   },
 };

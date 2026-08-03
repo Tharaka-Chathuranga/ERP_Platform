@@ -28,13 +28,13 @@ public class OilMartSupplierController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartSupplierResponse> list() {
         return suppliers.list().stream().map(OilMartSupplierResponse::from).toList();
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartSupplierResponse> create(
             @Valid @RequestBody SaveOilMartSupplierRequest request) {
         var supplier = suppliers.create(request.toCommand());
@@ -44,7 +44,7 @@ public class OilMartSupplierController {
     }
 
     @PutMapping("/{supplierId}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public OilMartSupplierResponse update(@PathVariable UUID supplierId,
                                           @Valid @RequestBody SaveOilMartSupplierRequest request) {
         return OilMartSupplierResponse.from(suppliers.update(supplierId, request.toCommand()));

@@ -15,9 +15,9 @@ const meta: Meta<typeof OilMartItemDetailPage> = {
 export default meta;
 type Story = StoryObj<typeof OilMartItemDetailPage>;
 
-export const AsStoresManager: Story = { parameters: { role: "STORES_MANAGER" } };
+export const AsSalesManager: Story = { parameters: { role: "OIL_MART_SALES_MANAGER" } };
 
-export const AsOilMartAssistant: Story = { parameters: { role: "OIL_MART_ASSISTANT" } };
+export const AsSalesAssistant: Story = { parameters: { role: "OIL_MART_SALES_ASSISTANT" } };
 
 export const LowStockItem: Story = { parameters: { route: "/oil-mart/items/itm-gear-ep90" } };
 

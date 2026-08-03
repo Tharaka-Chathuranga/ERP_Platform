@@ -14,25 +14,25 @@ const meta: Meta<typeof OilMartQuotationDetailPage> = {
 export default meta;
 type Story = StoryObj<typeof OilMartQuotationDetailPage>;
 
-export const DraftAsAssistant: Story = { parameters: { role: "OIL_MART_ASSISTANT" } };
+export const DraftAsAssistant: Story = { parameters: { role: "OIL_MART_SALES_ASSISTANT" } };
 
 export const PendingApprovalAsManager: Story = {
   parameters: {
-    role: "STORES_MANAGER",
+    role: "OIL_MART_SALES_MANAGER",
     route: "/oil-mart/quotations/quotation-pending",
   },
 };
 
 export const RejectedAsAssistant: Story = {
   parameters: {
-    role: "OIL_MART_ASSISTANT",
+    role: "OIL_MART_SALES_ASSISTANT",
     route: "/oil-mart/quotations/quotation-rejected",
   },
 };
 
 export const ExpiredApproved: Story = {
   parameters: {
-    role: "STORES_MANAGER",
+    role: "OIL_MART_SALES_MANAGER",
     route: "/oil-mart/quotations/quotation-expired",
   },
 };

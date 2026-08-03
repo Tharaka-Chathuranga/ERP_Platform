@@ -35,26 +35,26 @@ public class OilMartReceiptController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartReceiptResponse> list(@RequestParam(required = false) UUID supplierId) {
         return assembler.toReceiptResponses(receipts.list(supplierId));
     }
 
     @GetMapping("/{receiptId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartReceiptResponse get(@PathVariable UUID receiptId) {
         return assembler.toResponse(receipts.get(receiptId));
     }
 
     @GetMapping("/{receiptId}/movements")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartStockMovementResponse> movements(@PathVariable UUID receiptId) {
         return stock.movementsForReference(receiptId).stream()
                 .map(OilMartStockMovementResponse::from).toList();
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT')")
     public ResponseEntity<OilMartReceiptResponse> record(
             @Valid @RequestBody RecordOilMartReceiptRequest request) {
         var receipt = receipts.record(request.toCommand());

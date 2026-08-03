@@ -8,7 +8,7 @@ const meta: Meta<typeof NewOilMartReceiptPage> = {
   parameters: {
     layout: "fullscreen",
     route: "/oil-mart/receipts/new",
-    role: "OIL_MART_ASSISTANT",
+    role: "OIL_MART_SALES_ASSISTANT",
   },
 };
 

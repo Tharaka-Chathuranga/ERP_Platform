@@ -1,0 +1,9 @@
+ALTER TABLE users.users DROP CONSTRAINT chk_users_role;
+
+UPDATE users.users SET role = 'OIL_MART_SALES_ASSISTANT' WHERE role = 'OIL_MART_ASSISTANT';
+UPDATE users.users SET role = 'OIL_MART_SALES_MANAGER' WHERE role = 'STORES_MANAGER';
+
+ALTER TABLE users.users
+    ADD CONSTRAINT chk_users_role
+    CHECK (role IN ('ADMIN', 'STORE_KEEPER', 'QUALITY_ASSURANCE',
+                    'OIL_MART_SALES_ASSISTANT', 'OIL_MART_SALES_MANAGER'));

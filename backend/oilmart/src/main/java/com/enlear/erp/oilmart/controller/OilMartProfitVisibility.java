@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OilMartProfitVisibility {
 
-    private static final Set<String> ALLOWED_AUTHORITIES = Set.of("ROLE_ADMIN", "ROLE_STORES_MANAGER");
+    private static final Set<String> ALLOWED_AUTHORITIES = Set.of("ROLE_ADMIN", "ROLE_OIL_MART_SALES_MANAGER");
 
     public boolean isVisible() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -42,33 +42,33 @@ public class OilMartInvoiceController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartInvoiceResponse> list(
             @RequestParam(required = false) OilMartInvoiceStatus status) {
         return assembler.toInvoiceResponses(invoices.list(status));
     }
 
     @GetMapping("/invoiceable-quotations")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartQuotationResponse> invoiceableQuotations() {
         return assembler.toQuotationResponses(invoices.invoiceableQuotations());
     }
 
     @GetMapping("/{invoiceId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartInvoiceResponse get(@PathVariable UUID invoiceId) {
         return assembler.toResponse(invoices.get(invoiceId));
     }
 
     @GetMapping(value = "/{invoiceId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<byte[]> pdf(@PathVariable UUID invoiceId) {
         var invoice = invoices.get(invoiceId);
         return OilMartPdfResponse.inline(pdfs.renderInvoice(invoice), invoice.getInvoiceNo());
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartInvoiceResponse> create(
             @Valid @RequestBody CreateOilMartInvoiceRequest request) {
         var invoice = invoices.create(request.toCommand());
@@ -78,7 +78,7 @@ public class OilMartInvoiceController {
     }
 
     @PutMapping("/{invoiceId}/quotation")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartInvoiceResponse reselectQuotation(
             @PathVariable UUID invoiceId,
             @Valid @RequestBody ReselectOilMartQuotationRequest request) {
@@ -87,14 +87,14 @@ public class OilMartInvoiceController {
     }
 
     @PostMapping("/{invoiceId}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public OilMartInvoiceResponse approve(@PathVariable UUID invoiceId,
                                           @Valid @RequestBody OilMartDocumentTokenRequest request) {
         return assembler.toResponse(invoices.approve(invoiceId, request.expectedUpdatedAt()));
     }
 
     @PostMapping("/{invoiceId}/reject")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public OilMartInvoiceResponse reject(@PathVariable UUID invoiceId,
                                          @Valid @RequestBody RejectOilMartDocumentRequest request) {
         return assembler.toResponse(invoices.reject(

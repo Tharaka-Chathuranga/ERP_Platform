@@ -11,20 +11,20 @@ const meta: Meta<typeof OilMartQuotationsPage> = {
 export default meta;
 type Story = StoryObj<typeof OilMartQuotationsPage>;
 
-export const AsOilMartAssistant: Story = { parameters: { role: "OIL_MART_ASSISTANT" } };
+export const AsSalesAssistant: Story = { parameters: { role: "OIL_MART_SALES_ASSISTANT" } };
 
-export const AsStoresManager: Story = { parameters: { role: "STORES_MANAGER" } };
+export const AsSalesManager: Story = { parameters: { role: "OIL_MART_SALES_MANAGER" } };
 
 export const EmptyBoardAsAssistant: Story = {
   parameters: {
-    role: "OIL_MART_ASSISTANT",
+    role: "OIL_MART_SALES_ASSISTANT",
     msw: { handlers: [http.get("/api/oilmart/quotations", () => HttpResponse.json([]))] },
   },
 };
 
 export const ApprovalRejectedByBackend: Story = {
   parameters: {
-    role: "STORES_MANAGER",
+    role: "OIL_MART_SALES_MANAGER",
     msw: {
       handlers: [
         http.post("/api/oilmart/quotations/:quotationId/approve", () =>

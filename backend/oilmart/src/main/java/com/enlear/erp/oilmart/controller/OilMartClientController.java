@@ -43,31 +43,31 @@ public class OilMartClientController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartClientResponse> list(@RequestParam(required = false) String search) {
         return clients.list(search).stream().map(OilMartClientResponse::from).toList();
     }
 
     @GetMapping("/{clientId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartClientResponse get(@PathVariable UUID clientId) {
         return OilMartClientResponse.from(clients.get(clientId));
     }
 
     @GetMapping("/{clientId}/quotations")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartQuotationResponse> quotations(@PathVariable UUID clientId) {
         return assembler.toQuotationResponses(quotations.listByClient(clientId));
     }
 
     @GetMapping("/{clientId}/invoices")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartInvoiceResponse> invoices(@PathVariable UUID clientId) {
         return assembler.toInvoiceResponses(invoices.listByClient(clientId));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartClientResponse> create(
             @Valid @RequestBody SaveOilMartClientRequest request) {
         var client = clients.create(request.toCommand());
@@ -77,7 +77,7 @@ public class OilMartClientController {
     }
 
     @PostMapping("/quick-add")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartClientResponse> quickAdd(
             @Valid @RequestBody QuickAddOilMartClientRequest request) {
         var client = clients.quickAdd(request.name());
@@ -87,7 +87,7 @@ public class OilMartClientController {
     }
 
     @PutMapping("/{clientId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartClientResponse update(@PathVariable UUID clientId,
                                         @Valid @RequestBody SaveOilMartClientRequest request) {
         return OilMartClientResponse.from(clients.update(clientId, request.toCommand()));

@@ -9,8 +9,8 @@ const DISPLAY_NAMES: Record<Role, string> = {
   ADMIN: "Ayesha Perera",
   STORE_KEEPER: "Nuwan Silva",
   QUALITY_ASSURANCE: "Dilani Fernando",
-  OIL_MART_ASSISTANT: "Kasun Jayawardena",
-  STORES_MANAGER: "Ruwan Bandara",
+  OIL_MART_SALES_ASSISTANT: "Kasun Jayawardena",
+  OIL_MART_SALES_MANAGER: "Ruwan Bandara",
 };
 
 export function seedMockSession(role: Role) {

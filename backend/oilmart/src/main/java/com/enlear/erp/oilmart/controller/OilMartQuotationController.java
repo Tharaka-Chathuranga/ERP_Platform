@@ -42,27 +42,27 @@ public class OilMartQuotationController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartQuotationResponse> list(
             @RequestParam(required = false) OilMartQuotationStatus status) {
         return assembler.toQuotationResponses(quotations.list(status));
     }
 
     @GetMapping("/{quotationId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartQuotationResponse get(@PathVariable UUID quotationId) {
         return assembler.toResponse(quotations.get(quotationId));
     }
 
     @GetMapping(value = "/{quotationId}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<byte[]> pdf(@PathVariable UUID quotationId) {
         var quotation = quotations.get(quotationId);
         return OilMartPdfResponse.inline(pdfs.renderQuotation(quotation), quotation.getQuotationNo());
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartQuotationResponse> create(
             @Valid @RequestBody SaveOilMartQuotationRequest request) {
         var quotation = quotations.create(request.toCommand());
@@ -72,7 +72,7 @@ public class OilMartQuotationController {
     }
 
     @PutMapping("/{quotationId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartQuotationResponse revise(@PathVariable UUID quotationId,
                                            @Valid @RequestBody ReviseOilMartQuotationRequest request) {
         return assembler.toResponse(quotations.revise(
@@ -80,7 +80,7 @@ public class OilMartQuotationController {
     }
 
     @PostMapping("/{quotationId}/submit")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartQuotationResponse submitForApproval(
             @PathVariable UUID quotationId,
             @Valid @RequestBody OilMartDocumentTokenRequest request) {
@@ -89,14 +89,14 @@ public class OilMartQuotationController {
     }
 
     @PostMapping("/{quotationId}/approve")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public OilMartQuotationResponse approve(@PathVariable UUID quotationId,
                                             @Valid @RequestBody OilMartDocumentTokenRequest request) {
         return assembler.toResponse(quotations.approve(quotationId, request.expectedUpdatedAt()));
     }
 
     @PostMapping("/{quotationId}/reject")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public OilMartQuotationResponse reject(@PathVariable UUID quotationId,
                                            @Valid @RequestBody RejectOilMartDocumentRequest request) {
         return assembler.toResponse(quotations.reject(
@@ -104,7 +104,7 @@ public class OilMartQuotationController {
     }
 
     @PostMapping("/{quotationId}/cancel")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartQuotationResponse cancel(@PathVariable UUID quotationId,
                                            @Valid @RequestBody CancelOilMartDocumentRequest request) {
         return assembler.toResponse(quotations.cancel(

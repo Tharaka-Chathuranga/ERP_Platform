@@ -25,19 +25,19 @@ public class OilMartStockController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartStockBalanceResponse> balances() {
         return stockQueries.balances().stream().map(OilMartStockBalanceResponse::from).toList();
     }
 
     @GetMapping("/low")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartStockBalanceResponse> lowStock() {
         return stockQueries.lowStock().stream().map(OilMartStockBalanceResponse::from).toList();
     }
 
     @GetMapping("/{itemId}/movements")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartStockMovementResponse> movements(@PathVariable UUID itemId) {
         return stock.movements(itemId).stream().map(OilMartStockMovementResponse::from).toList();
     }

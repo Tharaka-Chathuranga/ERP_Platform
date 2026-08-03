@@ -11,11 +11,11 @@ const meta: Meta<typeof NewOilMartInvoicePage> = {
 export default meta;
 type Story = StoryObj<typeof NewOilMartInvoicePage>;
 
-export const AsOilMartAssistant: Story = { parameters: { role: "OIL_MART_ASSISTANT" } };
+export const AsSalesAssistant: Story = { parameters: { role: "OIL_MART_SALES_ASSISTANT" } };
 
 export const NothingToInvoice: Story = {
   parameters: {
-    role: "OIL_MART_ASSISTANT",
+    role: "OIL_MART_SALES_ASSISTANT",
     msw: {
       handlers: [
         http.get("/api/oilmart/invoices/invoiceable-quotations", () => HttpResponse.json([])),

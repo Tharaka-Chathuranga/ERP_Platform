@@ -39,19 +39,19 @@ public class OilMartItemController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartItemResponse> list(@RequestParam(required = false) String search) {
         return items.list(search).stream().map(OilMartItemResponse::from).toList();
     }
 
     @GetMapping("/{itemId}")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public OilMartItemResponse get(@PathVariable UUID itemId) {
         return OilMartItemResponse.from(items.get(itemId));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartItemResponse> create(@Valid @RequestBody SaveOilMartItemRequest request) {
         var item = items.create(request.toCommand());
         return ResponseEntity
@@ -60,20 +60,20 @@ public class OilMartItemController {
     }
 
     @PutMapping("/{itemId}")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public OilMartItemResponse update(@PathVariable UUID itemId,
                                       @Valid @RequestBody SaveOilMartItemRequest request) {
         return OilMartItemResponse.from(items.update(itemId, request.toCommand()));
     }
 
     @GetMapping("/{itemId}/prices")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public List<OilMartItemPriceResponse> priceHistory(@PathVariable UUID itemId) {
         return prices.history(itemId).stream().map(OilMartItemPriceResponse::from).toList();
     }
 
     @GetMapping("/{itemId}/price")
-    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_ASSISTANT','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartItemPriceResponse> effectivePrice(
             @PathVariable UUID itemId,
             @RequestParam(required = false) LocalDate on) {
@@ -84,7 +84,7 @@ public class OilMartItemController {
     }
 
     @PostMapping("/{itemId}/prices")
-    @PreAuthorize("hasAnyRole('ADMIN','STORES_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_SALES_MANAGER')")
     public ResponseEntity<OilMartItemPriceResponse> addPrice(
             @PathVariable UUID itemId,
             @Valid @RequestBody AddOilMartItemPriceRequest request) {

@@ -43,8 +43,8 @@ const preview: Preview = {
         icon: "user",
         items: [
           { value: "ADMIN", title: "Admin" },
-          { value: "OIL_MART_ASSISTANT", title: "Oil mart assistant" },
-          { value: "STORES_MANAGER", title: "Stores manager" },
+          { value: "OIL_MART_SALES_ASSISTANT", title: "Sales assistant" },
+          { value: "OIL_MART_SALES_MANAGER", title: "Sales manager" },
           { value: "STORE_KEEPER", title: "Store keeper (no access)" },
         ],
         dynamicTitle: true,

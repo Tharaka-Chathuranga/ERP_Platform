@@ -10,9 +10,10 @@ public record CreateUserRequest(
         @NotBlank @Size(min = 8, max = 100) String password,
         @Size(max = 150) String displayName,
         @NotBlank @Pattern(
-                regexp = "ADMIN|STORE_KEEPER|QUALITY_ASSURANCE|OIL_MART_ASSISTANT|STORES_MANAGER",
+                regexp = "ADMIN|STORE_KEEPER|QUALITY_ASSURANCE"
+                        + "|OIL_MART_SALES_ASSISTANT|OIL_MART_SALES_MANAGER",
                 message = "role must be ADMIN, STORE_KEEPER, QUALITY_ASSURANCE, "
-                        + "OIL_MART_ASSISTANT or STORES_MANAGER") String role,
+                        + "OIL_MART_SALES_ASSISTANT or OIL_MART_SALES_MANAGER") String role,
         @Size(max = 100) String department) {
 
     public CreateUserCommand toCommand() {

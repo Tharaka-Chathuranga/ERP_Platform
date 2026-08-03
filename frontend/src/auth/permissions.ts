@@ -1,25 +1,17 @@
-/**
- * Capability-based access control. Roles map to a fixed set of permissions in
- * ONE place; the rest of the app gates routes, nav and UI on permissions (via
- * `useCan` / `Can` / `RequirePermission`), never on the role string directly.
- *
- * Adding a new role is a single new row here; adding a new gated capability is a
- * single new permission. The backend `@PreAuthorize` rules are the real
- * enforcement — this only drives the UX so users don't see what they can't do.
- */
+
 export type Role =
   | "ADMIN"
   | "STORE_KEEPER"
   | "QUALITY_ASSURANCE"
-  | "OIL_MART_ASSISTANT"
-  | "STORES_MANAGER";
+  | "OIL_MART_SALES_ASSISTANT"
+  | "OIL_MART_SALES_MANAGER";
 
 export const ROLE_LABELS: Record<Role, string> = {
   ADMIN: "Administrator",
   STORE_KEEPER: "Store Keeper",
   QUALITY_ASSURANCE: "Quality Assurance",
-  OIL_MART_ASSISTANT: "Oil Mart Assistant",
-  STORES_MANAGER: "Stores Manager",
+  OIL_MART_SALES_ASSISTANT: "Sales Assistant",
+  OIL_MART_SALES_MANAGER: "Sales Manager",
 };
 
 export function roleLabel(role: string | null | undefined): string {
@@ -65,13 +57,13 @@ const OIL_MART_ALL: Permission[] = [
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   STORE_KEEPER: ["dashboard:overview", "stock:view", "count:request", "ncr:view", "fuel:view"],
   QUALITY_ASSURANCE: ["dashboard:overview", "ncr:view", "ncr:review", "dashboard:qa"],
-  OIL_MART_ASSISTANT: [
+  OIL_MART_SALES_ASSISTANT: [
     "oilmart:view",
     "oilmart:receive",
     "oilmart:client:manage",
     "oilmart:sale:create",
   ],
-  STORES_MANAGER: [
+  OIL_MART_SALES_MANAGER: [
     "oilmart:view",
     "oilmart:client:manage",
     "oilmart:sale:create",
