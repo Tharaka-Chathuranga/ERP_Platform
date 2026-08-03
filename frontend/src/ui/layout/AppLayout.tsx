@@ -5,13 +5,8 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { NotificationsPopover } from "./NotificationsPopover";
 import { useAuth } from "@auth/AuthContext";
+import { roleLabel } from "@auth/permissions";
 // import { VoiceAssistant } from "@voice/index";
-
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "Administrator",
-  STORE_KEEPER: "Store Keeper",
-  QUALITY_ASSURANCE: "Quality Assurance",
-};
 
 export function AppLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -71,7 +66,7 @@ export function AppLayout() {
                         {username}
                       </Text>
                       <Text size="xs" c="dimmed" visibleFrom="xs">
-                        {ROLE_LABELS[role ?? ""] ?? "Store Keeper"}
+                        {roleLabel(role)}
                       </Text>
                     </div>
                     <Avatar color="brand" radius="xl" size={38}>

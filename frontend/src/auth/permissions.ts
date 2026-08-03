@@ -14,6 +14,18 @@ export type Role =
   | "OIL_MART_ASSISTANT"
   | "STORES_MANAGER";
 
+export const ROLE_LABELS: Record<Role, string> = {
+  ADMIN: "Administrator",
+  STORE_KEEPER: "Store Keeper",
+  QUALITY_ASSURANCE: "Quality Assurance",
+  OIL_MART_ASSISTANT: "Oil Mart Assistant",
+  STORES_MANAGER: "Stores Manager",
+};
+
+export function roleLabel(role: string | null | undefined): string {
+  return ROLE_LABELS[role as Role] ?? role ?? "";
+}
+
 export type Permission =
   | "stock:view" // view stock levels, movements, low-stock warnings
   | "item:edit" // edit / deactivate item master data

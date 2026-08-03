@@ -5,9 +5,8 @@ import { DepartmentSelect } from "@ui/primitives/DepartmentSelect";
 import { UserSelect } from "@ui/primitives/UserSelect";
 import { LineItemsEditor } from "@ui/primitives/LineItemsEditor";
 import { DefinitionList } from "@ui/data/DefinitionList";
+import { roleLabel } from "@auth/permissions";
 import { useNewIssue } from "../hooks/use-new-issue";
-
-const roleLabel = (role: string) => (role === "ADMIN" ? "Administrator" : "Store Keeper");
 
 export function NewIssueForm() {
   const {
