@@ -3,6 +3,7 @@ import type {
   OilMartItem,
   OilMartItemPrice,
   OilMartReceipt,
+  OilMartInvoice,
   OilMartQuotation,
   OilMartStockBalance,
   OilMartStockMovement,
@@ -14,6 +15,7 @@ import {
   oilMartItems,
   oilMartMovements,
   oilMartReceipts,
+  oilMartInvoices,
   oilMartQuotations,
   oilMartStock,
   oilMartSuppliers,
@@ -28,6 +30,7 @@ interface MockDb {
   movements: OilMartStockMovement[];
   receipts: OilMartReceipt[];
   quotations: OilMartQuotation[];
+  invoices: OilMartInvoice[];
   sequence: number;
 }
 
@@ -43,6 +46,7 @@ function seed(): MockDb {
     movements: clone(oilMartMovements),
     receipts: clone(oilMartReceipts),
     quotations: clone(oilMartQuotations),
+    invoices: clone(oilMartInvoices),
     sequence: 100,
   };
 }

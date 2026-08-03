@@ -1,4 +1,5 @@
 import { clientHandlers } from "./clients.handlers";
+import { invoiceHandlers } from "./invoices.handlers";
 import { itemHandlers } from "./items.handlers";
 import { overviewHandlers } from "./overview.handlers";
 import { receiptHandlers } from "./receipts.handlers";
@@ -13,12 +14,14 @@ export const oilMartHandlers = [
   ...stockHandlers,
   ...receiptHandlers,
   ...quotationHandlers,
+  ...invoiceHandlers,
   ...overviewHandlers,
 ];
 
 export * from "./mock-db";
 export {
   clientHandlers,
+  invoiceHandlers,
   itemHandlers,
   overviewHandlers,
   quotationHandlers,

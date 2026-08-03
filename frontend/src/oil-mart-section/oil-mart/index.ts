@@ -15,5 +15,8 @@ export { OilMartReceiptsPage } from "./receiving/pages/oil-mart-receipts";
 export { NewOilMartReceiptPage } from "./receiving/pages/new-oil-mart-receipt";
 export { OilMartReceiptDetailPage } from "./receiving/pages/oil-mart-receipt-detail";
 export { OilMartQuotationsPage } from "./selling/pages/oil-mart-quotations";
+export { OilMartInvoicesPage } from "./selling/pages/oil-mart-invoices";
+export { NewOilMartInvoicePage } from "./selling/pages/new-oil-mart-invoice";
+export { OilMartInvoiceDetailPage } from "./selling/pages/oil-mart-invoice-detail";
 export { NewOilMartQuotationPage } from "./selling/pages/new-oil-mart-quotation";
 export { OilMartQuotationDetailPage } from "./selling/pages/oil-mart-quotation-detail";

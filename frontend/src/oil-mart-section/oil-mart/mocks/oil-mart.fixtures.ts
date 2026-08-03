@@ -4,6 +4,9 @@ import type {
   OilMartItemPrice,
   OilMartOverview,
   OilMartReceipt,
+  OilMartInvoice,
+  OilMartInvoiceLine,
+  OilMartInvoiceStatus,
   OilMartQuotation,
   OilMartQuotationLine,
   OilMartQuotationStatus,
@@ -668,6 +671,103 @@ export const oilMartQuotationByStatus = (
   status: OilMartQuotationStatus,
 ): OilMartQuotation =>
   oilMartQuotations.find((q) => q.status === status) ?? anOilMartQuotation({ status });
+
+
+const BANK_DETAILS = {
+  accountName: "Enlear Oil Mart (Pvt) Ltd",
+  bankName: "Commercial Bank of Ceylon PLC",
+  branch: "Colombo 03",
+  accountNumber: "1000123456",
+  swiftCode: "CCEYLKLX",
+};
+
+const invoiceLine = (over: Partial<OilMartInvoiceLine> = {}): OilMartInvoiceLine => ({
+  id: "iln-1",
+  itemId: "itm-engine-15w40",
+  itemCode: "OM-ENG-15W40",
+  itemName: "Engine Oil 15W-40",
+  quantityLitres: 100,
+  listUnitPrice: 1450,
+  unitPrice: 1450,
+  isPriceOverride: false,
+  discountPercent: 0,
+  lineTotal: 145000,
+  unitCost: 1180,
+  lineCost: 118000,
+  lineProfit: 27000,
+  ...over,
+});
+
+export const anOilMartInvoice = (over: Partial<OilMartInvoice> = {}): OilMartInvoice => ({
+  id: "invoice-pending",
+  invoiceNo: "IN-26-08-001",
+  quotationId: "quotation-approved",
+  quotationNo: "QT-26-07-010",
+  clientId: "cli-hill-country",
+  clientName: "Hill Country Plantations",
+  status: "PENDING_APPROVAL",
+  createdByUserId: ASSISTANT_ID,
+  invoiceDate: "2026-08-01",
+  bankDetails: BANK_DETAILS,
+  subtotal: 145000,
+  gstRatePercent: 10,
+  gstAmount: 14500,
+  grandTotal: 159500,
+  totalCost: 118000,
+  totalProfit: 27000,
+  note: "Payment due within 30 days of invoice date.",
+  updatedAt: "2026-08-01T04:00:00Z",
+  lines: [invoiceLine()],
+  ...over,
+});
+
+export const oilMartInvoices: OilMartInvoice[] = [
+  anOilMartInvoice(),
+  anOilMartInvoice({
+    id: "invoice-approved",
+    invoiceNo: "IN-26-07-004",
+    status: "APPROVED",
+    quotationId: "quotation-expired",
+    quotationNo: "QT-26-06-004",
+    clientId: "cli-southern-transport",
+    clientName: "Southern Transport Services",
+    invoiceDate: "2026-07-28",
+    approvedByUserId: MANAGER_ID,
+    approvedAt: "2026-07-28T06:30:00Z",
+    subtotal: 72500,
+    gstAmount: 7250,
+    grandTotal: 79750,
+    totalCost: 59000,
+    totalProfit: 13500,
+    updatedAt: "2026-07-28T06:30:00Z",
+    lines: [
+      invoiceLine({
+        id: "iln-2",
+        quantityLitres: 50,
+        lineTotal: 72500,
+        lineCost: 59000,
+        lineProfit: 13500,
+      }),
+    ],
+  }),
+  anOilMartInvoice({
+    id: "invoice-rejected",
+    invoiceNo: "IN-26-07-005",
+    status: "REJECTED",
+    quotationId: "quotation-approved",
+    quotationNo: "QT-26-07-010",
+    clientId: "cli-hill-country",
+    clientName: "Hill Country Plantations",
+    invoiceDate: "2026-07-30",
+    rejectedByUserId: MANAGER_ID,
+    rejectedAt: "2026-07-30T08:10:00Z",
+    rejectionReason: "Wrong quotation selected — this belongs to the Metro Garage order.",
+    updatedAt: "2026-07-30T08:10:00Z",
+  }),
+];
+
+export const oilMartInvoiceByStatus = (status: OilMartInvoiceStatus): OilMartInvoice =>
+  oilMartInvoices.find((i) => i.status === status) ?? anOilMartInvoice({ status });
 
 export const oilMartOverview: OilMartOverview = {
   stockValue: 2635320,

@@ -111,4 +111,7 @@ export const qk = {
   oilMartReceiptMovements: (id: string) => ["oilmart-receipt", id, "movements"] as const,
   oilMartQuotations: (status?: string) => filtered("oilmart-quotations", status),
   oilMartQuotation: (id: string) => ["oilmart-quotation", id] as const,
+  oilMartInvoices: (status?: string) => filtered("oilmart-invoices", status),
+  oilMartInvoice: (id: string) => ["oilmart-invoice", id] as const,
+  oilMartInvoiceableQuotations: () => ["oilmart-invoiceable-quotations"] as const,
 } as const;

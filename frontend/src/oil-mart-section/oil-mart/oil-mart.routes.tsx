@@ -2,12 +2,15 @@ import { Route } from "react-router-dom";
 import { RequirePermission } from "@auth/RequirePermission";
 import { OILMART_VIEW } from "@auth/permissions";
 import {
+  NewOilMartInvoicePage,
   NewOilMartQuotationPage,
   NewOilMartReceiptPage,
   OilMartClientDetailPage,
   OilMartClientsPage,
   OilMartItemDetailPage,
   OilMartItemsPage,
+  OilMartInvoiceDetailPage,
+  OilMartInvoicesPage,
   OilMartOverviewPage,
   OilMartQuotationDetailPage,
   OilMartQuotationsPage,
@@ -36,5 +39,8 @@ export const oilMartRoutes = (
       path="oil-mart/quotations/:quotationId/edit"
       element={<NewOilMartQuotationPage />}
     />
+    <Route path="oil-mart/invoices" element={<OilMartInvoicesPage />} />
+    <Route path="oil-mart/invoices/new" element={<NewOilMartInvoicePage />} />
+    <Route path="oil-mart/invoices/:invoiceId" element={<OilMartInvoiceDetailPage />} />
   </Route>
 );

@@ -646,6 +646,67 @@ export interface OilMartQuotation {
   lines: OilMartQuotationLine[];
 }
 
+export type OilMartInvoiceStatus =
+  | "PENDING_APPROVAL"
+  | "APPROVED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export interface OilMartInvoiceLine {
+  id: string;
+  itemId: string;
+  itemCode: string;
+  itemName: string;
+  quantityLitres: number;
+  listUnitPrice: number;
+  unitPrice: number;
+  isPriceOverride: boolean;
+  discountPercent: number;
+  lineTotal: number;
+  /** Present only for callers allowed to see margin. */
+  unitCost?: number;
+  lineCost?: number;
+  lineProfit?: number;
+}
+
+export interface OilMartBankDetails {
+  accountName?: string;
+  bankName?: string;
+  branch?: string;
+  accountNumber?: string;
+  swiftCode?: string;
+}
+
+export interface OilMartInvoice {
+  id: string;
+  invoiceNo: string;
+  quotationId: string;
+  quotationNo: string;
+  clientId: string;
+  clientName: string;
+  status: OilMartInvoiceStatus;
+  createdByUserId: string;
+  invoiceDate: string;
+  approvedByUserId?: string;
+  approvedAt?: string;
+  rejectedByUserId?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  cancellationReason?: string;
+  bankDetails?: OilMartBankDetails;
+  subtotal: number;
+  gstRatePercent: number;
+  gstAmount: number;
+  grandTotal: number;
+  /** Present only for callers allowed to see margin. */
+  totalCost?: number;
+  totalProfit?: number;
+  note?: string;
+  /** Concurrency token echoed back on every state transition. */
+  updatedAt: string;
+  lines: OilMartInvoiceLine[];
+}
+
 export interface OilMartSalesTrendPoint {
   date: string;
   total: number;
