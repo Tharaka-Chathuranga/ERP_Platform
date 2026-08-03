@@ -1,4 +1,4 @@
-import { Grid } from "@mantine/core";
+import { Grid, Stack } from "@mantine/core";
 import { PageHeader } from "@ui/layout/PageHeader";
 import { QueryBoundary } from "@ui/feedback/QueryBoundary";
 import { useOilMartOverview } from "./hooks/use-oil-mart-overview";
@@ -8,7 +8,16 @@ import { OilMartLowStockPanel } from "./oil-mart-low-stock-panel";
 import { OilMartPendingApprovalsPanel } from "./oil-mart-pending-approvals-panel";
 
 export function OilMartOverviewPage() {
-  const { query, overview, openStockItem, openQuotation } = useOilMartOverview();
+  const {
+    query,
+    overview,
+    chartQuery,
+    chartOverview,
+    chartPeriod,
+    setChartPeriod,
+    openStockItem,
+    openQuotation,
+  } = useOilMartOverview();
 
   return (
     <div>
@@ -16,9 +25,17 @@ export function OilMartOverviewPage() {
 
       <QueryBoundary loading={query.isLoading} error={query.error}>
         {overview && (
-          <>
+          <Stack gap="lg">
             <OilMartOverviewStats overview={overview} />
-            <OilMartSalesTrendChart overview={overview} />
+
+            {chartOverview && (
+              <OilMartSalesTrendChart
+                overview={chartOverview}
+                period={chartPeriod}
+                onPeriodChange={setChartPeriod}
+                loading={chartQuery.isFetching}
+              />
+            )}
 
             <Grid>
               <Grid.Col span={{ base: 12, lg: 6 }}>
@@ -31,7 +48,7 @@ export function OilMartOverviewPage() {
                 <OilMartLowStockPanel balances={overview.lowStock} onSelect={openStockItem} />
               </Grid.Col>
             </Grid>
-          </>
+          </Stack>
         )}
       </QueryBoundary>
     </div>

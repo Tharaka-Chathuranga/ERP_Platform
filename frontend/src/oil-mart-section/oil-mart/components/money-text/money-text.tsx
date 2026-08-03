@@ -1,6 +1,6 @@
 import { Text, type TextProps } from "@mantine/core";
 
-const FORMATTER = new Intl.NumberFormat("en-LK", {
+const FORMATTER = new Intl.NumberFormat("en-PG", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
@@ -16,7 +16,7 @@ interface MoneyTextProps extends TextProps {
   emphasis?: boolean;
 }
 
-export function MoneyText({ value, currency = "Rs", emphasis, ...rest }: MoneyTextProps) {
+export function MoneyText({ value, currency = "PGK", emphasis, ...rest }: MoneyTextProps) {
   const blank = value === null || value === undefined || Number.isNaN(value);
   const zero = !blank && value === 0;
   const negative = !blank && (value as number) < 0;

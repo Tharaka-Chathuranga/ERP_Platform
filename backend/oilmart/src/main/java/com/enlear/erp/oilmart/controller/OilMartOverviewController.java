@@ -1,10 +1,12 @@
 package com.enlear.erp.oilmart.controller;
 
 import com.enlear.erp.oilmart.controller.dto.OilMartResponses.OilMartOverviewResponse;
+import com.enlear.erp.oilmart.service.overview.OilMartOverviewPeriod;
 import com.enlear.erp.oilmart.service.overview.OilMartOverviewService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,7 +24,8 @@ public class OilMartOverviewController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','OIL_MART_ASSISTANT','STORES_MANAGER')")
-    public OilMartOverviewResponse snapshot() {
-        return OilMartOverviewResponse.from(overview.snapshot(), assembler::toResponse);
+    public OilMartOverviewResponse snapshot(
+            @RequestParam(defaultValue = "THIS_MONTH") OilMartOverviewPeriod period) {
+        return OilMartOverviewResponse.from(overview.snapshot(period), assembler::toResponse);
     }
 }

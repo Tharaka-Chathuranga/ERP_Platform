@@ -773,19 +773,21 @@ export const oilMartInvoiceByStatus = (status: OilMartInvoiceStatus): OilMartInv
   oilMartInvoices.find((i) => i.status === status) ?? anOilMartInvoice({ status });
 
 export const oilMartOverview: OilMartOverview = {
+  period: "THIS_MONTH",
+  trendBucket: "DAYS",
   stockValue: 2635320,
   salesThisPeriod: 1093000,
   saleCountThisPeriod: 6,
   awaitingApproval: 2,
   lowStockCount: 3,
   salesTrend: [
-    { date: "2026-07-25", total: 84000 },
-    { date: "2026-07-26", total: 132500 },
-    { date: "2026-07-27", total: 0 },
-    { date: "2026-07-28", total: 198000 },
-    { date: "2026-07-29", total: 116000 },
-    { date: "2026-07-30", total: 290000 },
-    { date: "2026-07-31", total: 215000 },
+    { bucketStart: "2026-07-25T00:00:00Z", total: 84000 },
+    { bucketStart: "2026-07-26T00:00:00Z", total: 132500 },
+    { bucketStart: "2026-07-27T00:00:00Z", total: 0 },
+    { bucketStart: "2026-07-28T00:00:00Z", total: 198000 },
+    { bucketStart: "2026-07-29T00:00:00Z", total: 116000 },
+    { bucketStart: "2026-07-30T00:00:00Z", total: 290000 },
+    { bucketStart: "2026-07-31T00:00:00Z", total: 215000 },
   ],
   lowStock: oilMartStock.filter((s) => s.quantityOnHand < s.reorderLevelLitres),
   pendingApprovals: oilMartQuotations.filter((q) => q.status === "PENDING_APPROVAL"),

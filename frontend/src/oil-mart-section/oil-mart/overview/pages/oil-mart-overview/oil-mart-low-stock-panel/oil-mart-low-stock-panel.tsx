@@ -33,7 +33,7 @@ interface OilMartLowStockPanelProps {
 
 export function OilMartLowStockPanel({ balances, onSelect }: OilMartLowStockPanelProps) {
   return (
-    <Card withBorder radius="md" padding="lg">
+    <Card withBorder radius="md" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
         <Title order={4}>Below reorder level</Title>
         <Anchor component={Link} to="/oil-mart/stock" size="sm">

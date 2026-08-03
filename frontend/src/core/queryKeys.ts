@@ -94,7 +94,7 @@ export const qk = {
   fuelOverview: () => ["fuel-overview"] as const,
   fuelEfficiency: (from: string, to: string, vehicleId?: string) => ["fuel-efficiency", from, to, vehicleId ?? "ALL"] as const,
 
-  oilMartOverview: () => ["oilmart", "overview"] as const,
+  oilMartOverview: (period?: string) => filtered("oilmart-overview", period),
   oilMartItems: (search?: string) => filtered("oilmart-items", search),
   oilMartItem: (id: string) => ["oilmart-item", id] as const,
   oilMartItemPrices: (itemId: string) => ["oilmart-item", itemId, "prices"] as const,

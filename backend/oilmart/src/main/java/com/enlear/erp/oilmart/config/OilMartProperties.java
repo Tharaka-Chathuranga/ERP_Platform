@@ -10,7 +10,7 @@ public record OilMartProperties(BigDecimal gstRatePercent,
                                 BankAccount bank) {
 
     private static final BigDecimal DEFAULT_GST_RATE_PERCENT = new BigDecimal("10.00");
-    private static final String DEFAULT_CURRENCY_CODE = "LKR";
+    private static final String DEFAULT_CURRENCY_CODE = "PGK";
 
     public OilMartProperties {
         if (gstRatePercent == null) {

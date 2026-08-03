@@ -38,7 +38,7 @@ export function OilMartPendingApprovalsPanel({
   onSelect,
 }: OilMartPendingApprovalsPanelProps) {
   return (
-    <Card withBorder radius="md" padding="lg">
+    <Card withBorder radius="md" padding="lg" h="100%">
       <Group justify="space-between" mb="md">
         <Title order={4}>Awaiting approval</Title>
         <Anchor component={Link} to="/oil-mart/quotations" size="sm">

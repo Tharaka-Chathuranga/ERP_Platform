@@ -15,8 +15,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.dao.OptimisticLockingFailureException;
 
@@ -58,6 +61,36 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST, "Malformed request body");
         pd.setProperty("code", "MALFORMED_REQUEST");
+        pd.setProperty("path", req.getRequestURI());
+        return pd;
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ProblemDetail handleTypeMismatch(MethodArgumentTypeMismatchException ex,
+                                            HttpServletRequest req) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "'%s' is not a valid value for %s".formatted(ex.getValue(), ex.getName()));
+        pd.setProperty("code", "INVALID_PARAMETER");
+        pd.setProperty("parameter", ex.getName());
+        pd.setProperty("path", req.getRequestURI());
+        return pd;
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ProblemDetail handleMethodNotSupported(HttpRequestMethodNotSupportedException ex,
+                                                  HttpServletRequest req) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED,
+                "%s is not supported for this endpoint".formatted(ex.getMethod()));
+        pd.setProperty("code", "METHOD_NOT_ALLOWED");
+        pd.setProperty("path", req.getRequestURI());
+        return pd;
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ProblemDetail handleNoResource(NoResourceFoundException ex, HttpServletRequest req) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                "No endpoint at this path");
+        pd.setProperty("code", "NOT_FOUND");
         pd.setProperty("path", req.getRequestURI());
         return pd;
     }

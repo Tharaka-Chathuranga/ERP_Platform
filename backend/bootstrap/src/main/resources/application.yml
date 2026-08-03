@@ -57,7 +57,7 @@ erp:
     # Snapshotted onto each quotation and invoice, so a later rate change
     # never rewrites the totals of documents already issued.
     gst-rate-percent: ${ERP_OILMART_GST_RATE_PERCENT:10.00}
-    currency-code: ${ERP_OILMART_CURRENCY_CODE:LKR}
+    currency-code: ${ERP_OILMART_CURRENCY_CODE:PGK}
     # Letterhead on the quotation and invoice PDFs sent to clients.
     company:
       name: ${ERP_OILMART_COMPANY_NAME:Enlear Oil Mart (Pvt) Ltd}

@@ -706,12 +706,20 @@ export interface OilMartInvoice {
   lines: OilMartInvoiceLine[];
 }
 
+export type OilMartOverviewPeriod = "TODAY" | "THIS_WEEK" | "THIS_MONTH";
+
+/** HOURS when the period is today, otherwise DAYS. */
+export type OilMartTrendBucket = "HOURS" | "DAYS";
+
 export interface OilMartSalesTrendPoint {
-  date: string;
+  /** ISO instant the bucket opens. */
+  bucketStart: string;
   total: number;
 }
 
 export interface OilMartOverview {
+  period: OilMartOverviewPeriod;
+  trendBucket: OilMartTrendBucket;
   stockValue: number;
   salesThisPeriod: number;
   saleCountThisPeriod: number;

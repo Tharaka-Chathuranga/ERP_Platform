@@ -20,6 +20,7 @@ import com.enlear.erp.oilmart.model.OilMartStockMovement;
 import com.enlear.erp.oilmart.model.OilMartSupplier;
 import com.enlear.erp.oilmart.model.OilMartSupplierStatus;
 import com.enlear.erp.oilmart.model.OilType;
+import com.enlear.erp.oilmart.service.overview.OilMartOverviewPeriod;
 import com.enlear.erp.oilmart.service.overview.OilMartOverviewSnapshot;
 import com.enlear.erp.oilmart.service.overview.OilMartStockView;
 import java.math.BigDecimal;
@@ -254,10 +255,11 @@ public final class OilMartResponses {
         }
     }
 
-    public record OilMartTrendPointResponse(LocalDate date, BigDecimal total) {
+    public record OilMartTrendPointResponse(Instant bucketStart, BigDecimal total) {
     }
 
     public record OilMartOverviewResponse(
+            OilMartOverviewPeriod period, String trendBucket,
             BigDecimal stockValue, BigDecimal salesThisPeriod, long saleCountThisPeriod,
             long awaitingApproval, long lowStockCount,
             List<OilMartTrendPointResponse> salesTrend,
@@ -268,13 +270,16 @@ public final class OilMartResponses {
                 OilMartOverviewSnapshot snapshot,
                 Function<OilMartQuotation, OilMartQuotationResponse> quotationMapper) {
             return new OilMartOverviewResponse(
+                    snapshot.period(),
+                    snapshot.trendBucket().name(),
                     snapshot.stockValue(),
                     snapshot.salesThisPeriod(),
                     snapshot.saleCountThisPeriod(),
                     snapshot.awaitingApproval(),
                     snapshot.lowStockCount(),
                     snapshot.salesTrend().stream()
-                            .map(point -> new OilMartTrendPointResponse(point.date(), point.total()))
+                            .map(point -> new OilMartTrendPointResponse(
+                                    point.bucketStart(), point.total()))
                             .toList(),
                     snapshot.lowStock().stream().map(OilMartStockBalanceResponse::from).toList(),
                     snapshot.pendingApprovals().stream().map(quotationMapper).toList());

@@ -22,8 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class OilMartOverviewService {
 
-    private static final int TREND_DAYS = 7;
-
     private final OilMartQuotationRepository quotations;
     private final OilMartInvoiceRepository invoices;
     private final OilMartStockQueryService stockQueries;
@@ -36,10 +34,10 @@ public class OilMartOverviewService {
         this.stockQueries = stockQueries;
     }
 
-    public OilMartOverviewSnapshot snapshot() {
+    public OilMartOverviewSnapshot snapshot(OilMartOverviewPeriod period) {
         LocalDate today = LocalDate.now();
-        LocalDate from = today.minusDays(TREND_DAYS - 1L);
-        Instant since = from.atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant since = period.startOn(today).atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant until = period.endOn(today).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         List<OilMartInvoice> approved =
                 invoices.findApprovedSince(OilMartInvoiceStatus.APPROVED, since);
@@ -57,32 +55,37 @@ public class OilMartOverviewService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new OilMartOverviewSnapshot(
+                period,
+                period.bucket(),
                 stockQueries.totalStockValue(),
                 salesThisPeriod,
                 approved.size(),
                 awaitingApproval,
                 lowStock.size(),
-                trend(approved, from),
+                trend(approved, since, until, period.bucket()),
                 lowStock,
                 pendingApprovals);
     }
 
     private List<OilMartOverviewSnapshot.TrendPoint> trend(List<OilMartInvoice> approved,
-                                                           LocalDate from) {
-        Map<LocalDate, BigDecimal> byDay = new TreeMap<>();
-        for (int offset = 0; offset < TREND_DAYS; offset++) {
-            byDay.put(from.plusDays(offset), BigDecimal.ZERO);
+                                                           Instant since,
+                                                           Instant until,
+                                                           ChronoUnit bucket) {
+        Map<Instant, BigDecimal> byBucket = new TreeMap<>();
+        for (Instant at = since.truncatedTo(bucket); at.isBefore(until); at = at.plus(1, bucket)) {
+            byBucket.put(at, BigDecimal.ZERO);
         }
+
         for (OilMartInvoice invoice : approved) {
-            byDay.computeIfPresent(invoice.getInvoiceDate(),
-                    (key, running) -> running.add(invoice.getGrandTotal()));
+            if (invoice.getApprovedAt() == null) {
+                continue;
+            }
+            Instant at = invoice.getApprovedAt().truncatedTo(bucket);
+            byBucket.computeIfPresent(at, (key, running) -> running.add(invoice.getGrandTotal()));
         }
-        return byDay.entrySet().stream()
+
+        return byBucket.entrySet().stream()
                 .map(entry -> new OilMartOverviewSnapshot.TrendPoint(entry.getKey(), entry.getValue()))
                 .toList();
-    }
-
-    public long trendDays() {
-        return ChronoUnit.DAYS.between(LocalDate.now().minusDays(TREND_DAYS - 1L), LocalDate.now()) + 1;
     }
 }
